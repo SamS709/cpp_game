@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     character1 = new Character(400, 300, time_between_frames);
     
     // Load sprite frames
-    character1->loadSpriteFrames("/home/sami/dev/cours/cpp/Stickman/resources/images/characters/redhat");
+    character1->loadSpriteFrames("resources/images/characters/redhat");
     
     // Setup animation timer
     animationTimer = new QTimer(this);
@@ -65,6 +65,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         if (!character1->get_jumping()) {
             character1->set_jumping(true);
             character1->set_moving(false);
+            
         }
     }
     if (event->key() == Qt::Key_Right) {

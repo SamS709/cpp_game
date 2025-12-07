@@ -51,7 +51,7 @@ void Character::loadSpriteFrames(const QString &basePath)
     
     }
     if (!jump_frames.isEmpty()) {
-        frame_per_sprite_jump = total_jump_time * 1000 / (jump_frames.size() * time_between_frames);
+        frame_per_sprite_jump = total_jump_time * 1000 / (jump_frames.size() * time_between_frames) * 2;
     }
     
     // Use first move frame as idle frame
@@ -70,11 +70,8 @@ void Character::update()
             jumping = false;
             frameCounter = 0;
             current_move_frame = 0;
-        }
-        else if (right) {
-            x += 1;
-            facingRight = true;
-            // Advance animation frame
+        } else {
+            // Advance jump animation frame (regardless of direction)
             if (!jump_frames.isEmpty()) {
                 frameCounter++;
                 if (frameCounter >= frame_per_sprite_jump) {
@@ -82,16 +79,14 @@ void Character::update()
                     current_move_frame = (current_move_frame + 1) % jump_frames.size();
                 }
             }
-        } else if (left) {
-            x -= 1;
-            facingRight = false;
-            // Advance animation frame
-            if (!jump_frames.isEmpty()) {
-                frameCounter++;
-                if (frameCounter >= frame_per_sprite_jump) {
-                    frameCounter = 0;
-                    current_move_frame = (current_move_frame + 1) % jump_frames.size();
-                }
+            
+            // Move horizontally during jump
+            if (right) {
+                x += 1;
+                facingRight = true;
+            } else if (left) {
+                x -= 1;
+                facingRight = false;
             }
         }
     }
