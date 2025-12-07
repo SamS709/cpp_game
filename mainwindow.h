@@ -32,6 +32,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTimer *animationTimer;
-    Character *character;
+    Character *character1;
 };
 #endif // MAINWINDOW_H
