@@ -1,0 +1,18 @@
+# ninja log v6
+60	906	1765031499045875739	CMakeFiles/Stickman.dir/character.cpp.o	a9d3b7e2c5319cba
+1	105	1764947863161872712	build.ninja	ae95cd73f4f32449
+970	1148	1765031499954900309	Stickman	a5b8d711c11e40db
+60	970	1765031499044902101	CMakeFiles/Stickman.dir/mainwindow.cpp.o	b9f21b74c4f4fedc
+179	1011	1765031161426145507	CMakeFiles/Stickman.dir/main.cpp.o	3b08a283f5169fe9
+13	60	1765031498997902194	/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/mocs_compilation.cpp	268bd2a1c965a3ef
+13	60	1765031498997902194	/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/timestamp	268bd2a1c965a3ef
+178	1029	1765031161425798859	CMakeFiles/Stickman.dir/Stickman_autogen/mocs_compilation.cpp.o	cd340bb4f98e693
+13	60	1765031498997902194	Stickman_autogen/mocs_compilation.cpp	268bd2a1c965a3ef
+13	60	1765031498997902194	Stickman_autogen/timestamp	268bd2a1c965a3ef
+4	29	1765031513784883154	Stickman_autogen/timestamp	268bd2a1c965a3ef
+4	29	1765031513784883154	Stickman_autogen/mocs_compilation.cpp	268bd2a1c965a3ef
+4	29	1765031513784883154	/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/timestamp	268bd2a1c965a3ef
+4	29	1765031513784883154	/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/mocs_compilation.cpp	268bd2a1c965a3ef
+29	797	1765031513810738411	CMakeFiles/Stickman.dir/character.cpp.o	a9d3b7e2c5319cba
+29	888	1765031513809986909	CMakeFiles/Stickman.dir/mainwindow.cpp.o	b9f21b74c4f4fedc
+888	1048	1765031514668882519	Stickman	a5b8d711c11e40db

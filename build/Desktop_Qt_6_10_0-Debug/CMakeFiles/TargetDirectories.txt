@@ -1,0 +1,9 @@
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/Stickman.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/edit_cache.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/rebuild_cache.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/list_install_components.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/install.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/install/local.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/install/strip.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/Stickman_autogen_timestamp_deps.dir
+/home/sami/dev/cours/cpp/Stickman/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/Stickman_autogen.dir
