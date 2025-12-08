@@ -23,9 +23,10 @@ void Character::loadSpriteFrames(const QString &basePath)
 {
     move_frames.clear();
     jump_frames.clear();
+    slide_frames.clear();
     
     // Load run animation frames (run_0.png to run_7.png)
-    for (int i = 0; i <= 7; ++i) {
+    for (int i = 0; i <= 4; ++i) {
         QString framePath = basePath + QString("/run/run_%1.png").arg(i);
         QPixmap sprite(framePath);
         
@@ -38,7 +39,7 @@ void Character::loadSpriteFrames(const QString &basePath)
     }
 
     // Load jump animation frames (jump_0.png to jump_11.png)
-    for (int i = 0; i <= 11; ++i) {
+    for (int i = 0; i <= 4; ++i) {
         QString framePath = basePath + QString("/jump/jump_%1.png").arg(i);
         QPixmap sprite(framePath);
         
@@ -48,11 +49,26 @@ void Character::loadSpriteFrames(const QString &basePath)
         } else {
             qDebug() << "Failed to load:" << framePath;
         }
-    
     }
     if (!jump_frames.isEmpty()) {
         frame_per_sprite_jump = total_jump_time * 1000 / (jump_frames.size() * time_between_frames) * 2;
     }
+    for (int i = 0; i <= 4; ++i) {
+        QString framePath = basePath + QString("/slide/slide_%1.png").arg(i);
+        QPixmap sprite(framePath);
+        
+        if (!sprite.isNull()) {
+            slide_frames.append(sprite);
+            qDebug() << "Loaded:" << framePath;
+        } else {
+            qDebug() << "Failed to load:" << framePath;
+        }
+    
+    }
+    if (!slide_frames.isEmpty()) {
+        frame_per_sprite_slide = total_slide_time * 1000 / (slide_frames.size() * time_between_frames) * 2;
+    }
+    
     
     // Use first move frame as idle frame
     if (!move_frames.isEmpty()) {
@@ -70,6 +86,10 @@ void Character::update()
             jumping = false;
             frameCounter = 0;
             current_move_frame = 0;
+            // Resume moving if a direction key is still pressed
+            if (right || left) {
+                moving = true;
+            }
         } else {
             // Advance jump animation frame (regardless of direction)
             if (!jump_frames.isEmpty()) {
@@ -86,6 +106,35 @@ void Character::update()
                 facingRight = true;
             } else if (left) {
                 x -= 1;
+                facingRight = false;
+            }
+        }
+    }
+    slide_time += time_between_frames/1000;
+    if (sliding) {
+        if(slide_time > total_slide_time) {
+            sliding = false;
+            slide_time = 0.0;
+            frameCounter = 0;
+            current_move_frame = 0;
+            // Resume moving if a direction key is still pressed
+            if (right || left) {
+                moving = true;
+            }
+        } else {
+            // Advance jump animation frame (regardless of direction)
+            if (!slide_frames.isEmpty()) {
+                frameCounter++;
+                if (frameCounter >= frame_per_sprite_slide) {
+                    frameCounter = 0;
+                    current_move_frame = (current_move_frame + 1) % jump_frames.size();
+                }
+            }
+            
+            // Move horizontally during jump
+            if (right) {
+                facingRight = true;
+            } else if (left) {
                 facingRight = false;
             }
         }
@@ -135,6 +184,9 @@ void Character::draw(QPainter &painter)
             currentSprite = &move_frames[current_move_frame];
     } else if (jumping && !jump_frames.isEmpty()) {
             currentSprite = &jump_frames[current_move_frame];
+    } else if (sliding && !slide_frames.isEmpty()) {
+            currentSprite = &slide_frames[current_move_frame];
+            
     } else if (!idleFrame.isNull()) {
         currentSprite = &idleFrame;
     }
@@ -145,9 +197,14 @@ void Character::draw(QPainter &painter)
 
         // Add the y variations wile jumping
         double delta_y = 0.0;
+        double delta_x = 0.0;
         if(jumping) {
             delta_y = get_y_jump(jump_time);
         }
+        if(sliding){
+            delta_x = get_x_sliding(slide_time);
+        }
+        x += slide_dir * delta_x;
         
         // Calculate position (center the sprite)
         double drawX = x - currentSprite->width() / 2.0;
@@ -163,6 +220,9 @@ void Character::draw(QPainter &painter)
         painter.drawPixmap(drawX, drawY, *currentSprite);
         painter.restore();
     }
+}
+double Character::get_x_sliding(double t) {
+    return slide_dist * (total_slide_time - t) / (total_slide_time );
 }
 
 double Character::get_y_jump(double t) {
@@ -190,9 +250,26 @@ void Character::set_jumping(bool jumping_)
     jump_time = 0.0;
 }
 
+void Character::set_sliding(bool s)
+{
+    if (slide_time>time_between_slides)
+        sliding = s;
+        slide_time = 0.0;
+        if (right){
+            slide_dir = 1.0;
+        } else if (left) {
+            slide_dir = -1.0;
+        }
+}
+
 bool Character::get_jumping()
 {
     return jumping;
+}
+
+bool Character::get_sliding()
+{
+    return sliding;
 }
 
 
