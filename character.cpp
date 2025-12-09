@@ -263,11 +263,7 @@ void Character::update_move(){
 
 void Character::draw(QPainter &painter)
 {
-    const QPixmap *currentSprite = nullptr;
-    // qDebug() << "Moving = " << moving;
-    // qDebug() << "Jumping = " << jumping;
     
-    // Select appropriate sprite based on movement
     double delta_y = 0.0;
     double delta_x = 0.0;
 
@@ -418,3 +414,20 @@ void Character::checkBounds(int windowWidth)
         x = windowWidth + 50;
     }
 }
+
+
+QRectF Character::get_full_hitbox() {
+    int  width = currentSprite->width();
+    int height = currentSprite->height();
+    return QRectF(x - width / 2, y - height / 2, width, height);
+
+}
+
+
+// QRectF getHitbox() const {
+//     return QRectF(x - width/2, y - height/2, width, height);
+// }
+
+// bool collidesWith(const Character& other) {
+//     return getHitbox().intersects(other.getHitbox());
+// }

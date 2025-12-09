@@ -55,6 +55,8 @@ public:
     void handle_rotate(QPainter &painte);
     
     void checkBounds(int windowWidth);
+
+    QRectF get_full_hitbox();
     
 private:
     double x;
@@ -74,6 +76,8 @@ private:
     QVector<QPixmap> slide_frames;
     QVector<QPixmap> lower_frames;
     QVector<QPixmap> sword_attack_frames;
+    QVector<double> bounds;
+    QPixmap *currentSprite = nullptr;
 
     QPixmap idleFrame;
     
