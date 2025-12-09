@@ -198,7 +198,7 @@ void Character::update_slide(){
             frameCounter++;
             if (frameCounter >= frame_per_sprite_slide) {
                 frameCounter = 0;
-                current_move_frame = (current_move_frame + 1) % jump_frames.size();
+                current_move_frame = (current_move_frame + 1) % slide_frames.size();
             }
         }
         
@@ -207,27 +207,28 @@ void Character::update_slide(){
 }
 
 void Character::update_sword_attack(){
-    // if(slide_time > total_slide_time) {
-    //     sliding = false;
-    //     slide_time = 0.0;
-    //     frameCounter = 0;
-    //     current_move_frame = 0;
-    //     // Resume moving if a direction key is still pressed
-    //     if (right || left) {
-    //         moving = true;
-    //     }
-    // } else {
-    //     // Advance jump animation frame (regardless of direction)
-    //     if (!slide_frames.isEmpty()) {
-    //         frameCounter++;
-    //         if (frameCounter >= frame_per_sprite_slide) {
-    //             frameCounter = 0;
-    //             current_move_frame = (current_move_frame + 1) % jump_frames.size();
-    //         }
-    //     }
+    sword_attack_time += time_between_frames/1000;
+    if(sword_attack_time > total_sword_attack_time) {
+        sword_attacking = false;
+        sword_attack_time = 0.0;
+        frameCounter = 0;
+        current_move_frame = 0;
+        // Resume moving if a direction key is still pressed
+        if (right || left) {
+            moving = true;
+        }
+    } else {
+        // Advance jump animation frame (regardless of direction)
+        if (!sword_attack_frames.isEmpty()) {
+            frameCounter++;
+            if (frameCounter >= frame_per_sprite_attack) {
+                frameCounter = 0;
+                current_move_frame = (current_move_frame + 1) % sword_attack_frames.size();
+            }
+        }
         
-    //     // No horizontal movement during slide, just maintain direction
-    // }
+        // No horizontal movement during slide, just maintain direction
+    }
 }
 
 void Character::update_move(){
@@ -282,6 +283,9 @@ void Character::draw(QPainter &painter)
         currentSprite = &slide_frames[current_move_frame];
     } else if (lowering && !lower_frames.isEmpty()) {
         currentSprite = &lower_frames[current_move_frame];
+    } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
+        delta_x = get_x_sword_attacking(sword_attack_time);
+        currentSprite = &sword_attack_frames[current_move_frame];
     } else if (!idleFrame.isNull()) {
         currentSprite = &idleFrame;
     }
@@ -308,8 +312,8 @@ void Character::draw(QPainter &painter)
 }
 
 void Character::handle_rotate(QPainter &painter){
-    if(sliding){
-        if (slide_dir=="left"){
+    if(sliding || sword_attacking){
+        if (slide_dir=="left" || sword_dir == "left"){
             painter.translate(x, y);
             painter.scale(-1, 1);
             painter.translate(-x, -y);
@@ -325,6 +329,10 @@ void Character::handle_rotate(QPainter &painter){
 
 double Character::get_x_sliding(double t) {
     return slide_dist * (total_slide_time - t) / (total_slide_time );
+}
+
+double Character::get_x_sword_attacking(double t) {
+    return sword_attack_dist * (total_sword_attack_time - t) / (total_sword_attack_time );
 }
 
 double Character::get_y_jump(double t) {
@@ -377,6 +385,11 @@ void Character::set_lowering(bool s)
     lowering = s;
 }
 
+void Character::set_sword_attacking(bool a)
+{
+    sword_attacking = a;
+}
+
 bool Character::get_moving()
 {
     return moving;
@@ -392,6 +405,10 @@ bool Character::get_sliding()
     return sliding;
 }
 
+bool Character::get_sword_attacking()
+{
+    return sword_attacking;
+}
 
 void Character::checkBounds(int windowWidth)
 {

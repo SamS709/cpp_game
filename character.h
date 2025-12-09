@@ -34,6 +34,8 @@ public:
     void set_jumping(bool j);
     void set_sliding(bool s);
     void set_lowering(bool s);
+    void set_sword_attacking(bool a);
+
 
     void set_moving(bool m);
 
@@ -41,10 +43,14 @@ public:
     double getY() const { return y; }
     double get_y_jump(double t); 
     double get_x_sliding(double t);
+    double get_x_sword_attacking(double t);
+
 
     bool get_moving();
     bool get_jumping();
     bool get_sliding();
+    bool get_sword_attacking();
+
 
     void handle_rotate(QPainter &painte);
     
@@ -77,16 +83,21 @@ private:
     int framesPerSprite;  // Updates before switching sprite
     int frame_per_sprite_jump;
     int frame_per_sprite_slide;
+    int frame_per_sprite_attack;
     int total_jump_frames {5};
     std::string slide_dir;
+    std::string sword_dir = "right";
     
     double jump_height {2.0};
     double slide_dist {4.0};
+    double sword_attack_dist {4.0};
     double total_jump_time {0.5};
     double total_slide_time {0.5};
+    double total_sword_attack_time {0.3};
     double time_between_slides {1.0};
     double jump_time;
     double slide_time;
+    double sword_attack_time;
     double time_between_frames;
 };
 

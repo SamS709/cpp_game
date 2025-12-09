@@ -95,6 +95,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         } else {
             character1->set_moving(true);
         }
+    } if (event->key() == Qt::Key_0) {
+        character1->set_sword_attacking(true);
+        character1->set_lowering(false);
+        character1->set_sliding(false);
     } 
     QMainWindow::keyPressEvent(event);
 }
