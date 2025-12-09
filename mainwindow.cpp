@@ -68,10 +68,20 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             
         }
     }
+    if (event->key() == Qt::Key_Down) {
+        if (!character1->get_jumping() && !character1->get_sliding()) {
+            if (character1->get_moving()){
+                character1->set_sliding(true);
+            } else {
+                character1->set_lowering(true);
+                qDebug()<<"lowering";
+            }
+        }
+    }
     if (event->key() == Qt::Key_Right) {
         character1->set_right(true);
         character1->set_left(false);
-        if(character1->get_jumping()){
+        if(character1->get_jumping() || character1->get_sliding()){
             character1->set_moving(false);
         } else {
             character1->set_moving(true);
@@ -80,7 +90,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         character1->set_left(true);
         character1->set_right(false);
 
-        if(character1->get_jumping()){
+        if(character1->get_jumping() || character1->get_sliding()){
             character1->set_moving(false);
         } else {
             character1->set_moving(true);
@@ -92,9 +102,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Right) {
+        character1->set_right(false);
         character1->set_moving(false);
     } else if (event->key() == Qt::Key_Left) {
+        character1->set_left(false);
         character1->set_moving(false);
+    } else if (event->key() == Qt::Key_Down) {
+        character1->set_lowering(false);
     }
+    
     QMainWindow::keyReleaseEvent(event);
 }
