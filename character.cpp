@@ -415,7 +415,6 @@ void Character::checkBounds(int windowWidth)
     }
 }
 
-
 QRectF Character::get_full_hitbox() {
     int  width = currentSprite->width();
     int height = currentSprite->height();
