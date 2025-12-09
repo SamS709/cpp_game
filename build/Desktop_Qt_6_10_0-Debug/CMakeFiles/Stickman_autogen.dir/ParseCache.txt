@@ -418,6 +418,6 @@ D:/Dev/cours/cpp_game/mainwindow.h
  mdp:D:/Dev/cours/cpp_game/character.h
  mdp:D:/Dev/cours/cpp_game/mainwindow.h
 D:/Dev/cours/cpp_game/character.cpp
+D:/Dev/cours/cpp_game/main.cpp
 D:/Dev/cours/cpp_game/mainwindow.cpp
  uic:./ui_mainwindow.h
-D:/Dev/cours/cpp_game/main.cpp
