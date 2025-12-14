@@ -100,7 +100,7 @@ private:
     double sword_attack_dist {4.0};
     double total_jump_time {0.5};
     double total_slide_time {0.5};
-    double total_sword_attack_time {0.7};
+    double total_sword_attack_time {2.0};
     double time_between_slides {1.0};
     double time_between_sword_attacks {1.0};
     double jump_time;

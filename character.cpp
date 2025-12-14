@@ -106,8 +106,8 @@ void Character::load_lower_frames(const QString &basePath){
 
 void Character::load_sword_attack_frames(const QString &basePath){
     sword_attack_frames.clear();
-    for (int i = 0; i <= 7; ++i) {
-        QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i);
+    for (int i = 1; i <= 253; ++i) {
+        QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i, 3, 10, QChar('0'));
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
@@ -132,7 +132,6 @@ void Character::update()
     if (sliding) {
         update_slide();
     }
-    sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
     if (sword_attacking){
         update_sword_attack();
     }
@@ -210,6 +209,8 @@ void Character::update_slide(){
 }
 
 void Character::update_sword_attack(){
+    sword_attack_time += time_between_frames / 1000.0;
+    
     if(sword_attack_time > total_sword_attack_time) {
         sword_attacking = false;
         sword_attack_time = 0.0;
@@ -220,12 +221,13 @@ void Character::update_sword_attack(){
             moving = true;
         }
     } else {
-        // Advance jump animation frame (regardless of direction)
+        // Calculate which frame to show based on elapsed time
         if (!sword_attack_frames.isEmpty()) {
             frameCounter++;
             if (frameCounter >= frame_per_sprite_attack) {
                 frameCounter = 0;
                 current_move_frame = (current_move_frame + 1) % sword_attack_frames.size();
+                qDebug()<<current_move_frame;
             }
         }
         
