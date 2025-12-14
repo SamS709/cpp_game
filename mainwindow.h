@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <QKeyEvent>
-#include "character.h"
+#include "env.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -33,5 +33,7 @@ private:
     Ui::MainWindow *ui;
     QTimer *animationTimer;
     Character *character1;
+    Character *character2;
+    Env *env;
 };
 #endif // MAINWINDOW_H

@@ -1,15 +1,53 @@
 #ifndef ENV_H
 #define ENV_H
 
-#include <character.h>
+#include "character.h"
+#include <QKeyEvent>
+#include <vector>
+
+using namespace std;
+
+struct Ground{
+    double height = 500.0;
+    double norm = -1.0; 
+};
+
+struct Vec2{
+    double x;
+    double y;
+};
+
+struct Particle{
+    Vec2 pos;          
+    Vec2 expected_pos; 
+    Vec2 vel;
+    double radius;
+    double mass;
+};
 
 class Env {
 
 public:
+    Env(Character *c1_, Character *c2_, double dt_);
+    void update(int width);
+    void paint(QPainter *painter, int width, int height);
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
+    void load_env_assets();
+    void apply_external_forces();
+    void apply_static_constraints();
+    void update_velocities_and_positions();
+    void draw_assets(QPainter &painter);
 
-    Env(Character c1, Character c2);
-
-}
+private:
+    Character *c1;
+    Character *c2;
+    double t;
+    double dt;
+    double g = 981;
+    Ground ground;
+    vector<Particle> particles;
+};
 
 
 

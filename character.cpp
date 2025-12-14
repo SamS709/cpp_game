@@ -64,7 +64,7 @@ void Character::load_jump_frames(const QString &basePath){
         }
     }
     if (!jump_frames.isEmpty()) {
-        frame_per_sprite_jump = total_jump_time * 1000 / (jump_frames.size() * time_between_frames) * 2;
+        frame_per_sprite_jump = total_jump_time * 1000 / (jump_frames.size() * time_between_frames) ;
     }
 }
 
@@ -84,7 +84,7 @@ void Character::load_slide_frames(const QString &basePath){
     
     }
     if (!slide_frames.isEmpty()) {
-        frame_per_sprite_slide = total_slide_time * 1000 / (slide_frames.size() * time_between_frames) * 2;
+        frame_per_sprite_slide = total_slide_time * 1000 / (slide_frames.size() * time_between_frames) ;
     }
 }
 
@@ -106,18 +106,20 @@ void Character::load_lower_frames(const QString &basePath){
 
 void Character::load_sword_attack_frames(const QString &basePath){
     sword_attack_frames.clear();
-    for (int i = 0; i <= 3; ++i) {
+    for (int i = 0; i <= 7; ++i) {
         QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i);
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
-            lower_frames.append(sprite);
+            sword_attack_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
             qDebug() << "Failed to load:" << framePath;
         }
     }
-
+    if (!sword_attack_frames.isEmpty()) {
+        frame_per_sprite_attack = total_sword_attack_time * 1000 / (sword_attack_frames.size() * time_between_frames) ;
+    }
 }
 
 void Character::update()
@@ -130,11 +132,12 @@ void Character::update()
     if (sliding) {
         update_slide();
     }
-    if (lowering){
-        update_lower();
-    }
+    sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
     if (sword_attacking){
         update_sword_attack();
+    }
+    if (lowering){
+        update_lower();
     }
     if(moving){
         update_move();
@@ -207,7 +210,6 @@ void Character::update_slide(){
 }
 
 void Character::update_sword_attack(){
-    sword_attack_time += time_between_frames/1000;
     if(sword_attack_time > total_sword_attack_time) {
         sword_attacking = false;
         sword_attack_time = 0.0;
@@ -277,11 +279,21 @@ void Character::draw(QPainter &painter)
         // Add x variations when sliding
         delta_x = get_x_sliding(slide_time);
         currentSprite = &slide_frames[current_move_frame];
+        if (slide_dir == "right") {
+            x += delta_x;
+        } else {
+            x-= delta_x;
+        }
     } else if (lowering && !lower_frames.isEmpty()) {
         currentSprite = &lower_frames[current_move_frame];
     } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
         delta_x = get_x_sword_attacking(sword_attack_time);
         currentSprite = &sword_attack_frames[current_move_frame];
+        if (sword_attack_dir == "right") {
+            x += delta_x;
+        } else {
+            x-= delta_x;
+        }
     } else if (!idleFrame.isNull()) {
         currentSprite = &idleFrame;
     }
@@ -290,11 +302,7 @@ void Character::draw(QPainter &painter)
     if (currentSprite && !currentSprite->isNull()) {
         painter.save();
 
-        if (slide_dir == "right") {
-            x += delta_x;
-        } else {
-            x-= delta_x;
-        }
+        
         
         // Calculate position (center the sprite)
         double drawX = x - currentSprite->width() / 2.0;
@@ -309,7 +317,7 @@ void Character::draw(QPainter &painter)
 
 void Character::handle_rotate(QPainter &painter){
     if(sliding || sword_attacking){
-        if (slide_dir=="left" || sword_dir == "left"){
+        if (slide_dir=="left" || sword_attack_dir == "left"){
             painter.translate(x, y);
             painter.scale(-1, 1);
             painter.translate(-x, -y);
@@ -372,6 +380,8 @@ void Character::set_sliding(bool s)
             slide_dir = "right";
         } else if (left) {
             slide_dir = "left";
+        } else {
+            slide_dir = facingRight ? "right" : "left";
         }
     }
 }
@@ -383,7 +393,18 @@ void Character::set_lowering(bool s)
 
 void Character::set_sword_attacking(bool a)
 {
-    sword_attacking = a;
+    if (sword_attack_time > time_between_sword_attacks) {
+        moving = false;
+        sword_attacking = a;
+        sword_attack_time = 0.0;
+        if (right) {
+            sword_attack_dir = "right";
+        } else if (left) {
+            sword_attack_dir = "left";
+        } else {
+            sword_attack_dir = facingRight ? "right" : "left";
+        }
+    }
 }
 
 bool Character::get_moving()

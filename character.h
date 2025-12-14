@@ -26,9 +26,10 @@ public:
     void update_lower();
     void update_sword_attack();
 
-    void draw(QPainter &painter);
-
-
+    void draw(QPainter &painter);    
+    void getX(double x_) { x = x_; }
+    void getY(double y_) { y = y_; }
+    void get_mass(double mass_) { mass = mass_; } 
     void set_right(bool r);
     void set_left(bool l);
     void set_jumping(bool j);
@@ -41,6 +42,7 @@ public:
 
     double getX() const { return x; }
     double getY() const { return y; }
+    double get_mass() const { return mass; } 
     double get_y_jump(double t); 
     double get_x_sliding(double t);
     double get_x_sword_attacking(double t);
@@ -90,15 +92,17 @@ private:
     int frame_per_sprite_attack;
     int total_jump_frames {5};
     std::string slide_dir;
-    std::string sword_dir = "right";
+    std::string sword_attack_dir = "right";
     
+    double mass {2.0};
     double jump_height {2.0};
     double slide_dist {4.0};
     double sword_attack_dist {4.0};
     double total_jump_time {0.5};
     double total_slide_time {0.5};
-    double total_sword_attack_time {0.3};
+    double total_sword_attack_time {0.7};
     double time_between_slides {1.0};
+    double time_between_sword_attacks {1.0};
     double jump_time;
     double slide_time;
     double sword_attack_time;

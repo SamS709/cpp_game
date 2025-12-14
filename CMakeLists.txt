@@ -19,6 +19,8 @@ set(PROJECT_SOURCES
         mainwindow.ui
         character.cpp
         character.h
+        env.cpp
+        env.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

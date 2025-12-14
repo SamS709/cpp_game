@@ -18,10 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
     
     // Create character
     character1 = new Character(400, 300, time_between_frames);
-    
-    // Load sprite frames
-    character1->loadSpriteFrames("resources/images/characters/redhat");
-    
+    character2 = new Character(400, 300, time_between_frames);
+    env = new Env(character1, character2, time_between_frames);
+        
     // Setup animation timer
     animationTimer = new QTimer(this);
     connect(animationTimer, &QTimer::timeout, this, &MainWindow::updateAnimation);
@@ -31,89 +30,39 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete character1;
+    delete character2;
+    delete env;
     delete ui;
 }
 
 void MainWindow::updateAnimation()
 {
-    character1->update();
-    character1->checkBounds(width());
+    env->update(width());
     update(); // Trigger repaint
 }
 
 void MainWindow::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
-    
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
     
+    painter.setRenderHint(QPainter::Antialiasing);
     // Draw background
     painter.fillRect(rect(), QColor(200, 230, 255));
+    env->paint(&painter, width(), height());
     
-    // Draw ground
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(QColor(100, 200, 100));
-    painter.drawRect(0, character1->getY() + 50, width(), height() - character1->getY() - 50);
-    
-    character1->draw(painter);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Up) {
-        if (!character1->get_jumping()) {
-            character1->set_jumping(true);
-            character1->set_moving(false);
-            
-        }
-    }
-    if (event->key() == Qt::Key_Down) {
-        if (!character1->get_jumping() && !character1->get_sliding()) {
-            if (character1->get_moving()){
-                character1->set_sliding(true);
-            } else {
-                character1->set_lowering(true);
-                qDebug()<<"lowering";
-            }
-        }
-    }
-    if (event->key() == Qt::Key_Right) {
-        character1->set_right(true);
-        character1->set_left(false);
-        if(character1->get_jumping() || character1->get_sliding()){
-            character1->set_moving(false);
-        } else {
-            character1->set_moving(true);
-        }
-    } if (event->key() == Qt::Key_Left) {
-        character1->set_left(true);
-        character1->set_right(false);
 
-        if(character1->get_jumping() || character1->get_sliding()){
-            character1->set_moving(false);
-        } else {
-            character1->set_moving(true);
-        }
-    } if (event->key() == Qt::Key_0) {
-        character1->set_sword_attacking(true);
-        character1->set_lowering(false);
-        character1->set_sliding(false);
-    } 
+{
+    env->keyPressEvent(event);
     QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Right) {
-        character1->set_right(false);
-        character1->set_moving(false);
-    } else if (event->key() == Qt::Key_Left) {
-        character1->set_left(false);
-        character1->set_moving(false);
-    } else if (event->key() == Qt::Key_Down) {
-        character1->set_lowering(false);
-    }
+    env->keyReleaseEvent(event);
     
     QMainWindow::keyReleaseEvent(event);
 }
