@@ -15,11 +15,6 @@ struct Ground{
     double norm = -1.0; 
 };
 
-struct Vec2{
-    double x;
-    double y;
-};
-
 class Env {
 
 public:

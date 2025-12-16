@@ -28,8 +28,8 @@ class Rectangle: public Asset {
 public:
 
     Rectangle() = default;
-    Rectangle(Vec2 dims);
-    Rectangle(Vec2 pos, Vec2 dims);
+    Rectangle(Vec2 dim_);
+    Rectangle(Vec2 pos_, Vec2 dims_);
     double get_h() const { return dims.y; }
     double get_w() const { return dims.x; }
     void set_h(double h_) { dims.y = h_; }
@@ -37,8 +37,9 @@ public:
 
     double get_norm(double x_other, double y_other){
         if(x_other >= pos.x + dims.x / 2) {
-
+            return -1.0;
         }
+        return -1.0;
     }
 
 protected:
@@ -86,7 +87,7 @@ public:
     MovableCircle() = default;
     MovableCircle(double mass_);
     MovableCircle(double mass_, double radius_);
-    MovableCircle(Vec2 pos, Vec2 v, double mass_, double radius_);
+    MovableCircle(Vec2 pos_, Vec2 v_, double mass_, double radius_);
 
     double get_radius() const { return radius; }
     void set_radius(double radius_) { radius = radius_; }

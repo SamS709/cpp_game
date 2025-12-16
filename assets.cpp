@@ -12,7 +12,13 @@ Rectangle::Rectangle(Vec2 dims_)
 
     }
 
+Rectangle::Rectangle(Vec2 pos_, Vec2 dims_)
+    : Asset(pos_)
+    , dims(dims_)
+    {
 
+    }
+    
 MovableAsset::MovableAsset(double mass_)
     : Asset()
     , mass(mass_)

@@ -15,7 +15,7 @@ Env::Env(Character *c1_, Character *c2_, double dt_, double width_, double heigh
     }
 
 void Env::load_env_assets(){
-    ground = new Rectangle({width, height});
+    ground = new Rectangle({0.0, height - 100},{width, 100});
     MovableCircle *p1 = new MovableCircle(
         {50.0, 50.0},
         {0.0, 0.0},
@@ -29,7 +29,7 @@ void Env::load_env_assets(){
 
 void Env::apply_static_constraints(){
     for (MovableCircle *particle: particles) {
-        double collision_dist = (particle->get_y_expected() - ground->get_h()) * ground->get_h() - particle->get_radius();
+        double collision_dist = (particle->get_y_expected() + particle->get_radius()) - ground->get_y();
         if (collision_dist <= 0) {
             double delta_y = -collision_dist * ground->get_norm(particle->get_x(), particle->get_y());
             particle->update_expected_pos_collision(0.0, delta_y);
@@ -80,7 +80,7 @@ void Env::paint(QPainter *painter){
     // Draw ground
     (*painter).setPen(Qt::NoPen);
     (*painter).setBrush(QColor(100, 200, 100));
-    QRect visuals = QRect(0, ground->get_h(), width, height - ground->get_h());
+    QRect visuals = QRect(ground->get_x(), ground->get_y(), ground->get_w(), ground->get_h());
     (*painter).drawRect(visuals);
     draw_assets(*painter);
     c1->draw((*painter));
