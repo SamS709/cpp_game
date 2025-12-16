@@ -415,6 +415,7 @@ D:/Dev/cours/cpp_game/mainwindow.h
  mdp:C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/time.h
  mdp:C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/vadefs.h
  mdp:C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wchar.h
+ mdp:D:/Dev/cours/cpp_game/assets.h
  mdp:D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/moc_predefs.h
  mdp:D:/Dev/cours/cpp_game/character.h
  mdp:D:/Dev/cours/cpp_game/env.h
@@ -424,3 +425,5 @@ D:/Dev/cours/cpp_game/env.cpp
 D:/Dev/cours/cpp_game/main.cpp
 D:/Dev/cours/cpp_game/mainwindow.cpp
  uic:./ui_mainwindow.h
+D:/Dev/cours/cpp_game/assets.h
+D:/Dev/cours/cpp_game/assets.cpp

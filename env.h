@@ -1,11 +1,14 @@
 #ifndef ENV_H
 #define ENV_H
 
+#include "assets.h"
 #include "character.h"
 #include <QKeyEvent>
 #include <vector>
 
 using namespace std;
+
+
 
 struct Ground{
     double height = 500.0;
@@ -17,20 +20,12 @@ struct Vec2{
     double y;
 };
 
-struct Particle{
-    Vec2 pos;          
-    Vec2 expected_pos; 
-    Vec2 vel;
-    double radius;
-    double mass;
-};
-
 class Env {
 
 public:
-    Env(Character *c1_, Character *c2_, double dt_);
+    Env(Character *c1_, Character *c2_, double dt_, double width_, double height_);
     void update(int width);
-    void paint(QPainter *painter, int width, int height);
+    void paint(QPainter *painter);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void load_env_assets();
@@ -45,8 +40,10 @@ private:
     double t;
     double dt;
     double g = 981;
-    Ground ground;
-    vector<Particle> particles;
+    double width;
+    double height;
+    Rectangle *ground;
+    vector<MovableCircle*> particles;
 };
 
 

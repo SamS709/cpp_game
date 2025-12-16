@@ -590,6 +590,8 @@ Stickman_autogen/timestamp: \
 	C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/vadefs.h \
 	C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wchar.h \
 	D:/Dev/cours/cpp_game/CMakeLists.txt \
+	D:/Dev/cours/cpp_game/assets.cpp \
+	D:/Dev/cours/cpp_game/assets.h \
 	D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/3.30.5/CMakeCXXCompiler.cmake \
 	D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/3.30.5/CMakeRCCompiler.cmake \
 	D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/CMakeFiles/3.30.5/CMakeSystem.cmake \

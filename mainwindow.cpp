@@ -14,12 +14,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("Stickman Walking Animation");
     resize(800, 600);
-    double time_between_frames = 16.0;
-    
+    double time_between_frames = 4.0;  
     // Create character
     character1 = new Character(400, 300, time_between_frames);
     character2 = new Character(400, 300, time_between_frames);
-    env = new Env(character1, character2, time_between_frames);
+    env = new Env(character1, character2, time_between_frames, width(), height());
         
     // Setup animation timer
     animationTimer = new QTimer(this);
@@ -49,7 +48,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
     // Draw background
     painter.fillRect(rect(), QColor(200, 230, 255));
-    env->paint(&painter, width(), height());
+    env->paint(&painter);
     
 }
 

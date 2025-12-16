@@ -1,10 +1,12 @@
 #include "env.h"
 
 
-Env::Env(Character *c1_, Character *c2_, double dt_)
+Env::Env(Character *c1_, Character *c2_, double dt_, double width_, double height_)
     : c1(c1_)
     , c2(c2_)
-    , dt(dt_ / 1000.0) {
+    , dt(dt_ / 1000.0)
+    , width(width_)
+    , height(height_) {
 
         // Load sprite frames
         c1->loadSpriteFrames("resources/images/characters/redhat");
@@ -13,37 +15,36 @@ Env::Env(Character *c1_, Character *c2_, double dt_)
     }
 
 void Env::load_env_assets(){
-    Particle p1 = Particle{
-        .pos {.x = 50.0, .y = 50.0},
-        .expected_pos {.x = 50.0, .y = 50.0},
-        .vel {.x = 0.0, .y = 0.0},
-        .radius = 50.0,
-        .mass = 1.0
-    };
+    ground = new Rectangle({width, height});
+    MovableCircle *p1 = new MovableCircle(
+        {50.0, 50.0},
+        {0.0, 0.0},
+        5.0,
+        20.0
+    );
 
     particles.push_back(p1);
 
 }
 
 void Env::apply_static_constraints(){
-    for (Particle& particle: particles) {
-        double collision_dist = (particle.expected_pos.y - ground.height) * ground.norm - particle.radius;
-        
+    for (MovableCircle *particle: particles) {
+        double collision_dist = (particle->get_y_expected() - ground->get_h()) * ground->get_h() - particle->get_radius();
         if (collision_dist <= 0) {
-            double delta_y = -collision_dist * ground.norm;
-            particle.expected_pos.y += delta_y;
+            double delta_y = -collision_dist * ground->get_norm(particle->get_x(), particle->get_y());
+            particle->update_expected_pos_collision(0.0, delta_y);
+            
         }
     }
+
 }
 
 
 void Env::update_velocities_and_positions(){
-    for (Particle& particle : particles) {
-        particle.vel.x = (particle.expected_pos.x - particle.pos.x) / dt;
-        particle.vel.y = (particle.expected_pos.y - particle.pos.y) / dt;
-        
-        particle.pos.x = particle.expected_pos.x;
-        particle.pos.y = particle.expected_pos.y;
+    for (MovableCircle *particle : particles) {
+        particle->update_vel(dt);
+        particle->update_pos();
+
     }
 }
 
@@ -59,27 +60,27 @@ void Env::update(int width){
 }
 
 void Env::draw_assets(QPainter &painter){
-    for (const Particle& particle: particles) {
-        painter.drawEllipse(particle.pos.x, particle.pos.y, particle.radius, particle.radius);
+    for (MovableCircle *particle: particles) {
+        painter.drawEllipse(particle->get_x(), particle->get_y(), particle->get_radius(), particle->get_radius());
     }
 }
 
 void Env::apply_external_forces(){
-    for (Particle& particle : particles) {
-        particle.vel.y += g * dt;
+    for (MovableCircle *particle : particles) {
+        double new_v_y = particle->get_v_y() + g * dt;
+        particle->set_v_y(new_v_y);
     }
     
-    for (Particle& particle : particles) {
-        particle.expected_pos.x = particle.pos.x + dt * particle.vel.x;
-        particle.expected_pos.y = particle.pos.y + dt * particle.vel.y;
+    for (MovableCircle *particle : particles) {
+        particle->update_expected_pos(dt);
     }
 }
 
-void Env::paint(QPainter *painter, int width, int height){
+void Env::paint(QPainter *painter){
     // Draw ground
     (*painter).setPen(Qt::NoPen);
     (*painter).setBrush(QColor(100, 200, 100));
-    QRect visuals = QRect(0, ground.height, width, height - ground.height);
+    QRect visuals = QRect(0, ground->get_h(), width, height - ground->get_h());
     (*painter).drawRect(visuals);
     draw_assets(*painter);
     c1->draw((*painter));
@@ -89,13 +90,15 @@ void Env::paint(QPainter *painter, int width, int height){
 void Env::keyPressEvent(QKeyEvent *event){
      if (event->key() == Qt::Key_Up) {
         if (!c1->get_jumping()) {
-            c1->set_jumping(true);
             c1->set_moving(false);
+            c1->set_sword_attacking(false);
+            c1->set_jumping(true);
+            
             
         }
     }
     if (event->key() == Qt::Key_Down) {
-        if (!c1->get_jumping() && !c1->get_sliding()) {
+        if (!c1->get_jumping() && !c1->get_sliding() && !c1->get_sword_attacking()) {
             if (c1->get_moving()){
                 c1->set_sliding(true);
             } else {
@@ -122,10 +125,11 @@ void Env::keyPressEvent(QKeyEvent *event){
             c1->set_moving(true);
         }
     } if (event->key() == Qt::Key_A) {
-        c1->set_sword_attacking(true);
         c1->set_lowering(false);
         c1->set_sliding(false);
         c1->set_jumping(false);
+        c1->set_sword_attacking(true);
+        
     } 
 
 }

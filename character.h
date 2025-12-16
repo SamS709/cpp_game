@@ -97,15 +97,17 @@ private:
     double mass {2.0};
     double jump_height {2.0};
     double slide_dist {4.0};
-    double sword_attack_dist {4.0};
+    double sword_attack_dist {1.0};
     double total_jump_time {0.5};
     double total_slide_time {0.5};
-    double total_sword_attack_time {2.0};
+    double total_sword_attack_time {0.5};
     double time_between_slides {1.0};
     double time_between_sword_attacks {1.0};
     double jump_time;
     double slide_time;
     double sword_attack_time;
+    double walk_step_time {0.0};
+    double total_walk_step_time {0.5};  // Total duration for one walk cycle
     double time_between_frames;
 };
 

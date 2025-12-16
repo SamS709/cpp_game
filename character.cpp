@@ -31,11 +31,12 @@ void Character::loadSpriteFrames(const QString &basePath)
 
 void Character::load_move_frames(const QString &basePath){
     move_frames.clear();
-    for (int i = 0; i <= 4; ++i) {
-        QString framePath = basePath + QString("/run/run_%1.png").arg(i);
+    for (int i = 0; i <= 25; ++i) {
+        QString framePath = basePath + QString("/walk/walk_%1.png").arg(i, 3, 10, QChar('0'));
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
+            sprite = sprite.scaledToHeight(50, Qt::SmoothTransformation);
             move_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
@@ -57,15 +58,14 @@ void Character::load_jump_frames(const QString &basePath){
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
+            sprite = sprite.scaledToHeight(50, Qt::SmoothTransformation);
             jump_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
             qDebug() << "Failed to load:" << framePath;
         }
     }
-    if (!jump_frames.isEmpty()) {
-        frame_per_sprite_jump = total_jump_time * 1000 / (jump_frames.size() * time_between_frames) ;
-    }
+
 }
 
 void Character::load_slide_frames(const QString &basePath){
@@ -76,6 +76,7 @@ void Character::load_slide_frames(const QString &basePath){
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
+            sprite = sprite.scaledToHeight(50, Qt::SmoothTransformation);
             slide_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
@@ -83,9 +84,7 @@ void Character::load_slide_frames(const QString &basePath){
         }
     
     }
-    if (!slide_frames.isEmpty()) {
-        frame_per_sprite_slide = total_slide_time * 1000 / (slide_frames.size() * time_between_frames) ;
-    }
+
 }
 
 void Character::load_lower_frames(const QString &basePath){
@@ -95,6 +94,7 @@ void Character::load_lower_frames(const QString &basePath){
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
+            sprite = sprite.scaledToHeight(50, Qt::SmoothTransformation);
             lower_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
@@ -106,19 +106,17 @@ void Character::load_lower_frames(const QString &basePath){
 
 void Character::load_sword_attack_frames(const QString &basePath){
     sword_attack_frames.clear();
-    for (int i = 0; i <= 7; ++i) {
-        QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i);
+    for (int i = 1; i <= 121; ++i) {
+        QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i, 3, 10, QChar('0'));
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
+            sprite = sprite.scaledToHeight(50, Qt::SmoothTransformation);
             sword_attack_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
+            // qDebug() << "Loaded:" << framePath;
         } else {
             qDebug() << "Failed to load:" << framePath;
         }
-    }
-    if (!sword_attack_frames.isEmpty()) {
-        frame_per_sprite_attack = total_sword_attack_time * 1000 / (sword_attack_frames.size() * time_between_frames) ;
     }
 }
 
@@ -139,6 +137,7 @@ void Character::update()
     if (lowering){
         update_lower();
     }
+    walk_step_time += time_between_frames/1000; // walk_step_time always counts
     if(moving){
         update_move();
     } 
@@ -149,39 +148,31 @@ void Character::update_jump(){
     jump_time += time_between_frames/1000;
     if(jump_time > total_jump_time) {
         jumping = false;
-        frameCounter = 0;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
             moving = true;
         }
     } else {
-        // Advance jump animation frame (regardless of direction)
+        // Calculate which frame to show based on elapsed time
         if (!jump_frames.isEmpty()) {
-            frameCounter++;
-            if (frameCounter >= frame_per_sprite_jump) {
-                frameCounter = 0;
-                current_move_frame = (current_move_frame + 1) % jump_frames.size();
-            }
+            int target_frame = (int)((jump_time / total_jump_time) * jump_frames.size());
+            current_move_frame = std::min(target_frame, (int)jump_frames.size() - 1);
         }
         
         // Move horizontally during jump
         if (right) {
-            x += 1;
+            x += 1.0;
         } else if (left) {
-            x -= 1;
+            x -= 1.0;
         }
     }
 }
 
 void Character::update_lower(){
     if (!lower_frames.isEmpty()) {
-        frameCounter++;
-        if (frameCounter >= framesPerSprite) {
-            frameCounter = 0;
-            current_move_frame = 1;
+        current_move_frame = 1;
         }
-    }
 }
 
 
@@ -189,20 +180,16 @@ void Character::update_slide(){
     if(slide_time > total_slide_time) {
         sliding = false;
         slide_time = 0.0;
-        frameCounter = 0;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
             moving = true;
         }
     } else {
-        // Advance jump animation frame (regardless of direction)
+        // Calculate which frame to show based on elapsed time
         if (!slide_frames.isEmpty()) {
-            frameCounter++;
-            if (frameCounter >= frame_per_sprite_slide) {
-                frameCounter = 0;
-                current_move_frame = (current_move_frame + 1) % slide_frames.size();
-            }
+            int target_frame = (int)((slide_time / total_slide_time) * slide_frames.size());
+            current_move_frame = std::min(target_frame, (int)slide_frames.size() - 1);
         }
         
         // No horizontal movement during slide, just maintain direction
@@ -213,20 +200,17 @@ void Character::update_sword_attack(){
     if(sword_attack_time > total_sword_attack_time) {
         sword_attacking = false;
         sword_attack_time = 0.0;
-        frameCounter = 0;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
             moving = true;
         }
     } else {
-        // Advance jump animation frame (regardless of direction)
+        // Calculate which frame to show based on elapsed time
         if (!sword_attack_frames.isEmpty()) {
-            frameCounter++;
-            if (frameCounter >= frame_per_sprite_attack) {
-                frameCounter = 0;
-                current_move_frame = (current_move_frame + 1) % sword_attack_frames.size();
-            }
+            int target_frame = (int)((sword_attack_time / total_sword_attack_time) * sword_attack_frames.size());
+            current_move_frame = std::min(target_frame, (int)sword_attack_frames.size() - 1);
+            qDebug()<<current_move_frame;
         }
         
         // No horizontal movement during slide, just maintain direction
@@ -235,31 +219,24 @@ void Character::update_sword_attack(){
 
 void Character::update_move(){
     if (right) {
-        x += 3;
+        x += 0.5;
         
-        // Advance animation frame
         if (!move_frames.isEmpty()) {
-            frameCounter++;
-            if (frameCounter >= framesPerSprite) {
-                frameCounter = 0;
-                current_move_frame = (current_move_frame + 1) % move_frames.size();
-            }
+            double cycle_time = fmod(walk_step_time, total_walk_step_time);
+            int target_frame = (int)((cycle_time / total_walk_step_time) * move_frames.size());
+            current_move_frame = std::min(target_frame, (int)move_frames.size() - 1);
         }
     } else if (left) {
-        x -= 3;
+        x -= 0.5;
         
-        // Advance animation frame
         if (!move_frames.isEmpty()) {
-            frameCounter++;
-            if (frameCounter >= framesPerSprite) {
-                frameCounter = 0;
-                current_move_frame = (current_move_frame + 1) % move_frames.size();
-            }
+            double cycle_time = fmod(walk_step_time, total_walk_step_time);
+            int target_frame = (int)((cycle_time / total_walk_step_time) * move_frames.size());
+            current_move_frame = std::min(target_frame, (int)move_frames.size() - 1);
         }
     } else {
-        // Reset to first frame when not moving
         current_move_frame = 0;
-        frameCounter = 0;
+        walk_step_time = 0.0;
     }
 }
 
@@ -364,6 +341,7 @@ void Character::set_jumping(bool jumping_)
 {
     jumping = jumping_;
     jump_time = 0.0;
+    current_move_frame = 0;
     sliding = false;
 }
 
@@ -376,6 +354,7 @@ void Character::set_sliding(bool s)
         qDebug() << "slide_time" << slide_time << ">" << time_between_slides;
         sliding = s;
         slide_time = 0.0;
+        current_move_frame = 0;
         if (right) {
             slide_dir = "right";
         } else if (left) {
@@ -397,6 +376,7 @@ void Character::set_sword_attacking(bool a)
         moving = false;
         sword_attacking = a;
         sword_attack_time = 0.0;
+        current_move_frame = 0;
         if (right) {
             sword_attack_dir = "right";
         } else if (left) {
