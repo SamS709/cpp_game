@@ -11,15 +11,21 @@ class Asset {
 public:
 
     Asset(Vec2 pos_);
+    Asset(Vec2 pos_, Vec2 dims_);
     Asset() = default;
     double get_x() { return pos.x; }
     double get_y() { return pos.y; }
     void set_x(double x_) { pos.x = x_; }
     void set_y(double y_) { pos.y = y_; }
+    double get_h() const { return dims.y; }
+    double get_w() const { return dims.x; }
+    void set_h(double h_) { dims.y = h_; }
+    void set_w(double w_) { dims.x = w_; }
 
 protected:
 
     Vec2 pos = {0.0, 0.0};
+    Vec2 dims = {0.5, 0.5};
 
 };
 
@@ -30,21 +36,11 @@ public:
     Rectangle() = default;
     Rectangle(Vec2 dim_);
     Rectangle(Vec2 pos_, Vec2 dims_);
-    double get_h() const { return dims.y; }
-    double get_w() const { return dims.x; }
-    void set_h(double h_) { dims.y = h_; }
-    void set_w(double w_) { dims.x = w_; }
 
-    double get_norm(double x_other, double y_other){
-        if(x_other >= pos.x + dims.x / 2) {
-            return -1.0;
-        }
-        return -1.0;
-    }
+    double get_norm(double x_other, double y_other);
+    
 
 protected:
-
-    Vec2 dims = {0.5, 0.5};
 
 };
 
@@ -72,7 +68,9 @@ public:
     void update_vel(double dt){ v.x = (pos_exp.x - pos.x) / dt; v.y = (pos_exp.y - pos.y) / dt; }
     void update_expected_pos(double dt){ pos_exp.x = pos.x + v.x * dt; pos_exp.y = pos.y + v.y * dt; }
     void update_pos(){ pos.x = pos_exp.x; pos.y = pos_exp.y; }
-    
+    void update_expected_pos_collision(double delta_x, double delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
+
+    virtual double get_rest() const { return 0.0; } // Default restitution coefficient
 
 protected:
 
@@ -92,11 +90,21 @@ public:
     double get_radius() const { return radius; }
     void set_radius(double radius_) { radius = radius_; }
 
-    void update_expected_pos_collision(double delta_x, double delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
-    
+    double get_rest() const override { return 0.8; } // Higher bounce for particles
 
 protected:
     double radius {0.5};
+
+};
+
+class MovableRectangle : public MovableAsset{
+
+public:
+    MovableRectangle() = default;
+    MovableRectangle(Vec2 dims_, double mass_);
+    MovableRectangle(Vec2 pos_, Vec2 dims_, Vec2 v_, double mass_);
+
+protected:
 
 };
 

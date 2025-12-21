@@ -26,18 +26,29 @@ public:
     void load_env_assets();
     void apply_external_forces();
     void apply_static_constraints();
+    void apply_static_constraint(MovableAsset *a);
+    void resolve_aabb_collision(MovableAsset *movable, Rectangle *rect);
+    void update_velocity_and_position(MovableAsset *a);
+
     void update_velocities_and_positions();
     void draw_assets(QPainter &painter);
+
+    bool intersect(MovableCircle, Rectangle);
 
 private:
     Character *c1;
     Character *c2;
     double t;
     double dt;
-    double g = 981;
+    double g = 1000;
     double width;
     double height;
+    double rest {0.8};
+    double speed_move {75.0};
+    double speed_run; 
+    double speed_jump {20.0};
     Rectangle *ground;
+    Rectangle *obstacle;
     vector<MovableCircle*> particles;
 };
 

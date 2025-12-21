@@ -147,6 +147,7 @@ D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/
   C:/Qt/6.10.1/mingw_64/include/QtCore/qversiontagging.h \
   C:/Qt/6.10.1/mingw_64/include/QtCore/qxptype_traits.h \
   C:/Qt/6.10.1/mingw_64/include/QtCore/qyieldcpu.h \
+  C:/Qt/6.10.1/mingw_64/include/QtGui/QImage \
   C:/Qt/6.10.1/mingw_64/include/QtGui/QKeyEvent \
   C:/Qt/6.10.1/mingw_64/include/QtGui/QPainter \
   C:/Qt/6.10.1/mingw_64/include/QtGui/QPixmap \

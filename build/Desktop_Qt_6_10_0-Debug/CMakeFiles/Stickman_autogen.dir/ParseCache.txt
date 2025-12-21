@@ -150,6 +150,7 @@ D:/Dev/cours/cpp_game/mainwindow.h
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/qversiontagging.h
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/qxptype_traits.h
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/qyieldcpu.h
+ mdp:C:/Qt/6.10.1/mingw_64/include/QtGui/QImage
  mdp:C:/Qt/6.10.1/mingw_64/include/QtGui/QKeyEvent
  mdp:C:/Qt/6.10.1/mingw_64/include/QtGui/QPainter
  mdp:C:/Qt/6.10.1/mingw_64/include/QtGui/QPixmap
