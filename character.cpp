@@ -1,10 +1,7 @@
 #include "character.h"
-#include <QDebug>
 
-Character::Character(double startX, double startY, double time_betwwen_frames_, double mass_)
+Character::Character(Vec2 pos_, double time_betwwen_frames_, double mass_)
     : MovableAsset(mass)
-    , x(startX)
-    , y(startY)
     , time_between_frames(time_betwwen_frames_)
     , right(false)
     , left(false)
@@ -17,6 +14,11 @@ Character::Character(double startX, double startY, double time_betwwen_frames_, 
     , framesPerSprite(100)  // Change sprite every 5 updates (~12 FPS at 60 FPS)
     , jump_height(500)
 {
+    loadSpriteFrames("resources/images/characters/redhat");
+    current_dims = move_frames_dims[0];
+    set_x(pos_.x);
+    set_y(pos_.y);
+    
     
 }
 
@@ -27,7 +29,6 @@ void Character::loadSpriteFrames(const QString &basePath)
     load_slide_frames(basePath);
     load_lower_frames(basePath);
     load_sword_attack_frames(basePath);
-    current_dims = move_frames_dims[0];
     
 }
 
@@ -52,6 +53,7 @@ void Character::load_move_frames(const QString &basePath){
     // Use first move frame as idle frame
     if (!move_frames.isEmpty()) {
         idleFrame = move_frames[5];
+        idle_dims = move_frames_dims[5];
         qDebug() << "Loaded" << move_frames.size() << "sprite frames";
     }
 }
@@ -86,6 +88,7 @@ void Character::load_slide_frames(const QString &basePath){
         
         if (!sprite.isNull()) {
             sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
+            
             slide_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
@@ -98,13 +101,16 @@ void Character::load_slide_frames(const QString &basePath){
 
 void Character::load_lower_frames(const QString &basePath){
     lower_frames.clear();
-    for (int i = 0; i <= 3; ++i) {
-        QString framePath = basePath + QString("/lower/lower_%1.png").arg(i);
+    for (int i = 0; i <= 10; ++i) {
+        QString framePath = basePath + QString("/lower/lower_%1.png").arg(i, 3, 10, QChar('0'));
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
             sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
+            vector<double> frameDims;
+            set_hitbox(sprite, frameDims);
             lower_frames.append(sprite);
+            lower_frames_dims.push_back(frameDims);
             qDebug() << "Loaded:" << framePath;
         } else {
             qDebug() << "Failed to load:" << framePath;
@@ -197,8 +203,10 @@ void Character::set_hitbox(QPixmap& sprite, vector<double>& dims_){
     double charWidth = rightBound - leftBound;
     double charHeight = bottomBound - topBound;
     
-    // Fill dims_ with computed dimensions [width/2, height/2]
+    // Fill dims_ with computed dimensions [leftBound, topBound, width/2, height/2]
     dims_.clear();
+    dims_.push_back(leftBound);
+    dims_.push_back(topBound);
     dims_.push_back(charWidth / 2.0);
     dims_.push_back(charHeight / 2.0);
     
@@ -250,8 +258,8 @@ void Character::update_jump(){
         // v_y ranges from -jump_velocity (rising) to +jump_velocity (falling)
         // Map to frame 0 (start of jump) -> num_frames/2 (peak) -> num_frames-1 (landing)
         
-        double velocity_range = jump_velocity * 2.0;  // Total velocity range
-        double normalized = (v_y + jump_velocity) / velocity_range;  // 0.0 to 1.0
+        double velocity_range = speed_jump * 2.0;  // Total velocity range
+        double normalized = (v_y + speed_jump) / velocity_range;  // 0.0 to 1.0
         normalized = std::max(0.0, std::min(1.0, normalized));  // Clamp
         
         // Map to frame index
@@ -263,7 +271,7 @@ void Character::update_jump(){
 
 void Character::update_lower(){
     if (!lower_frames.isEmpty()) {
-        current_move_frame = 1;
+        current_move_frame = 9;
         }
 }
 
@@ -341,11 +349,9 @@ void Character::draw(QPainter &painter)
         currentSprite = &move_frames[current_move_frame];
         current_dims = move_frames_dims[current_move_frame];
     } else if (jumping && !jump_frames.isEmpty()) {
-        // Use jump animation frame
         currentSprite = &jump_frames[current_move_frame];
         current_dims = jump_frames_dims[current_move_frame];
     } else if (sliding && !slide_frames.isEmpty()) {
-        // Add x variations when sliding
         delta_x = get_x_sliding(slide_time);
         currentSprite = &slide_frames[current_move_frame];
         if (slide_dir == "right") {
@@ -355,6 +361,7 @@ void Character::draw(QPainter &painter)
         }
     } else if (lowering && !lower_frames.isEmpty()) {
         currentSprite = &lower_frames[current_move_frame];
+        current_dims = lower_frames_dims[current_move_frame];
     } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
         delta_x = get_x_sword_attacking(sword_attack_time);
         currentSprite = &sword_attack_frames[current_move_frame];
@@ -363,23 +370,24 @@ void Character::draw(QPainter &painter)
         } else {
             x-= delta_x;
         }
-    } else if (!idleFrame.isNull()) {
+    } else if (!(idleFrame.isNull() | idle_dims.empty())) {
+        current_dims = idle_dims;
         currentSprite = &idleFrame;
     }
     
     // Update dims based on current sprite
     if (currentSprite && !currentSprite->isNull()) {
-        dims.x = current_dims[0];
-        dims.y = current_dims[1];
+        set_w(2*current_dims[2]);
+        set_h(2*current_dims[3]);
     }
     
     // Draw the sprite
     if (currentSprite && !currentSprite->isNull()) {
         painter.save();
 
-        // Calculate position (center the sprite)
-        double drawX = get_x() - currentSprite->width() / 2.0;
-        double drawY = get_y() - currentSprite->height() / 2.0;
+        // Calculate position for drawing (offset from the character dims)
+        double drawX = get_x() - current_dims[0]-current_dims[2];
+        double drawY = get_y() - current_dims[1]-current_dims[3];
         
         // Flip horizontally if facing left
         handle_rotate(painter);
@@ -391,15 +399,15 @@ void Character::draw(QPainter &painter)
 void Character::handle_rotate(QPainter &painter){
     if(sliding || sword_attacking){
         if (slide_dir=="left" || sword_attack_dir == "left"){
-            painter.translate(pos.x, pos.y);
+            painter.translate(get_x(), get_y());
             painter.scale(-1, 1);
-            painter.translate(-pos.x, -pos.y);
+            painter.translate(-get_x(), -get_y());
         }
     } else {
         if (!facingRight) {
-            painter.translate(pos.x, pos.y);
+            painter.translate(get_x(), get_y());
             painter.scale(-1, 1);
-            painter.translate(-pos.x, -pos.y);
+            painter.translate(-get_x(), -get_y());
         }
     }
 }
@@ -415,6 +423,14 @@ double Character::get_x_sword_attacking(double t) {
 void Character::set_moving(bool m)
 {
     moving = m;
+    if (m) {
+        if (right) {
+            set_v_x(speed_move);
+        }
+        else {
+            set_v_x(-speed_move);
+        }
+    }
 }
 
 void Character::set_right(bool r)
@@ -435,7 +451,7 @@ void Character::set_jumping(bool jumping_)
     current_move_frame = 0;
     sliding = false;
     if (jumping_) {
-        set_v_y(-jump_velocity);
+        set_v_y(-speed_jump);
     }
 }
 
@@ -504,25 +520,13 @@ bool Character::get_sword_attacking()
 
 void Character::checkBounds(int windowWidth)
 {
-    if (pos.x > windowWidth + 50) {
-        pos.x = -50;
-    } else if (pos.x < -50) {
-        pos.x = windowWidth + 50;
+    if (get_x() > windowWidth + 50) {
+        set_x(-50);
+    } else if (get_x() < -50) {
+        set_x(50);
     }
 }
 
-QRectF Character::get_full_hitbox() {
-    int  width = currentSprite->width();
-    int height = currentSprite->height();
-    return QRectF(pos.x - width / 2, pos.y - height / 2, width, height);
-
-}
 
 
-// QRectF getHitbox() const {
-//     return QRectF(x - width/2, y - height/2, width, height);
-// }
 
-// bool collidesWith(const Character& other) {
-//     return getHitbox().intersects(other.getHitbox());
-// }

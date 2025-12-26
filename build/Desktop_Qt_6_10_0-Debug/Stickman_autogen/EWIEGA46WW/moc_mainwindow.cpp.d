@@ -1,5 +1,6 @@
 D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/moc_mainwindow.cpp: D:/Dev/cours/cpp_game/mainwindow.h \
   D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/moc_predefs.h \
+  C:/Qt/6.10.1/mingw_64/include/QtCore/QDebug \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QList \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QObject \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QRect \
