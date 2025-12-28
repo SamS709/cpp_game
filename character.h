@@ -8,13 +8,15 @@
 #include <cmath>
 #include <vector>
 #include "assets.h"
-# include <QDebug>
+#include <QDebug>
+#include "lifebar.h"
+
 using namespace std;
 
 class Character: public MovableAsset
 {
 public:
-    Character(Vec2 pos_, double time_betwwen_frames_, double mass);
+    Character(Vec2 pos_, double time_betwwen_frames_, double mass, double max_hp_);
     
     void loadSpriteFrames(const QString &basePath);
     void load_jump_frames(const QString &basePath);
@@ -24,7 +26,7 @@ public:
     void load_sword_attack_frames(const QString &basePath);
 
 
-    void update();
+    void update(int width);
     void update_jump();
     void update_move();
     void update_slide();
@@ -41,7 +43,7 @@ public:
     void update_pos(){ pos.x = pos_exp.x; pos.y = pos_exp.y; }
     void update_expected_pos_collision(double delta_x, double delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
     void set_c_scale(double s) {c_scale = s;}
-    void set_hitbox(QPixmap& sprite, vector<double>& dims_);
+    void set_hitbox(QPixmap& sprite, vector<vector<double>>* asset_dims_, vector<vector<double>>* character_dims_, vector<vector<double>>* sword_dims_);
     void set_draw_baxes(bool d) { draw_baxes = d; }
     void set_right(bool r);
     void set_right_pressed(bool r) {right_pressed = r;}
@@ -54,46 +56,49 @@ public:
     void set_speed_move(double s) {speed_move = s;}
     void set_speed_jump(double s) {speed_jump = s;}
     void set_speed_run(double s) {speed_run = s;}
+    void set_hp(double hp_) {hp = hp_; lifebar->set_percentage(hp/max_hp);}
+    void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
+    void set_lifebar_dims(double x, double y, double w, double h);
 
     double get_rest() const override { return 0.0; } // No bounce for characters
 
     // Drawing positions (with sprite offset)
-    double get_y() { return pos.y;} //- current_dims[1] - current_dims[3]; }
-    double get_x() { return pos.x;} //- current_dims[0] - current_dims[2]; }
-    double get_x_expected() const { return pos_exp.x;} //- current_dims[0] - current_dims[2]; }
-    double get_y_expected() const { return pos_exp.y;} //- current_dims[1] - current_dims[3]; }
-    
-    // Center positions for collision detection (without sprite offset)
-    // double get_center_x() const { return pos.x; }
-    // double get_center_y() const { return pos.y; }
-    // double get_center_x_expected() const { return pos_exp.x; }
-    // double get_center_y_expected() const { return pos_exp.y; }
+    double get_y() { return pos.y;} 
+    double get_x() { return pos.x;} 
+    double get_x_expected() const { return pos_exp.x;} 
+    double get_y_expected() const { return pos_exp.y;}
+
 
     void set_moving(bool m);
 
     double get_mass() const { return mass; } 
-    double get_y_jump(double t); 
     double get_x_sliding(double t);
     double get_x_sword_attacking(double t);
     double get_c_scale() const { return c_scale; }
+    double get_hp() const { return hp; }
+    double get_current_sprite_width() {return currentSprite->width();}
+    double get_sword_attack_damages() { return sword_attack_damages; }
+    vector<double> get_current_asset_dims() {return current_asset_dims; }
+    vector<double> get_current_character_dims() {return current_character_dims; }
+    vector<double> get_current_sword_dims() {return current_sword_dims; }
 
 
 
-    bool get_moving();
-    bool get_jumping();
-    bool get_sliding();
-    bool get_sword_attacking();
+    bool get_moving() { return moving; };
+    bool get_jumping() { return jumping; };
+    bool get_sliding() {return sliding; };
+    bool get_attacking() { return attacking; }
+    bool get_sword_attacking() {return sword_attacking; };
     bool get_right() { return facingRight; }
     bool get_right_pressed() { return right_pressed; }  // Check if right key is pressed
     bool get_left_pressed() { return left_pressed; }    // Check if left key is pressed
+    bool get_first_hit_sword_attack() { return first_hit_sword_attack; }    // Check if left key is pressed
 
 
     void handle_rotate(QPainter &painte);
     
-    void checkBounds(int windowWidth);
+    void checkBounds(int windowWidth);   
 
-    QRectF get_full_hitbox();
-    
 private:
     double x;
     double y;
@@ -101,26 +106,39 @@ private:
     bool jumping = false;
     bool sliding = false;
     bool lowering = false;
+    bool attacking = false;
     bool sword_attacking = false;
     bool right;
     bool left;
     bool left_pressed;
     bool right_pressed;
     bool facingRight;
+    bool first_hit_sword_attack;
     
     // Sprite animation
     QVector<QPixmap> move_frames;
-    vector<vector<double>> move_frames_dims;
-    vector<vector<double>> jump_frames_dims;
-    vector<vector<double>> lower_frames_dims;
+    vector<vector<double>> move_frames_asset_dims;
+    vector<vector<double>> jump_frames_asset_dims;
+    vector<vector<double>> lower_frames_asset_dims;
+    vector<vector<double>> sword_attack_frames_asset_dims;
+    vector<vector<double>> move_frames_character_dims;
+    vector<vector<double>> jump_frames_character_dims;
+    vector<vector<double>> lower_frames_character_dims;
+    vector<vector<double>> sword_attack_frames_character_dims;
+    vector<vector<double>> sword_attack_frames_sword_dims;
     QVector<QPixmap> jump_frames;
     QVector<QPixmap> slide_frames;
     QVector<QPixmap> lower_frames;
     QVector<QPixmap> sword_attack_frames;
     QVector<double> bounds;
+    Lifebar *lifebar;
     QPixmap *currentSprite = nullptr;
-    vector<double> current_dims;
+    vector<double> current_asset_dims;
+    vector<double> current_character_dims;
+    vector<double> current_sword_dims;
     vector<double> idle_dims;
+    vector<double> idle_character_dims;
+    
 
     QPixmap idleFrame;
     
@@ -136,6 +154,7 @@ private:
     std::string sword_attack_dir = "right";
     
     double mass {2.0};
+    double max_hp {100.0};
     double jump_height {50.0};
     double speed_move;
     double speed_run;
@@ -154,9 +173,11 @@ private:
     double walk_step_time {10000.0};
     double total_walk_step_time {0.5};  // Total duration for one walk cycle
     double time_between_frames;
-    double c_scale = 72.0;
+    double c_scale = 100.0;
     bool draw_baxes = true;
     double base_y {0.0};  // Base Y position when jump starts
+    double hp {100.0};
+    double sword_attack_damages {10.0};
 };
 
 #endif // CHARACTER_H

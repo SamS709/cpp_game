@@ -602,6 +602,8 @@ Stickman_autogen/timestamp: \
 	D:/Dev/cours/cpp_game/character.h \
 	D:/Dev/cours/cpp_game/env.cpp \
 	D:/Dev/cours/cpp_game/env.h \
+	D:/Dev/cours/cpp_game/lifebar.cpp \
+	D:/Dev/cours/cpp_game/lifebar.h \
 	D:/Dev/cours/cpp_game/main.cpp \
 	D:/Dev/cours/cpp_game/mainwindow.cpp \
 	D:/Dev/cours/cpp_game/mainwindow.h \

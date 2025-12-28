@@ -16,8 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     resize(800, 600);
     double time_between_frames = 4.0;  
     // Create character
-    character1 = new Character({0, 0}, time_between_frames, 2.0);
-    character2 = new Character({400, 300}, time_between_frames, 2.0);
+    character1 = new Character({0, 0}, time_between_frames, 2.0, 100);
+    character2 = new Character({400, 300}, time_between_frames, 2.0, 100);
     env = new Env(character1, character2, time_between_frames, width(), height());
         
     // Setup animation timer

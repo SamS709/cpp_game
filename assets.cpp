@@ -25,14 +25,14 @@ Rectangle::Rectangle(Vec2 pos_, Vec2 dims_)
     {
 
     }
+
+void Rectangle::draw(QPainter &painter){
+    painter.setBrush(get_color());
+    painter.drawRect(get_x(), get_y(), get_w(), get_h());
+}
     
 
-double Rectangle::get_norm(double x_other, double y_other){
-        if(x_other >= pos.x + dims.x / 2) {
-            return -1.0;
-        }
-        return -1.0;
-    }
+
 
 MovableAsset::MovableAsset(double mass_)
     : Asset()

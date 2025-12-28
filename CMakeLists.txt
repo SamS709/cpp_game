@@ -23,6 +23,8 @@ set(PROJECT_SOURCES
         env.h
         assets.cpp
         assets.h
+        lifebar.cpp
+        lifebar.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

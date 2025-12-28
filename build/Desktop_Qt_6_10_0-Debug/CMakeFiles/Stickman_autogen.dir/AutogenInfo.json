@@ -315,6 +315,12 @@
 		],
 		[ "D:/Dev/cours/cpp_game/env.h", "MU", "EWIEGA46WW/moc_env.cpp", null ],
 		[
+			"D:/Dev/cours/cpp_game/lifebar.h",
+			"MU",
+			"EWIEGA46WW/moc_lifebar.cpp",
+			null
+		],
+		[
 			"D:/Dev/cours/cpp_game/mainwindow.h",
 			"MU",
 			"EWIEGA46WW/moc_mainwindow.cpp",
@@ -395,6 +401,7 @@
 		[ "D:/Dev/cours/cpp_game/assets.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/character.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/env.cpp", "MU", null ],
+		[ "D:/Dev/cours/cpp_game/lifebar.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/main.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/mainwindow.cpp", "MU", null ]
 	],
