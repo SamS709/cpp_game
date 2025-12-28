@@ -24,7 +24,7 @@ set(PROJECT_SOURCES
         assets.cpp
         assets.h
         lifebar.cpp
-        lifebar.h ///
+        lifebar.h 
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

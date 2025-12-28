@@ -1,5 +1,34 @@
 #include "assets.h"
 
+// ...existing code...
+std::optional<StaticConstraint> PlaneCollider::checkContact(const MovableCircle& particle, int index) const {
+    const Vec2 center = particle.get_pos_expected();
+    const Vec2 toCenter = center - init_point;
+
+    // Distance along normal (penetration must be positive)
+    float distance = toCenter.dot(normal);
+    float penetration = particle.get_radius() - distance;
+    if (penetration <= 0) return std::nullopt;
+
+    // Finite segment test along plane tangent
+    Vec2 tangent = Vec2{-normal.y, normal.x}; // perpendicular to normal
+    float s = toCenter.dot(tangent);          // local coord along the plane
+
+    // Require the circle center to be within [radius, width - radius]
+    if (s < 0.0 || s > (width)) {
+        return std::nullopt;
+    }
+
+    StaticConstraint constraint;
+    constraint.particleIndex = index;
+    constraint.normal = normal;
+    constraint.penetration = penetration;
+    constraint.contactPoint = center - normal * particle.get_radius();
+    return constraint;
+}
+// ...existing code...
+
+
 Asset::Asset(Vec2 pos_) 
     : pos(pos_)
     , dims({0.5, 0.5})
@@ -67,8 +96,13 @@ MovableCircle::MovableCircle(Vec2 pos_, Vec2 v_, double mass_, double radius_)
     : MovableAsset(pos_, v_, mass_)
     , radius(radius_)
     {
-        dims = {radius * 2.0, radius * 2.0};
+        dims = {2.0 * radius, 2.0 * radius};
     }
+
+void MovableCircle::draw(QPainter &painter){
+    const double r = get_radius();
+    painter.drawEllipse(QPointF(get_x(), get_y()), r, r);
+}
 
 MovableRectangle::MovableRectangle(Vec2 dims_, double mass_)
     : MovableAsset(mass_)

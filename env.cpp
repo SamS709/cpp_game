@@ -36,125 +36,132 @@ void Env::load_env_assets(){
     ground = new Rectangle({0.0, height - 100.0},{width, 100});
     obstacle = new Rectangle({width/2.0 - 50.0, height-height/3.0}, {100.0, 10});
     MovableCircle *p1 = new MovableCircle(
-        {width-50.0, 50.0},
-        {-50.0, 0.0},
+        {width/2.0, 0.0},
+        {50.0, 0.0},
         5.0,
         20.0
     );
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
     particles.push_back(p1);
+    colliders.push_back(std::make_unique<PlaneCollider>(Vec2(width / 2 - 200, height/2), Vec2(0, -1), 400.0));
 }
 
-void Env::apply_static_constraints(){
+// void Env::apply_static_constraints(){
 
-    // particles and ground
-    for (MovableCircle *particle: particles) {
-        apply_static_constraint(particle);
-        resolve_aabb_collision(particle, obstacle);
-    }       
-    // Charaters and ground
-    apply_static_constraint(c1);
-    apply_static_constraint(c2);
+//     // particles and ground
+//     for (MovableCircle *particle: particles) {
+//         apply_static_constraint(particle);
+//         resolve_aabb_collision(particle, obstacle);
+//     }       
+//     // Charaters and ground
+//     apply_static_constraint(c1);
+//     apply_static_constraint(c2);
     
-    // Characters and obstacle (AABB collision)
-    resolve_aabb_collision(c1, obstacle);
-    resolve_aabb_collision(c2, obstacle);
+//     // Characters and obstacle (AABB collision)
+//     resolve_aabb_collision(c1, obstacle);
+//     resolve_aabb_collision(c2, obstacle);
 
-}
+// }
 
-void Env::apply_static_constraint(MovableAsset *a){
-    double collision_dist = (a->get_y_expected() + a->get_h() / 2.0) - ground->get_y();
-    if (collision_dist >= 0) {
-        double delta_y = -collision_dist;
-        a->update_expected_pos_collision(0.0, delta_y);
+// void Env::apply_static_constraint(MovableAsset *a){
+//     double collision_dist = (a->get_y_expected() + a->get_h() / 2.0) - ground->get_y();
+//     if (collision_dist >= 0) {
+//         double delta_y = -collision_dist;
+//         int sim_res = 3;
+//         for(int it = 0; it<sim_res; it++) {
+//             a->update_expected_pos_collision(0.0, delta_y);
+//         }
         
-        double v_y = a->get_v_y();
-        if (v_y > 0) {
-            a->set_v_y(0.0);
-        }
         
-        // End jump when character lands on ground
-        Character* character = dynamic_cast<Character*>(a);
-        if (character && character->get_jumping()) {
-            character->set_jumping(false);
-            // Resume moving if direction key is still pressed
-            if (character->get_right_pressed() || character->get_left_pressed()) {
-                character->set_moving(true);
-            }
-        }
-    }
-}
+//         // double v_y = a->get_v_y();
+//         // if (v_y > 0) {
+//         //     a->set_v_y(-a->get_rest()*v_y);
+//         //     a->update_expected_pos(dt);
+//         //     qDebug()<<v_y;
+//         // }
+        
+//         // End jump when character lands on ground
+//         Character* character = dynamic_cast<Character*>(a);
+//         if (character && character->get_jumping()) {
+//             character->set_jumping(false);
+//             // Resume moving if direction key is still pressed
+//             if (character->get_right_pressed() || character->get_left_pressed()) {
+//                 character->set_moving(true);
+//             }
+//         }
+//     }
+// }
 
-void Env::resolve_aabb_collision(MovableAsset *movable, Rectangle *rect){
-    // Get positions and dimensions
-    double m_x = movable->get_x_expected();
-    double m_y = movable->get_y_expected();
-    double m_w = movable->get_w();
-    double m_h = movable->get_h();
+// void Env::resolve_aabb_collision(MovableAsset *movable, Rectangle *rect){
+//     // Get positions and dimensions
+//     double m_x = movable->get_x_expected();
+//     double m_y = movable->get_y_expected();
+//     double m_w = movable->get_w();
+//     double m_h = movable->get_h();
     
-    double r_x = rect->get_x();
-    double r_y = rect->get_y();
-    double r_w = rect->get_w();
-    double r_h = rect->get_h();
+//     double r_x = rect->get_x();
+//     double r_y = rect->get_y();
+//     double r_w = rect->get_w();
+//     double r_h = rect->get_h();
     
-    // Convert character center position to AABB (top-left corner)
-    double m_left = m_x - m_w / 2.0;
-    double m_right = m_x + m_w / 2.0;
-    double m_top = m_y - m_h / 2.0;
-    double m_bottom = m_y + m_h / 2.0;
+//     // Convert character center position to AABB (top-left corner)
+//     double m_left = m_x - m_w / 2.0;
+//     double m_right = m_x + m_w / 2.0;
+//     double m_top = m_y - m_h / 2.0;
+//     double m_bottom = m_y + m_h / 2.0;
     
-    // Check for AABB overlap
-    bool overlap = !(m_right < r_x || r_x + r_w < m_left ||
-                     m_bottom < r_y || r_y + r_h < m_top);
+//     // Check for AABB overlap
+//     bool overlap = !(m_right < r_x || r_x + r_w < m_left ||
+//                      m_bottom < r_y || r_y + r_h < m_top);
     
-    if (!overlap) return;
+//     if (!overlap) return;
     
-    // Calculate penetration depths
-    double overlap_left = m_right - r_x;
-    double overlap_right = (r_x + r_w) - m_left;
-    double overlap_top = m_bottom - r_y;
-    double overlap_bottom = (r_y + r_h) - m_top;
+//     // Calculate penetration depths
+//     double overlap_left = m_right - r_x;
+//     double overlap_right = (r_x + r_w) - m_left;
+//     double overlap_top = m_bottom - r_y;
+//     double overlap_bottom = (r_y + r_h) - m_top;
     
-    double overlap_x = (overlap_left < overlap_right) ? overlap_left : overlap_right;
-    double overlap_y = (overlap_top < overlap_bottom) ? overlap_top : overlap_bottom;
+//     double overlap_x = (overlap_left < overlap_right) ? overlap_left : overlap_right;
+//     double overlap_y = (overlap_top < overlap_bottom) ? overlap_top : overlap_bottom;
     
-    // Resolve along minimum penetration axis
-    if (overlap_x < overlap_y) {
-        // Horizontal 
-        double delta_x = (m_x < r_x) ? -overlap_left : overlap_right;
-        movable->update_expected_pos_collision(delta_x, 0.0);
+//     // Resolve along minimum penetration axis
+//     if (overlap_x < overlap_y) {
+//         // Horizontal 
+//         double delta_x = (m_x < r_x) ? -overlap_left : overlap_right;
+//         movable->update_expected_pos_collision(delta_x, 0.0);
         
-        // horizontal velocity
-        double v_x = movable->get_v_x();
-        if ((m_x < r_x && v_x > 0) || (m_x > r_x && v_x < 0)) {
-            movable->set_v_x(-movable->get_rest() * v_x);
-        }
-    } else {
-        // Vertical resolution
-        double delta_y = (m_y < r_y) ? -overlap_top : overlap_bottom;
-        movable->update_expected_pos_collision(0.0, delta_y);
+//         // horizontal velocity
+//         double v_x = movable->get_v_x();
+//         if ((m_x < r_x && v_x > 0) || (m_x > r_x && v_x < 0)) {
+//             movable->set_v_x(-movable->get_rest() * v_x);
+//         }
+//     } else {
+//         // Vertical resolution
+//         double delta_y = (m_y < r_y) ? -overlap_top : overlap_bottom;
+//         movable->update_expected_pos_collision(0.0, delta_y);
         
-        // vertical velocity
-        double v_y = movable->get_v_y();
+//         // vertical velocity
+//         double v_y = movable->get_v_y();
         
-        // Bounce
-        if ((m_y < r_y && v_y > 0) || (m_y > r_y && v_y < 0)) {    
-            movable->set_v_y(-movable->get_rest() * v_y);
+//         // Bounce
+//         if ((m_y < r_y && v_y > 0) || (m_y > r_y && v_y < 0)) {    
+//             movable->set_v_y(-movable->get_rest() * v_y);
             
-        }
+//         }
 
-        Character* character = dynamic_cast<Character*>(movable);        
-        // End jump when character lands on top of rectangle
-        if (character && character->get_jumping() && m_y < r_y && v_y > 0) {
-            character->set_jumping(false);
-            // Resume moving if direction key is still pressed
-            if (character->get_right_pressed() || character->get_left_pressed()) {
-                character->set_moving(true);
-            }
-        }
-    }
-}
+//         Character* character = dynamic_cast<Character*>(movable);        
+//         // End jump when character lands on top of rectangle
+//         if (character && character->get_jumping() && m_y < r_y && v_y > 0) {
+//             character->set_jumping(false);
+//             // Resume moving if direction key is still pressed
+//             if (character->get_right_pressed() || character->get_left_pressed()) {
+//                 character->set_moving(true);
+//             }
+//         }
+//     }
+// }
 
 
 
@@ -173,28 +180,44 @@ void Env::update_velocities_and_positions(){
 }
 
 void Env::update_velocity_and_position(MovableAsset *a){
+    a->update_vel(dt);
     a->update_pos();
+    
 }
 
 
 void Env::update(int width){
     apply_external_forces();
-    update_expected_poses();           
-    apply_static_constraints();        
-    update_velocities_and_positions(); 
+    update_expected_positions(); 
+    apply_damping();      
+    add_static_contact_constraints();  
+    project_constraints();
+    deleteContactConstraints();
+    update_velocities_and_positions();
     handle_attacks();
     // update_hp();
     c1->update(width);
     c2->update(width);
 }
 
+void Env::apply_damping() {
+    for(MovableCircle *particle: particles){
+        particle->set_v(particle->get_v() * particle->get_damp());
+
+    }
+}
+
 void Env::draw_assets(QPainter &painter){
     for (MovableCircle *particle: particles) {
-        painter.drawEllipse(particle->get_x(), particle->get_y(), particle->get_radius(), particle->get_radius());
+        particle->draw(painter);
+        
     }
     // Draw obstacles
     painter.setBrush(QColor(200, 100, 100));
     obstacle->draw(painter);
+    for (const auto& collider : colliders) {
+            collider->draw(&painter);
+    }
 
 }
 
@@ -212,7 +235,7 @@ void Env::apply_external_forces(){
     c2->set_v_y(new_v_y_c2);
 }
 
-void Env::update_expected_poses(){
+void Env::update_expected_positions(){
     for (MovableCircle *particle : particles) {
         particle->update_expected_pos(dt);
     }
@@ -220,6 +243,45 @@ void Env::update_expected_poses(){
     c2->update_expected_pos(dt);
 
 }
+
+void Env::enforce_static_ground_constraints(const StaticConstraint& constraint, MovableCircle& particle) {
+        particle.update_expected_pos_collision(constraint.normal * constraint.penetration);
+    }
+
+void Env::project_constraints() {
+    int solver_iterations = 3;
+    for (int iter = 0; iter < solver_iterations; ++iter) {
+        // Resolve static constraints
+        for (const auto& constraint : staticConstraints) {
+            enforce_static_ground_constraints(constraint, *particles[constraint.particleIndex]);
+        }
+        
+        // // Resolve dynamic constraints
+        // for (const auto& constraint : dynamicConstraints) {
+        //     enforceDynamicConstraint(constraint, 
+        //         particles[constraint.particleIndex1],
+        //         particles[constraint.particleIndex2]);
+        // }
+    }
+}
+
+void Env::add_static_contact_constraints() {
+        for (int i = 0; i < particles.size(); ++i) {
+            particles[i]->hasContact = false;
+            for (const auto& collider : colliders) {
+                auto contact = collider->checkContact(*particles[i], i);
+                if (contact.has_value()) {
+                    staticConstraints.push_back(contact.value());
+                    particles[i]->hasContact = true;
+                }
+            }
+        }
+    }
+
+void Env::deleteContactConstraints() {
+        staticConstraints.clear();
+        dynamicConstraints.clear();
+    }
 
 
 void Env::handle_sword_attack(Character* attacker, Character* defender){
@@ -280,6 +342,7 @@ void Env::paint(QPainter *painter){
     draw_assets(*painter);
     c1->draw((*painter));
     c2->draw((*painter));
+    
 
 }
 

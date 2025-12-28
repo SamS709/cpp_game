@@ -24,13 +24,19 @@ public:
     void keyReleaseEvent(QKeyEvent *event);
     void load_env_assets();
     void apply_external_forces();
-    void update_expected_poses();
-    void apply_static_constraints();
-    void apply_static_constraint(MovableAsset *a);
-    void resolve_aabb_collision(MovableAsset *movable, Rectangle *rect);
-    void update_velocity_and_position(MovableAsset *a);
-
+    void update_expected_positions();
     void update_velocities_and_positions();
+    void add_static_contact_constraints();
+    void apply_damping();
+    void deleteContactConstraints();
+    // void apply_static_constraints();
+    // void apply_static_constraint(MovableAsset *a);
+    // void resolve_aabb_collision(MovableAsset *movable, Rectangle *rect);
+    void update_velocity_and_position(MovableAsset *a);
+    void enforce_static_ground_constraints(const StaticConstraint& constraint, MovableCircle& particle);
+    void project_constraints();
+
+    
     void update_hp();
     void draw_assets(QPainter &painter);
     void handle_attacks();
@@ -44,7 +50,7 @@ private:
     Character *c2;
     double t;
     double dt;
-    double g = 10000;
+    double g = 1000;
     double max_hp {100.0};
     double width;
     double height;
@@ -52,10 +58,15 @@ private:
     double rest {0.8};
     double speed_move {75.0};
     double speed_run; 
-    double speed_jump {2500.0};
+    double speed_jump {500.0};
     Rectangle *ground;
     Rectangle *obstacle;
     vector<MovableCircle*> particles;
+    std::vector<std::unique_ptr<Collider>> colliders;
+    std::vector<StaticConstraint> staticConstraints;
+    std::vector<DynamicConstraint> dynamicConstraints;
+    
+
 };
 
 
