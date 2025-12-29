@@ -62,7 +62,7 @@ private:
     Rectangle *ground;
     Rectangle *obstacle;
     vector<MovableCircle*> particles;
-    std::vector<std::unique_ptr<Collider>> colliders;
+    std::vector<std::unique_ptr<PlaneCollider>> colliders;
     std::vector<StaticConstraint> staticConstraints;
     std::vector<DynamicConstraint> dynamicConstraints;
     

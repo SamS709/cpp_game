@@ -37,14 +37,14 @@ void Env::load_env_assets(){
     obstacle = new Rectangle({width/2.0 - 50.0, height-height/3.0}, {100.0, 10});
     MovableCircle *p1 = new MovableCircle(
         {width/2.0, 0.0},
-        {50.0, 0.0},
+        {-50.0, 0.0},
         5.0,
         20.0
     );
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
     particles.push_back(p1);
-    colliders.push_back(std::make_unique<PlaneCollider>(Vec2(width / 2 - 200, height/2), Vec2(0, -1), 400.0));
+    colliders.push_back(std::make_unique<PlaneCollider>(Vec2(width / 2 - 200, height/2), Vec2(400.0, 100.0), Vec2(0, -1)));
 }
 
 // void Env::apply_static_constraints(){
@@ -216,7 +216,7 @@ void Env::draw_assets(QPainter &painter){
     painter.setBrush(QColor(200, 100, 100));
     obstacle->draw(painter);
     for (const auto& collider : colliders) {
-            collider->draw(&painter);
+            collider->draw(painter);
     }
 
 }
@@ -249,7 +249,7 @@ void Env::enforce_static_ground_constraints(const StaticConstraint& constraint, 
     }
 
 void Env::project_constraints() {
-    int solver_iterations = 3;
+    int solver_iterations = 1;
     for (int iter = 0; iter < solver_iterations; ++iter) {
         // Resolve static constraints
         for (const auto& constraint : staticConstraints) {

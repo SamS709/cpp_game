@@ -10,7 +10,7 @@ class Lifebar: public Rectangle {
 public:
 
     void set_percentage(double p_) {p = p_;}
-    void draw(QPainter &painter);
+    void draw(QPainter &painter) ;
     void reload_image();
     Lifebar();
     Lifebar(Vec2 dim_);

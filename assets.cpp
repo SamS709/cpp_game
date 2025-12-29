@@ -1,32 +1,53 @@
 #include "assets.h"
 
-// ...existing code...
 std::optional<StaticConstraint> PlaneCollider::checkContact(const MovableCircle& particle, int index) const {
     const Vec2 center = particle.get_pos_expected();
-    const Vec2 toCenter = center - init_point;
+    const float radius = particle.get_radius();
+    const Vec2 toCenter = center - get_pos();
 
     // Distance along normal (penetration must be positive)
-    float distance = toCenter.dot(normal);
-    float penetration = particle.get_radius() - distance;
+    float distance = toCenter.dot(norm);
+    float penetration = radius - distance;
     if (penetration <= 0) return std::nullopt;
 
     // Finite segment test along plane tangent
-    Vec2 tangent = Vec2{-normal.y, normal.x}; // perpendicular to normal
+    Vec2 tangent = Vec2{-norm.y, norm.x}; // perpendicular to normal
     float s = toCenter.dot(tangent);          // local coord along the plane
-
-    // Require the circle center to be within [radius, width - radius]
-    if (s < 0.0 || s > (width)) {
-        return std::nullopt;
-    }
-
+    
     StaticConstraint constraint;
     constraint.particleIndex = index;
-    constraint.normal = normal;
-    constraint.penetration = penetration;
-    constraint.contactPoint = center - normal * particle.get_radius();
+
+    // Check collision type based on position along plane
+    if (s < 0.0f) {
+        // Left edge: circular cap around init_point
+        float dist = (center - get_pos()).length();
+        if (dist > radius) return std::nullopt;
+        
+        // Recalculate for point collision
+        constraint.penetration = radius - dist;
+        constraint.normal = (center - get_pos()).normalized();
+        constraint.contactPoint = center - constraint.normal * radius;
+        
+    } else if (s > get_w()) {
+        // Right edge: circular cap around end_point
+        Vec2 end_point = get_pos() + tangent * get_w();
+        float dist = (center - end_point).length();
+        if (dist > radius) return std::nullopt;
+        
+        // Recalculate for point collision
+        constraint.penetration = radius - dist;
+        constraint.normal = (center - end_point).normalized();
+        constraint.contactPoint = center - constraint.normal * radius;
+        
+    } else {
+        // Flat face collision: use original plane normal
+        constraint.normal = norm;
+        constraint.penetration = penetration;
+        constraint.contactPoint = center - norm * radius;
+    }
+    
     return constraint;
 }
-// ...existing code...
 
 
 Asset::Asset(Vec2 pos_) 
@@ -58,6 +79,80 @@ Rectangle::Rectangle(Vec2 pos_, Vec2 dims_)
 void Rectangle::draw(QPainter &painter){
     painter.setBrush(get_color());
     painter.drawRect(get_x(), get_y(), get_w(), get_h());
+}
+
+
+Plane::Plane(Vec2 dims_, Vec2 norm_)
+    : Asset({0.0, 0.0}, {dims_.x, 0.0})
+    , norm(norm_.normalized())
+    {
+
+    }
+
+Plane::Plane(Vec2 pos_, Vec2 dims_, Vec2 norm_)
+    : Asset(pos_, {dims_.x, 0.0})
+    , norm(norm_.normalized())
+    {
+
+    }
+
+void Plane::draw(QPainter &painter) {
+    Vec2 tangent(-norm.y, norm.x);
+    Vec2 p1 = get_pos();
+    Vec2 p2 = p1 + tangent * get_w();
+    painter.setPen(QPen(QColor(100, 100, 100), 2));
+    painter.drawLine(QPointF(p1.x, p1.y), QPointF(p2.x, p2.y));
+    painter.setBrush(get_color());
+    painter.drawRect(get_x(), get_y(), get_w(), get_h());
+}
+
+std::optional<StaticConstraint> AssetCollider::checkContact(const MovableCircle& particle, int index) const {
+    const Vec2 center = particle.get_pos_expected();
+    const float radius = particle.get_radius();
+    const Vec2 toCenter = center - get_pos();
+
+    // Distance along normal (penetration must be positive)
+    float distance = toCenter.dot(norm);
+    float penetration = radius - distance;
+    if (penetration <= 0) return std::nullopt;
+
+    // Finite segment test along plane tangent
+    Vec2 tangent = Vec2{-norm.y, norm.x}; // perpendicular to normal
+    float s = toCenter.dot(tangent);          // local coord along the plane
+    
+    StaticConstraint constraint;
+    constraint.particleIndex = index;
+
+    // Check collision type based on position along plane
+    if (s < 0.0f) {
+        // Left edge: circular cap around init_point
+        float dist = (center - get_pos()).length();
+        if (dist > radius) return std::nullopt;
+        
+        // Recalculate for point collision
+        constraint.penetration = radius - dist;
+        constraint.normal = (center - get_pos()).normalized();
+        constraint.contactPoint = center - constraint.normal * radius;
+        
+    } else if (s > get_w()) {
+        // Right edge: circular cap around end_point
+        Vec2 end_point = get_pos() + tangent * get_w();
+        float dist = (center - end_point).length();
+        if (dist > radius) return std::nullopt;
+        
+        // Recalculate for point collision
+        constraint.penetration = radius - dist;
+        constraint.normal = (center - end_point).normalized();
+        constraint.contactPoint = center - constraint.normal * radius;
+        
+    } else {
+        // Flat face collision: use original plane normal
+        constraint.normal = norm;
+        constraint.penetration = penetration;
+        constraint.contactPoint = center - norm * radius;
+    }
+    
+    return constraint;
 }
     
 

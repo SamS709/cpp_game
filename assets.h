@@ -38,10 +38,10 @@ public:
     Asset(Vec2 pos_);
     Asset(Vec2 pos_, Vec2 dims_);
     Asset() = default;
-    Vec2 get_pos(){return pos;}
-    double get_x() { return pos.x; }
-    double get_y() { return pos.y; }
-    QColor get_color() { return color; }
+    Vec2 get_pos() const {return pos;}
+    double get_x() const { return pos.x; }
+    double get_y() const { return pos.y; }
+    QColor get_color() const { return color; }
     void set_color(int r, int g, int b, int a) { color = QColor(r, g, b, a); }
     void set_x(double x_) { pos.x = x_; }
     void set_y(double y_) { pos.y = y_; }
@@ -49,6 +49,7 @@ public:
     double get_w() const { return dims.x; }
     void set_h(double h_) { dims.y = h_; }
     void set_w(double w_) { dims.x = w_; }
+    virtual void draw(QPainter &painter) = 0;
 
 protected:
 
@@ -65,7 +66,7 @@ public:
     Rectangle() = default;
     Rectangle(Vec2 dim_);
     Rectangle(Vec2 pos_, Vec2 dims_);
-    void draw(QPainter &painter);
+    void draw(QPainter &painter) ;
 
 
 
@@ -73,6 +74,21 @@ protected:
 
 };
 
+class Plane: public Asset {
+
+public:
+
+    Plane() = default;
+    Plane(Vec2 dim_, Vec2 norm_);
+    Plane(Vec2 pos_, Vec2 dims_, Vec2 norm_);
+    void draw(QPainter &painter) ;
+
+    
+
+protected:
+    Vec2 norm {1.0, 0.0};
+
+};
 class MovableAsset : public Asset{
 
 public:
@@ -133,7 +149,7 @@ public:
     double get_rest() const override { return 0.8; } // Higher bounce for particles
     bool hasContact = false;
 
-    void draw(QPainter &painter);
+    void draw(QPainter &painter) ;
 
 protected:
     double radius {0.5};
@@ -169,28 +185,26 @@ class Collider {
 public:
     virtual ~Collider() = default;
     virtual std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const = 0;
-    virtual void draw(QPainter* painter) const = 0;
 };
 
-class PlaneCollider : public Collider {
+class AssetCollider : public Plane, public Collider{
 public:
-    Vec2 init_point;
-    Vec2 normal;   // Plane normal (pointing "outward")
-    double width;
-    
-    PlaneCollider(Vec2 init_point_, Vec2 normal_, double width_) 
-        : init_point(init_point_), normal(normal_.normalized()), width(width_) {}
+    AssetCollider() = default;
+    AssetCollider(Vec2 pos_, Vec2 dims_, Vec2 norm_) 
+        : Plane(pos_, dims_, norm_)
+        {}
     
     std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override;
+};
+
+class PlaneCollider : public Plane, public Collider {
+public:
     
-    void draw(QPainter* painter) const override {
-        // Draw a line segment representing the plane
-        Vec2 tangent(-normal.y, normal.x);
-        Vec2 p1 = init_point;
-        Vec2 p2 = init_point + tangent * width;
-        painter->setPen(QPen(QColor(100, 100, 100), 2));
-        painter->drawLine(QPointF(p1.x, p1.y), QPointF(p2.x, p2.y));
-    }
+    PlaneCollider(Vec2 pos_, Vec2 dims_, Vec2 norm_) 
+        : Plane(pos_, dims_, norm_)
+        {}
+    
+    std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override;
 };
 
 class SphereCollider : public Collider {
@@ -218,11 +232,7 @@ public:
         return std::nullopt;
     }
     
-    void draw(QPainter* painter) const override {
-        painter->setPen(QPen(QColor(100, 100, 100), 2));
-        painter->setBrush(Qt::NoBrush);
-        painter->drawEllipse(QPointF(center.x, center.y), radius, radius);
-    }
+
 };
 
 #endif
