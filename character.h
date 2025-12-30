@@ -13,7 +13,7 @@
 
 using namespace std;
 
-class Character: public MovableAsset
+class Character: public MovableRectangle
 {
 public:
     Character(Vec2 pos_, double time_betwwen_frames_, double mass, double max_hp_);
@@ -63,8 +63,8 @@ public:
     double get_rest() const override { return 0.0; } // No bounce for characters
 
     // Drawing positions (with sprite offset)
-    double get_y() { return pos.y;} 
-    double get_x() { return pos.x;} 
+    double get_y() const { return pos.y;} 
+    double get_x() const { return pos.x;} 
     double get_x_expected() const { return pos_exp.x;} 
     double get_y_expected() const { return pos_exp.y;}
 

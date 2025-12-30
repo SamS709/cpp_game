@@ -313,6 +313,12 @@
 			"EWIEGA46WW/moc_character.cpp",
 			null
 		],
+		[
+			"D:/Dev/cours/cpp_game/collider.h",
+			"MU",
+			"EWIEGA46WW/moc_collider.cpp",
+			null
+		],
 		[ "D:/Dev/cours/cpp_game/env.h", "MU", "EWIEGA46WW/moc_env.cpp", null ],
 		[
 			"D:/Dev/cours/cpp_game/lifebar.h",
@@ -400,6 +406,7 @@
 	[
 		[ "D:/Dev/cours/cpp_game/assets.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/character.cpp", "MU", null ],
+		[ "D:/Dev/cours/cpp_game/collider.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/env.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/lifebar.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/main.cpp", "MU", null ],

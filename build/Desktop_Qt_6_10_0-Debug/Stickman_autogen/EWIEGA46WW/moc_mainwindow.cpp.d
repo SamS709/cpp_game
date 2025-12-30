@@ -416,5 +416,6 @@ D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wchar.h \
   D:/Dev/cours/cpp_game/assets.h \
   D:/Dev/cours/cpp_game/character.h \
+  D:/Dev/cours/cpp_game/collider.h \
   D:/Dev/cours/cpp_game/env.h \
   D:/Dev/cours/cpp_game/lifebar.h

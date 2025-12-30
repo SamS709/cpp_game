@@ -1,7 +1,7 @@
 #include "character.h"
 
 Character::Character(Vec2 pos_, double time_betwwen_frames_, double mass_, double max_hp_)
-    : MovableAsset(mass)
+    : MovableRectangle(mass)
     , time_between_frames(time_betwwen_frames_)
     , max_hp(max_hp_)
     , right(false)

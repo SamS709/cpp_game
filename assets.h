@@ -59,21 +59,6 @@ protected:
 
 };
 
-class Rectangle: public Asset {
-
-public:
-
-    Rectangle() = default;
-    Rectangle(Vec2 dim_);
-    Rectangle(Vec2 pos_, Vec2 dims_);
-    void draw(QPainter &painter) ;
-
-
-
-protected:
-
-};
-
 class Plane: public Asset {
 
 public:
@@ -82,13 +67,31 @@ public:
     Plane(Vec2 dim_, Vec2 norm_);
     Plane(Vec2 pos_, Vec2 dims_, Vec2 norm_);
     void draw(QPainter &painter) ;
-
-    
+    Vec2 get_norm() const {return norm;}
 
 protected:
     Vec2 norm {1.0, 0.0};
 
 };
+
+class Rectangle: public Asset {
+
+public:
+
+    Rectangle() = default;
+    ~Rectangle();
+    Rectangle(Vec2 dim_);
+    Rectangle(Vec2 pos_, Vec2 dims_);
+    void draw(QPainter &painter) ;
+
+    Plane *plane_x_0;
+    Plane *plane_x_1;
+    Plane *plane_y_0;
+    Plane *plane_y_1;
+
+};
+
+
 class MovableAsset : public Asset{
 
 public:
@@ -160,6 +163,7 @@ class MovableRectangle : public MovableAsset{
 
 public:
     MovableRectangle() = default;
+    MovableRectangle(double mass_);
     MovableRectangle(Vec2 dims_, double mass_);
     MovableRectangle(Vec2 pos_, Vec2 dims_, Vec2 v_, double mass_);
 
@@ -181,58 +185,35 @@ struct DynamicConstraint {
     float penetration;
 };
 
-class Collider {
-public:
-    virtual ~Collider() = default;
-    virtual std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const = 0;
-};
 
-class AssetCollider : public Plane, public Collider{
-public:
-    AssetCollider() = default;
-    AssetCollider(Vec2 pos_, Vec2 dims_, Vec2 norm_) 
-        : Plane(pos_, dims_, norm_)
-        {}
-    
-    std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override;
-};
 
-class PlaneCollider : public Plane, public Collider {
-public:
-    
-    PlaneCollider(Vec2 pos_, Vec2 dims_, Vec2 norm_) 
-        : Plane(pos_, dims_, norm_)
-        {}
-    
-    std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override;
-};
 
-class SphereCollider : public Collider {
-public:
-    Vec2 center;
-    float radius;
+// class SphereCollider : public Collider {
+// public:
+//     Vec2 center;
+//     float radius;
     
-    SphereCollider(Vec2 center, float radius) 
-        : center(center), radius(radius) {}
+//     SphereCollider(Vec2 center, float radius) 
+//         : center(center), radius(radius) {}
     
-    std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override {
-        Vec2 diff = particle.get_pos_expected() - center;
-        float distance = diff.length();
-        float minDist = particle.get_radius() + radius;
-        float penetration = minDist - distance;
+//     std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override {
+//         Vec2 diff = particle.get_pos_expected() - center;
+//         float distance = diff.length();
+//         float minDist = particle.get_radius() + radius;
+//         float penetration = minDist - distance;
         
-        if (penetration > 0 && distance > 0.0001f) {
-            StaticConstraint constraint;
-            constraint.particleIndex = index;
-            constraint.normal = diff.normalized();
-            constraint.penetration = penetration;
-            constraint.contactPoint = center + constraint.normal * radius;
-            return constraint;
-        }
-        return std::nullopt;
-    }
+//         if (penetration > 0 && distance > 0.0001f) {
+//             StaticConstraint constraint;
+//             constraint.particleIndex = index;
+//             constraint.normal = diff.normalized();
+//             constraint.penetration = penetration;
+//             constraint.contactPoint = center + constraint.normal * radius;
+//             return constraint;
+//         }
+//         return std::nullopt;
+//     }
     
 
-};
+// };
 
 #endif

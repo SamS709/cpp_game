@@ -1,6 +1,7 @@
 #ifndef ENV_H
 #define ENV_H
 
+#include "collider.h"
 #include "assets.h"
 #include "character.h"
 #include <QKeyEvent>
@@ -18,6 +19,7 @@ class Env {
 
 public:
     Env(Character *c1_, Character *c2_, double dt_, double width_, double height_);
+    ~Env();
     void update(int width);
     void paint(QPainter *painter);
     void keyPressEvent(QKeyEvent *event);
@@ -61,8 +63,10 @@ private:
     double speed_jump {500.0};
     Rectangle *ground;
     Rectangle *obstacle;
+    Collider *collider;
     vector<MovableCircle*> particles;
-    std::vector<std::unique_ptr<PlaneCollider>> colliders;
+    vector<Character*> characters;
+    std::vector<std::unique_ptr<Asset>> assets;
     std::vector<StaticConstraint> staticConstraints;
     std::vector<DynamicConstraint> dynamicConstraints;
     

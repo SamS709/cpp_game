@@ -420,6 +420,7 @@ D:/Dev/cours/cpp_game/mainwindow.h
  mdp:D:/Dev/cours/cpp_game/assets.h
  mdp:D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/moc_predefs.h
  mdp:D:/Dev/cours/cpp_game/character.h
+ mdp:D:/Dev/cours/cpp_game/collider.h
  mdp:D:/Dev/cours/cpp_game/env.h
  mdp:D:/Dev/cours/cpp_game/lifebar.h
  mdp:D:/Dev/cours/cpp_game/mainwindow.h
@@ -434,3 +435,5 @@ D:/Dev/cours/cpp_game/lifebar.h
 D:/Dev/cours/cpp_game/lifebar.cpp
 D:/Dev/cours/cpp_game/env_updated.h
 D:/Dev/cours/cpp_game/env_updated.cpp
+D:/Dev/cours/cpp_game/collider.h
+D:/Dev/cours/cpp_game/collider.cpp

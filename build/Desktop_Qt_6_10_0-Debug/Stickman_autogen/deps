@@ -600,6 +600,8 @@ Stickman_autogen/timestamp: \
 	D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/moc_predefs.h \
 	D:/Dev/cours/cpp_game/character.cpp \
 	D:/Dev/cours/cpp_game/character.h \
+	D:/Dev/cours/cpp_game/collider.cpp \
+	D:/Dev/cours/cpp_game/collider.h \
 	D:/Dev/cours/cpp_game/env.cpp \
 	D:/Dev/cours/cpp_game/env.h \
 	D:/Dev/cours/cpp_game/lifebar.cpp \

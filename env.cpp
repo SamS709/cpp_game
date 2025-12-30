@@ -21,6 +21,9 @@ Env::Env(Character *c1_, Character *c2_, double dt_, double width_, double heigh
         c2->set_speed_run(speed_run);
         c2->set_hp(max_hp);
 
+        characters.push_back(c1);
+        characters.push_back(c2);
+
         load_env_assets();
     }
 
@@ -32,19 +35,31 @@ void Env::update_hp() {
     c2->set_hp(hp_1);
 }
 
+Env::~Env(){
+    delete collider;
+    delete ground;
+    delete obstacle;
+
+}
+
 void Env::load_env_assets(){
+    collider = new Collider();
     ground = new Rectangle({0.0, height - 100.0},{width, 100});
     obstacle = new Rectangle({width/2.0 - 50.0, height-height/3.0}, {100.0, 10});
     MovableCircle *p1 = new MovableCircle(
-        {width/2.0, 0.0},
-        {-50.0, 0.0},
+        {width/2.0+250, height/2},
+        {-100.0, -5.0},
         5.0,
         20.0
     );
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
     particles.push_back(p1);
-    colliders.push_back(std::make_unique<PlaneCollider>(Vec2(width / 2 - 200, height/2), Vec2(400.0, 100.0), Vec2(0, -1)));
+    Vec2 pos = Vec2(width / 2 - 200, height/2);
+    Vec2 dims = Vec2(400.0, 100.0);
+    assets.push_back(std::make_unique<Rectangle>(pos, dims));
+
+
 }
 
 // void Env::apply_static_constraints(){
@@ -189,10 +204,10 @@ void Env::update_velocity_and_position(MovableAsset *a){
 void Env::update(int width){
     apply_external_forces();
     update_expected_positions(); 
-    apply_damping();      
-    add_static_contact_constraints();  
-    project_constraints();
-    deleteContactConstraints();
+    apply_damping();
+    collider->resolve_collisions(particles, characters, assets);   
+    // add_static_contact_constraints();  
+    // project_constraints();
     update_velocities_and_positions();
     handle_attacks();
     // update_hp();
@@ -215,7 +230,7 @@ void Env::draw_assets(QPainter &painter){
     // Draw obstacles
     painter.setBrush(QColor(200, 100, 100));
     obstacle->draw(painter);
-    for (const auto& collider : colliders) {
+    for (const auto& collider : assets) {
             collider->draw(painter);
     }
 
@@ -226,7 +241,6 @@ void Env::apply_external_forces(){
         double new_v_y = particle->get_v_y() + g * dt;
         particle->set_v_y(new_v_y);
     }
-
 
     double new_v_y_c1 = c1->get_v_y() + g * dt;
     c1->set_v_y(new_v_y_c1);
@@ -244,44 +258,18 @@ void Env::update_expected_positions(){
 
 }
 
-void Env::enforce_static_ground_constraints(const StaticConstraint& constraint, MovableCircle& particle) {
-        particle.update_expected_pos_collision(constraint.normal * constraint.penetration);
-    }
+// void Env::enforce_static_ground_constraints(const StaticConstraint& constraint, MovableCircle& particle) {
+//         particle.update_expected_pos_collision(constraint.normal * constraint.penetration);
+//     }
 
-void Env::project_constraints() {
-    int solver_iterations = 1;
-    for (int iter = 0; iter < solver_iterations; ++iter) {
-        // Resolve static constraints
-        for (const auto& constraint : staticConstraints) {
-            enforce_static_ground_constraints(constraint, *particles[constraint.particleIndex]);
-        }
+// void Env::project_constraints() {
+//     collider->resolve_constraints(particles, *c1, *c2);
+// }
+
+// void Env::add_static_contact_constraints() {
+//     collider->add_static_contact_constraints(particles, assets);
         
-        // // Resolve dynamic constraints
-        // for (const auto& constraint : dynamicConstraints) {
-        //     enforceDynamicConstraint(constraint, 
-        //         particles[constraint.particleIndex1],
-        //         particles[constraint.particleIndex2]);
-        // }
-    }
-}
-
-void Env::add_static_contact_constraints() {
-        for (int i = 0; i < particles.size(); ++i) {
-            particles[i]->hasContact = false;
-            for (const auto& collider : colliders) {
-                auto contact = collider->checkContact(*particles[i], i);
-                if (contact.has_value()) {
-                    staticConstraints.push_back(contact.value());
-                    particles[i]->hasContact = true;
-                }
-            }
-        }
-    }
-
-void Env::deleteContactConstraints() {
-        staticConstraints.clear();
-        dynamicConstraints.clear();
-    }
+//     }
 
 
 void Env::handle_sword_attack(Character* attacker, Character* defender){
