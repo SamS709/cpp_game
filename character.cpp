@@ -460,16 +460,11 @@ void Character::draw(QPainter &painter)
         current_asset_dims = lower_frames_asset_dims[current_move_frame];
         current_character_dims = lower_frames_character_dims[current_move_frame];
     } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
-        // delta_x = get_x_sword_attacking(sword_attack_time);
         currentSprite = &sword_attack_frames[current_move_frame];
         current_asset_dims = sword_attack_frames_asset_dims[current_move_frame];
         current_character_dims = sword_attack_frames_character_dims[current_move_frame];
         current_sword_dims = sword_attack_frames_sword_dims[current_move_frame];
-        if (sword_attack_dir == "right") {
-            x += delta_x;
-        } else {
-            x-= delta_x;
-        }
+        
     } else if (!(idleFrame.isNull() | idle_dims.empty())) {
         current_asset_dims = idle_dims;
         current_character_dims = idle_character_dims;

@@ -163,7 +163,7 @@ private:
     float sword_attack_dist {1.0};
     float total_jump_time {0.5};
     float total_slide_time {0.5};
-    float total_sword_attack_time {0.5};
+    float total_sword_attack_time {1.0};
     float time_between_slides {1.0};
     float time_between_sword_attacks {1.0};
     float lower_time {1.0};
