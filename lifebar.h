@@ -9,7 +9,7 @@ class Lifebar: public Rectangle {
 
 public:
 
-    void set_percentage(double p_) {p = p_;}
+    void set_percentage(float p_) {p = p_;}
     void draw(QPainter &painter) ;
     void reload_image();
     Lifebar();
@@ -18,8 +18,8 @@ public:
 
 private:
     QPixmap sprite;
-    double im_scale = 1.5;
-    double p = 1.0;
+    float im_scale = 1.5;
+    float p = 1.0;
 
 };
 

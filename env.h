@@ -11,14 +11,14 @@
 using namespace std;
 
 struct Ground{
-    double height = 500.0;
-    double norm = -1.0; 
+    float height = 500.0;
+    float norm = -1.0; 
 };
 
 class Env {
 
 public:
-    Env(Character *c1_, Character *c2_, double dt_, double width_, double height_);
+    Env(Character *c1_, Character *c2_, float dt_, float width_, float height_);
     ~Env();
     void update(int width);
     void paint(QPainter *painter);
@@ -28,47 +28,39 @@ public:
     void apply_external_forces();
     void update_expected_positions();
     void update_velocities_and_positions();
-    void add_static_contact_constraints();
     void apply_damping();
-    void deleteContactConstraints();
+    void apply_friction();
     // void apply_static_constraints();
     // void apply_static_constraint(MovableAsset *a);
     // void resolve_aabb_collision(MovableAsset *movable, Rectangle *rect);
     void update_velocity_and_position(MovableAsset *a);
-    void enforce_static_ground_constraints(const StaticConstraint& constraint, MovableCircle& particle);
-    void project_constraints();
 
     
-    void update_hp();
     void draw_assets(QPainter &painter);
     void handle_attacks();
     void handle_sword_attack(Character* attacker, Character* defender);
 
-    bool intersect(MovableCircle, Rectangle);
-    bool check_rectangles_overlap(double x1, double y1, double w1, double h1, double x2, double y2, double w2, double h2);
+    bool check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2);
 
 private:
     Character *c1;
     Character *c2;
-    double t;
-    double dt;
-    double g = 1000;
-    double max_hp {100.0};
-    double width;
-    double height;
-    double life_bar_width {100.0};
-    double rest {0.8};
-    double speed_move {75.0};
-    double speed_run; 
-    double speed_jump {500.0};
-    Rectangle *ground;
-    Rectangle *obstacle;
+    float t;
+    float dt;
+    float g = 1000;
+    float max_hp {100.0};
+    float friction = 0.01;
+    float width;
+    float height;
+    float life_bar_width {100.0};
+    float rest {0.8};
+    float speed_move {75.0};
+    float speed_run; 
+    float speed_jump {700.0};
     Collider *collider;
     vector<MovableCircle*> particles;
     vector<Character*> characters;
     std::vector<std::unique_ptr<Asset>> assets;
-    std::vector<StaticConstraint> staticConstraints;
-    std::vector<DynamicConstraint> dynamicConstraints;
     
 
 };

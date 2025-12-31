@@ -27,10 +27,14 @@ Rectangle::Rectangle(Vec2 dims_)
 Rectangle::Rectangle(Vec2 pos_, Vec2 dims_)
     : Asset(pos_, dims_)
     {
-        plane_x_0 = new Plane(Vec2(pos.x, pos.y + dims.y), Vec2(dims.y, 0.0), Vec2(-1.0, 0.0));
+        // Left wall
+        plane_x_0 = new Plane(Vec2(pos.x, pos.y), Vec2(dims.y, 0.0), Vec2(-1.0, 0.0));
+        // Right wall
         plane_x_1 = new Plane(Vec2(pos.x + dims.x, pos.y), Vec2(dims.y, 0.0), Vec2(1.0, 0.0));
-        plane_y_0 = new Plane(pos, dims, Vec2(0.0, -1));
-        plane_y_1 = new Plane(Vec2(pos.x + dims.x, pos.y + dims.y), dims, Vec2(0.0, 1.0));
+        // Top wall
+        plane_y_0 = new Plane(pos, Vec2(dims.x, 0.0), Vec2(0.0, -1.0));
+        // Bottom wall
+        plane_y_1 = new Plane(Vec2(pos.x, pos.y + dims.y), Vec2(dims.x, 0.0), Vec2(0.0, 1.0));
     }
 
 Rectangle::~Rectangle()
@@ -73,14 +77,14 @@ void Plane::draw(QPainter &painter) {
 
 
 
-MovableAsset::MovableAsset(double mass_)
+MovableAsset::MovableAsset(float mass_)
     : Asset()
     , mass(mass_)
     {
         
     }
 
-MovableAsset::MovableAsset(Vec2 pos_, Vec2 v_, double mass_)
+MovableAsset::MovableAsset(Vec2 pos_, Vec2 v_, float mass_)
     : Asset(pos_)
     , v(v_)
     , mass(mass_)
@@ -89,44 +93,44 @@ MovableAsset::MovableAsset(Vec2 pos_, Vec2 v_, double mass_)
     }
 
 
-MovableCircle::MovableCircle(double mass_)
+MovableCircle::MovableCircle(float mass_)
     : MovableAsset(mass_)
     {
-        dims = {radius * 2.0, radius * 2.0};
+        dims = {radius * 2.0f, radius * 2.0f};
     }
 
-MovableCircle::MovableCircle(double mass_, double radius_)
+MovableCircle::MovableCircle(float mass_, float radius_)
     : MovableAsset(mass_)
     , radius(radius_)
     {
-        dims = {radius * 2.0, radius * 2.0};
+        dims = {radius * 2.0f, radius * 2.0f};
     }
 
-MovableCircle::MovableCircle(Vec2 pos_, Vec2 v_, double mass_, double radius_)
+MovableCircle::MovableCircle(Vec2 pos_, Vec2 v_, float mass_, float radius_)
     : MovableAsset(pos_, v_, mass_)
     , radius(radius_)
     {
-        dims = {2.0 * radius, 2.0 * radius};
+        dims = {2.0f * radius, 2.0f * radius};
     }
 
 void MovableCircle::draw(QPainter &painter){
-    const double r = get_radius();
+    const float r = get_radius();
     painter.drawEllipse(QPointF(get_x(), get_y()), r, r);
 }
 
-MovableRectangle::MovableRectangle(double mass_)
+MovableRectangle::MovableRectangle(float mass_)
     : MovableAsset(mass_)
     {
     }
 
 
-MovableRectangle::MovableRectangle(Vec2 dims_, double mass_)
+MovableRectangle::MovableRectangle(Vec2 dims_, float mass_)
     : MovableAsset(mass_)
     {
         dims = dims_;
     }
 
-MovableRectangle::MovableRectangle(Vec2 pos_, Vec2 dims_, Vec2 v_, double mass_)
+MovableRectangle::MovableRectangle(Vec2 pos_, Vec2 dims_, Vec2 v_, float mass_)
     : MovableAsset(pos_, v_, mass_)
     {
         dims = dims_;
