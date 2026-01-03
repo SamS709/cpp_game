@@ -14,10 +14,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("Stickman Walking Animation");
     resize(800, 600);
-    double time_between_frames = 4.0;  
+    float time_between_frames = 16.0;  
     // Create character
     character1 = new Character({0, 0}, time_between_frames, 2.0, 100);
-    character2 = new Character({400, 300}, time_between_frames, 2.0, 100);
+    character2 = new Character({400, 0}, time_between_frames, 2.0, 100);
     env = new Env(character1, character2, time_between_frames, width(), height());
         
     // Setup animation timer
@@ -64,4 +64,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     env->keyReleaseEvent(event);
     
     QMainWindow::keyReleaseEvent(event);
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    env->mousePressEvent(event);
+    QMainWindow::mousePressEvent(event);
 }

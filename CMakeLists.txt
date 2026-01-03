@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         assets.h
         lifebar.cpp
         lifebar.h
+        collider.cpp
+        collider.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

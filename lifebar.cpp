@@ -25,7 +25,7 @@ void Lifebar::reload_image(){
 }
 
 void Lifebar::draw(QPainter &painter) {
-    double offset {0.0};
+    float offset {0.0};
     if(get_x()==0.0) {
         offset = sprite.width() / 3.0; 
     }
