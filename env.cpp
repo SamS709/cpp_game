@@ -44,9 +44,16 @@ void Env::load_env_assets(){
         5.0,
         20.0
     );
+    MovableCircle *p2 = new MovableCircle(
+        {0.0f, static_cast<float>(height)/2.0f},
+        {50.0, -5.0},
+        5.0,
+        20.0
+    );
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
     particles.push_back(p1);
+    particles.push_back(p2);
     Vec2 pos = Vec2(width / 2 - 200, height/2);
     Vec2 dims = Vec2(400.0, 100.0);
     // assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0, 10)));
@@ -193,9 +200,9 @@ void Env::update_velocity_and_position(MovableAsset *a){
 void Env::update(int width){
     apply_external_forces();
     update_expected_positions(); 
-    apply_damping();
     collider->resolve_collisions(particles, characters, assets);
     update_velocities_and_positions();
+    apply_damping();
     apply_friction();  // Apply friction AFTER velocity update
     handle_attacks();
     c1->update(width);
@@ -207,21 +214,21 @@ void Env::apply_damping() {
         particle->set_v(particle->get_v() * particle->get_damp());
     }
     
-    // Apply damping to characters
-    c1->set_v(c1->get_v() * c1->get_damp());
-    c2->set_v(c2->get_v() * c2->get_damp());
+    // // Apply damping to characters
+    // c1->set_v(c1->get_v() * c1->get_damp());
+    // c2->set_v(c2->get_v() * c2->get_damp());
     
-    // Additional energy loss when in contact with ground/surfaces
-    if (c1->get_has_contact()) {
-        Vec2 vel = c1->get_v();
-        vel *= 0.5;  // 5% energy loss on contact
-        c1->set_v(vel);
-    }
-    if (c2->get_has_contact()) {
-        Vec2 vel = c2->get_v();
-        vel *= 0.5;  // 5% energy loss on contact
-        c2->set_v(vel);
-    }
+    // // Additional energy loss when in contact with ground/surfaces
+    // if (c1->get_has_contact()) {
+    //     Vec2 vel = c1->get_v();
+    //     vel *= 0.5;  // 5% energy loss on contact
+    //     c1->set_v(vel);
+    // }
+    // if (c2->get_has_contact()) {
+    //     Vec2 vel = c2->get_v();
+    //     vel *= 0.5;  // 5% energy loss on contact
+    //     c2->set_v(vel);
+    // }
 }
 
 void Env::apply_friction() {
@@ -340,7 +347,18 @@ void Env::paint(QPainter *painter){
 
 }
 
+void Env::mousePressEvent(QMouseEvent* event) {
+        particles.push_back(new MovableCircle(
+        Vec2(event->pos().x(), event->pos().y()),
+        {0.0, 0.0},
+        3.0,
+        10.0
+    ));
+    }
+
 void Env::keyPressEvent(QKeyEvent *event){
+    // Ignore auto-repeated events
+    if (event->isAutoRepeat()) return;
 
     // Character 1 controls 
     if (event->key() == Qt::Key_Up) {
@@ -354,6 +372,7 @@ void Env::keyPressEvent(QKeyEvent *event){
         if (!c1->get_jumping() && !c1->get_sliding() && !c1->get_sword_attacking()) {
             if (c1->get_moving()){
                 c1->set_sliding(true);
+                qDebug()<<"sliding";
             } else {
                 c1->set_lowering(true);
                 qDebug()<<"lowering";
@@ -438,6 +457,9 @@ void Env::keyPressEvent(QKeyEvent *event){
 }
 
 void Env::keyReleaseEvent(QKeyEvent *event){
+    // Ignore auto-repeated events
+    if (event->isAutoRepeat()) return;
+    
     // Character 1 key releases
     if (event->key() == Qt::Key_Right) {
         c1->set_right(false);

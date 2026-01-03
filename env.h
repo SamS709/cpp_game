@@ -22,6 +22,7 @@ public:
     ~Env();
     void update(int width);
     void paint(QPainter *painter);
+    void mousePressEvent(QMouseEvent* event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void load_env_assets();

@@ -94,24 +94,25 @@ MovableAsset::MovableAsset(Vec2 pos_, Vec2 v_, float mass_)
 
 
 MovableCircle::MovableCircle(float mass_)
-    : MovableAsset(mass_)
-    {
-        dims = {radius * 2.0f, radius * 2.0f};
-    }
+    : MovableCircle(mass_, 10.0f)
+{
+}
 
 MovableCircle::MovableCircle(float mass_, float radius_)
     : MovableAsset(mass_)
     , radius(radius_)
-    {
-        dims = {radius * 2.0f, radius * 2.0f};
-    }
+{
+    inv_mass = 1 / mass;
+    dims = {radius * 2.0f, radius * 2.0f};
+}
 
 MovableCircle::MovableCircle(Vec2 pos_, Vec2 v_, float mass_, float radius_)
     : MovableAsset(pos_, v_, mass_)
     , radius(radius_)
-    {
-        dims = {2.0f * radius, 2.0f * radius};
-    }
+{
+    inv_mass = 1 / mass;
+    dims = {2.0f * radius, 2.0f * radius};
+}
 
 void MovableCircle::draw(QPainter &painter){
     const float r = get_radius();

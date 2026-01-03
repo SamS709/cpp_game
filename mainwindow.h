@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QPainter>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include "env.h"
 
 QT_BEGIN_NAMESPACE
@@ -25,6 +26,7 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private slots:
     void updateAnimation();

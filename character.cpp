@@ -351,9 +351,22 @@ void Character::update_jump(){
 
 
 void Character::update_lower(){
+    lower_time += time_between_frames/1000;
     if (!lower_frames.isEmpty()) {
-        current_move_frame = 9;
+        float normalized = 1.0;
+        int num_frames = lower_frames.size();
+        if (lower_time<total_lower_time){
+            if(lowering_start) {
+                normalized = lower_time / total_lower_time;
+            } else {
+                normalized = 1.0f - lower_time / total_lower_time;
+            }
+        } else if (lowering_stop){
+            lowering_stop = false;
+            lowering = false;
         }
+        current_move_frame = (int)(normalized * (num_frames - 1));
+    }
 }
 
 
@@ -574,7 +587,19 @@ void Character::set_sliding(bool s)
 
 void Character::set_lowering(bool s)
 {
-    lowering = s;
+
+    qDebug()<<s;
+    if(lowering != s) {
+        lower_time = 0.0f;
+    }
+    if(s){
+        lowering = s;
+        lowering_start = true;
+        lowering_stop = false;
+    } else {
+        lowering_start = false;
+        lowering_stop = true;
+    }
 }
 
 void Character::set_sword_attacking(bool a)

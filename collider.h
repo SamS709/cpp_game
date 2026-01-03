@@ -29,17 +29,27 @@ public:
 
 private:
     std::vector<StaticConstraint> static_constraints;
+    std::vector<DynamicConstraint> dynamic_constraints;
     std::vector<StaticConstraint> c_static_constraint;
+    float penetration_threshold_static {5.0};
+    float penetration_threshold_dynamic {0.02};
+
     // Type-specific collision handlers
     bool check_contact_particle(const MovableCircle& particle, int index, const Asset& asset);
     bool check_contact_characters(const MovableRectangle& character, int index, const Asset& asset);
     bool check_contact_particle_plane(const MovableCircle& particle, int index, const Plane& plane);
     bool check_contact_particle_rectangle(const MovableCircle& particle, int index, const Rectangle& rect);
-    void resolve_constraints_characters(const std::vector<Character*>& characters);
-    void resolve_constraints_particles(const std::vector<MovableCircle*>& particles);
+    void resolve_static_constraints_characters(const std::vector<Character*>& characters);
+    void resolve_static_constraints_particles(const std::vector<MovableCircle*>& particles);
     bool check_contact_character_plane(const MovableRectangle& character, int index, const Plane& plane);
     bool check_contact_character_rectangle(const MovableRectangle& c, int index, const Rectangle& rect);
     void handle_character_collision_response(const StaticConstraint& constraint, Character* character);
+
+    void add_dynamic_contact_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters);
+    void resolve_dynamic_constraints_particles(const std::vector<MovableCircle*>& particles);
+    void enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2);
+
+
 
 
     

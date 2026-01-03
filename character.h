@@ -106,6 +106,8 @@ private:
     bool jumping = false;
     bool sliding = false;
     bool lowering = false;
+    bool lowering_start = false;
+    bool lowering_stop = false;
     bool attacking = false;
     bool sword_attacking = false;
     bool right;
@@ -164,9 +166,10 @@ private:
     float total_jump_time {0.5};
     float total_slide_time {0.5};
     float total_sword_attack_time {0.5};
+    float total_lower_time {0.1};
     float time_between_slides {1.0};
     float time_between_sword_attacks {1.0};
-    float lower_time {1.0};
+    float lower_time {0.0};
     float jump_time;
     float slide_time;
     float sword_attack_time;

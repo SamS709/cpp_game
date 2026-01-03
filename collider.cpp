@@ -3,6 +3,7 @@
 
 void Collider::resolve_collisions(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets){
     add_static_contact_constraints(particles, characters, assets);
+    add_dynamic_contact_constraints(particles, characters);
     resolve_constraints(particles, characters);
 
 }
@@ -29,6 +30,57 @@ void Collider::add_static_contact_constraints(const std::vector<MovableCircle*>&
             }
         }
 }
+
+void Collider::add_dynamic_contact_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters) {
+        dynamic_constraints.clear();
+        for (size_t i = 0; i < particles.size(); ++i) {
+            for (size_t j = i + 1; j < particles.size(); ++j) {
+                Vec2 diff = particles[j]->get_pos_expected() - particles[i]->get_pos_expected();
+                float distance = diff.length();
+                float minDist = particles[i]->get_radius()  + particles[j]->get_radius() ;
+                float penetration = minDist - distance;
+                
+                if (penetration > 0 && distance > 0.0001f) {
+                    DynamicConstraint constraint;
+                    constraint.particleIndex1 = i;
+                    constraint.particleIndex2 = j;
+                    constraint.normal = diff.normalized();
+                    constraint.penetration = penetration;
+                    dynamic_constraints.push_back(constraint);
+                    
+                    particles[i]->set_has_contact(true);
+                    particles[j]->set_has_contact(true);
+                }
+            }
+        }
+    }
+
+void Collider::resolve_dynamic_constraints_particles(const std::vector<MovableCircle*>& particles){
+    int solver_iterations = 1;
+    int its;
+    for (const auto& constraint : dynamic_constraints) {
+        its = constraint.penetration < penetration_threshold_dynamic ? 1 : solver_iterations;
+        for (int it = 0; it < its; it++){
+            enforceDynamicConstraint(constraint, *particles[constraint.particleIndex1], *particles[constraint.particleIndex2]);
+        }
+    }
+    
+    
+}
+
+
+void Collider::enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2) {
+        float totalInvMass = p1.get_inv_mass() + p2.get_inv_mass();
+        qDebug()<<totalInvMass;
+        if (totalInvMass < 0.0001f) return;
+        
+        float correction1 = p1.get_inv_mass() / totalInvMass;
+        float correction2 = p2.get_inv_mass() / totalInvMass;
+        
+        p1.update_expected_pos_collision(constraint.normal * (-constraint.penetration * correction1));
+        p2.update_expected_pos_collision(constraint.normal * (constraint.penetration * correction2));
+}
+
 bool Collider::check_contact_characters(const MovableRectangle& character, int index, const Asset& asset){
     if (const Plane* plane = dynamic_cast<const Plane*>(&asset)) {
         return check_contact_character_plane(character, index, *plane);
@@ -56,12 +108,14 @@ bool Collider::check_contact_particle_plane(const MovableCircle& particle, int i
     const Vec2 center = particle.get_pos_expected();
     const float radius = particle.get_radius();
     const Vec2 toCenter = center - plane.get_pos();
-
+    const Vec2 center_real = particle.get_pos();
+    const Vec2 toCenter_real = center_real - plane.get_pos(); 
     // Distance along normal
     float distance = toCenter.dot(plane.get_norm());
+    float distance_real = toCenter_real.dot(plane.get_norm());
     
     // Only collide if particle is on the correct side
-    if (distance < 0) return false; 
+    if (distance_real < 0) return false; 
     
     float penetration = radius - distance;
     if (penetration <= 0) return false; 
@@ -237,11 +291,12 @@ bool Collider::check_contact_character_rectangle(const MovableRectangle& charact
 }
 
 void Collider::resolve_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters) {
-    resolve_constraints_particles(particles);
-    resolve_constraints_characters(characters);
+    resolve_static_constraints_particles(particles);
+    resolve_static_constraints_characters(characters);
+    resolve_dynamic_constraints_particles(particles);
 }
 
-void Collider::resolve_constraints_characters(const std::vector<Character*>& characters){
+void Collider::resolve_static_constraints_characters(const std::vector<Character*>& characters){
     int solver_iterations = 1;
     for (int iter = 0; iter < solver_iterations; ++iter) {
         for (const auto& constraint : c_static_constraint) {
@@ -253,14 +308,18 @@ void Collider::resolve_constraints_characters(const std::vector<Character*>& cha
 }
 
 
-void Collider::resolve_constraints_particles(const std::vector<MovableCircle*>& particles) {
-    int solver_iterations = 2;
-    for (int iter = 0; iter < solver_iterations; ++iter) {
-        // Resolve static constraints
-        for (const auto& constraint : static_constraints) {
+void Collider::resolve_static_constraints_particles(const std::vector<MovableCircle*>& particles) {
+    int solver_iterations = 1;
+    int its;
+  
+    for (const auto& constraint : static_constraints) {
+        its = constraint.penetration < penetration_threshold_static ? 1 : solver_iterations;
+        qDebug()<<its;
+        for (int it = 0; it < its; it++) {
             enforce_static_ground_constraints(constraint, *particles[constraint.index]);
         }
     }
+    
 }
 
 void Collider::enforce_static_ground_constraints(const StaticConstraint& constraint, MovableAsset& movable_asset) {

@@ -1,4 +1,4 @@
-#ifndef ASSET_H
+﻿#ifndef ASSET_H
 #define ASSET_H
 #include <QPainter>
 #include <cmath>
@@ -11,11 +11,14 @@ struct Vec2 {
     
     Vec2 operator+(const Vec2& v) const { return Vec2(x + v.x, y + v.y); }
     Vec2 operator-(const Vec2& v) const { return Vec2(x - v.x, y - v.y); }
+    Vec2 operator*(const Vec2& v) const { return Vec2(x * v.x, y * v.y); }
+    Vec2 operator+(float s) const { return Vec2(x + s, y + s); }
     Vec2 operator*(float s) const { return Vec2(x * s, y * s); }
     Vec2 operator/(float s) const { return Vec2(x / s, y / s); }
     
     Vec2& operator+=(const Vec2& v) { x += v.x; y += v.y; return *this; }
     Vec2& operator-=(const Vec2& v) { x -= v.x; y -= v.y; return *this; }
+    Vec2 operator*=(const Vec2& v) { x *= v.x; y *= v.y; return *this; }
     Vec2& operator*=(float s) { x *= s; y *= s; return *this; }
     
     float length() const { return std::sqrt(x * x + y * y); }
@@ -118,7 +121,7 @@ public:
     void set_y_expected(float y_expected_) { pos_exp.y = y_expected_; }
 
     float get_mass() { return mass; }
-    void set_mass(float mass_) { mass = mass_; }
+    virtual void set_mass(float mass_) { mass = mass_; }
 
     float get_damp() {return damp; }
     void set_damp(float damp_) {damp = damp_; }
@@ -127,7 +130,7 @@ public:
     void update_expected_pos(float dt){ pos_exp.x = pos.x + v.x * dt; pos_exp.y = pos.y + v.y * dt; }
     void update_pos(){ pos.x = pos_exp.x; pos.y = pos_exp.y; }
     void update_expected_pos_collision(float delta_x, float delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
-    void update_expected_pos_collision(Vec2 pos_exp_){ pos_exp += pos_exp_ ;}
+    virtual void update_expected_pos_collision(Vec2 pos_exp_){ pos_exp += pos_exp_;}
 
     
     virtual float get_rest() const { return 0.0; } // Default restitution coefficient
@@ -136,14 +139,14 @@ protected:
 
     Vec2 pos_exp {0.0, 0.0};
     Vec2 v {0.0, 0.0};
-    float mass {0.0};
+    float mass {0.1};
     float damp = 0.98;
 };
 
 class MovableCircle : public MovableAsset{
 
 public:
-    MovableCircle() = default;
+    MovableCircle() {inv_mass = 1 / mass; }
     MovableCircle(float mass_);
     MovableCircle(float mass_, float radius_);
     MovableCircle(Vec2 pos_, Vec2 v_, float mass_, float radius_);
@@ -151,6 +154,10 @@ public:
 
     float get_radius() const { return radius; }
     void set_radius(float radius_) { radius = radius_; }
+    float get_inv_mass() {return inv_mass; }
+    void set_mass(float mass_) override { mass = mass_; inv_mass = 1/mass;}
+    void update_expected_pos_collision(Vec2 pos_exp_) override { pos_exp += pos_exp_*1.5;}
+
 
     float get_rest() const override { return 0.8; } 
 
@@ -158,6 +165,7 @@ public:
 
 protected:
     float radius {0.5};
+    float inv_mass;
 
 };
 
@@ -188,34 +196,5 @@ struct DynamicConstraint {
 };
 
 
-
-
-// class SphereCollider : public Collider {
-// public:
-//     Vec2 center;
-//     float radius;
-    
-//     SphereCollider(Vec2 center, float radius) 
-//         : center(center), radius(radius) {}
-    
-//     std::optional<StaticConstraint> checkContact(const MovableCircle& particle, int index) const override {
-//         Vec2 diff = particle.get_pos_expected() - center;
-//         float distance = diff.length();
-//         float minDist = particle.get_radius() + radius;
-//         float penetration = minDist - distance;
-        
-//         if (penetration > 0 && distance > 0.0001f) {
-//             StaticConstraint constraint;
-//             constraint.particleIndex = index;
-//             constraint.normal = diff.normalized();
-//             constraint.penetration = penetration;
-//             constraint.contactPoint = center + constraint.normal * radius;
-//             return constraint;
-//         }
-//         return std::nullopt;
-//     }
-    
-
-// };
 
 #endif
