@@ -32,28 +32,28 @@ void Collider::add_static_contact_constraints(const std::vector<MovableCircle*>&
 }
 
 void Collider::add_dynamic_contact_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters) {
-        dynamic_constraints.clear();
-        for (size_t i = 0; i < particles.size(); ++i) {
-            for (size_t j = i + 1; j < particles.size(); ++j) {
-                Vec2 diff = particles[j]->get_pos_expected() - particles[i]->get_pos_expected();
-                float distance = diff.length();
-                float minDist = particles[i]->get_radius()  + particles[j]->get_radius() ;
-                float penetration = minDist - distance;
+    dynamic_constraints.clear();
+    for (size_t i = 0; i < particles.size(); ++i) {
+        for (size_t j = i + 1; j < particles.size(); ++j) {
+            Vec2 diff = particles[j]->get_pos_expected() - particles[i]->get_pos_expected();
+            float distance = diff.length();
+            float minDist = particles[i]->get_radius()  + particles[j]->get_radius() ;
+            float penetration = minDist - distance;
+            
+            if (penetration > 0 && distance > 0.0001f) {
+                DynamicConstraint constraint;
+                constraint.particleIndex1 = i;
+                constraint.particleIndex2 = j;
+                constraint.normal = diff.normalized();
+                constraint.penetration = penetration;
+                dynamic_constraints.push_back(constraint);
                 
-                if (penetration > 0 && distance > 0.0001f) {
-                    DynamicConstraint constraint;
-                    constraint.particleIndex1 = i;
-                    constraint.particleIndex2 = j;
-                    constraint.normal = diff.normalized();
-                    constraint.penetration = penetration;
-                    dynamic_constraints.push_back(constraint);
-                    
-                    particles[i]->set_has_contact(true);
-                    particles[j]->set_has_contact(true);
-                }
+                particles[i]->set_has_contact(true);
+                particles[j]->set_has_contact(true);
             }
         }
     }
+}
 
 void Collider::resolve_dynamic_constraints_particles(const std::vector<MovableCircle*>& particles){
     int solver_iterations = 1;
