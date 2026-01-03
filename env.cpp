@@ -38,6 +38,7 @@ Env::~Env(){
 
 void Env::load_env_assets(){
     collider = new Collider();
+    bonus_box = new BonusBox(Vec2(width/2.0 - 50.0, height-height/2.0), Vec2(100.0,25.0));
     MovableCircle *p1 = new MovableCircle(
         {static_cast<float>(width)/2.0f+250.0f, static_cast<float>(height)/2.0f},
         {-100.0, -5.0},
@@ -61,122 +62,6 @@ void Env::load_env_assets(){
     assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0,25.0)));
 
 }
-
-// void Env::apply_static_constraints(){
-
-//     // particles and ground
-//     for (MovableCircle *particle: particles) {
-//         apply_static_constraint(particle);
-//         resolve_aabb_collision(particle, obstacle);
-//     }       
-//     // Charaters and ground
-//     apply_static_constraint(c1);
-//     apply_static_constraint(c2);
-    
-//     // Characters and obstacle (AABB collision)
-//     resolve_aabb_collision(c1, obstacle);
-//     resolve_aabb_collision(c2, obstacle);
-
-// }
-
-// void Env::apply_static_constraint(MovableAsset *a){
-//     float collision_dist = (a->get_y_expected() + a->get_h() / 2.0) - ground->get_y();
-//     if (collision_dist >= 0) {
-//         float delta_y = -collision_dist;
-//         int sim_res = 3;
-//         for(int it = 0; it<sim_res; it++) {
-//             a->update_expected_pos_collision(0.0, delta_y);
-//         }
-        
-        
-//         // float v_y = a->get_v_y();
-//         // if (v_y > 0) {
-//         //     a->set_v_y(-a->get_rest()*v_y);
-//         //     a->update_expected_pos(dt);
-//         //     qDebug()<<v_y;
-//         // }
-        
-//         // End jump when character lands on ground
-//         Character* character = dynamic_cast<Character*>(a);
-//         if (character && character->get_jumping()) {
-//             character->set_jumping(false);
-//             // Resume moving if direction key is still pressed
-//             if (character->get_right_pressed() || character->get_left_pressed()) {
-//                 character->set_moving(true);
-//             }
-//         }
-//     }
-// }
-
-// void Env::resolve_aabb_collision(MovableAsset *movable, Rectangle *rect){
-//     // Get positions and dimensions
-//     float m_x = movable->get_x_expected();
-//     float m_y = movable->get_y_expected();
-//     float m_w = movable->get_w();
-//     float m_h = movable->get_h();
-    
-//     float r_x = rect->get_x();
-//     float r_y = rect->get_y();
-//     float r_w = rect->get_w();
-//     float r_h = rect->get_h();
-    
-//     // Convert character center position to AABB (top-left corner)
-//     float m_left = m_x - m_w / 2.0;
-//     float m_right = m_x + m_w / 2.0;
-//     float m_top = m_y - m_h / 2.0;
-//     float m_bottom = m_y + m_h / 2.0;
-    
-//     // Check for AABB overlap
-//     bool overlap = !(m_right < r_x || r_x + r_w < m_left ||
-//                      m_bottom < r_y || r_y + r_h < m_top);
-    
-//     if (!overlap) return;
-    
-//     // Calculate penetration depths
-//     float overlap_left = m_right - r_x;
-//     float overlap_right = (r_x + r_w) - m_left;
-//     float overlap_top = m_bottom - r_y;
-//     float overlap_bottom = (r_y + r_h) - m_top;
-    
-//     float overlap_x = (overlap_left < overlap_right) ? overlap_left : overlap_right;
-//     float overlap_y = (overlap_top < overlap_bottom) ? overlap_top : overlap_bottom;
-    
-//     // Resolve along minimum penetration axis
-//     if (overlap_x < overlap_y) {
-//         // Horizontal 
-//         float delta_x = (m_x < r_x) ? -overlap_left : overlap_right;
-//         movable->update_expected_pos_collision(delta_x, 0.0);
-        
-//         // horizontal velocity
-//         float v_x = movable->get_v_x();
-//         if ((m_x < r_x && v_x > 0) || (m_x > r_x && v_x < 0)) {
-//             movable->set_v_x(-movable->get_rest() * v_x);
-//         }
-//     } else {
-//         // Vertical resolution
-//         float delta_y = (m_y < r_y) ? -overlap_top : overlap_bottom;
-//         movable->update_expected_pos_collision(0.0, delta_y);
-        
-//         // vertical velocity
-//         float v_y = movable->get_v_y();
-        
-//         // Bounce
-//         if ((m_y < r_y && v_y > 0) || (m_y > r_y && v_y < 0)) {    
-//             movable->set_v_y(-movable->get_rest() * v_y);
-            
-//         }
-
-//         Character* character = dynamic_cast<Character*>(movable);        
-//         // End jump when character lands on top of rectangle
-//         if (character && character->get_jumping() && m_y < r_y && v_y > 0) {
-//             character->set_jumping(false);
-//             // Resume moving if direction key is still pressed
-//             if (character->get_right_pressed() || character->get_left_pressed()) {
-//                 character->set_moving(true);
-//             }
-//         }
-//     }
-// }
 
 
 
@@ -213,22 +98,7 @@ void Env::apply_damping() {
     for(MovableCircle *particle: particles){
         particle->set_v(particle->get_v() * particle->get_damp());
     }
-    
-    // // Apply damping to characters
-    // c1->set_v(c1->get_v() * c1->get_damp());
-    // c2->set_v(c2->get_v() * c2->get_damp());
-    
-    // // Additional energy loss when in contact with ground/surfaces
-    // if (c1->get_has_contact()) {
-    //     Vec2 vel = c1->get_v();
-    //     vel *= 0.5;  // 5% energy loss on contact
-    //     c1->set_v(vel);
-    // }
-    // if (c2->get_has_contact()) {
-    //     Vec2 vel = c2->get_v();
-    //     vel *= 0.5;  // 5% energy loss on contact
-    //     c2->set_v(vel);
-    // }
+
 }
 
 void Env::apply_friction() {
@@ -264,6 +134,7 @@ void Env::draw_assets(QPainter &painter){
     for (const auto& asset : assets) {
             asset->draw(painter);
     }
+    bonus_box->draw(painter);
 
 }
 

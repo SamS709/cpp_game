@@ -31,9 +31,6 @@ public:
     void update_velocities_and_positions();
     void apply_damping();
     void apply_friction();
-    // void apply_static_constraints();
-    // void apply_static_constraint(MovableAsset *a);
-    // void resolve_aabb_collision(MovableAsset *movable, Rectangle *rect);
     void update_velocity_and_position(MovableAsset *a);
 
     
@@ -59,6 +56,7 @@ private:
     float speed_run; 
     float speed_jump {1000.0};
     Collider *collider;
+    BonusBox *bonus_box;
     vector<MovableCircle*> particles;
     vector<Character*> characters;
     std::vector<std::unique_ptr<Asset>> assets;
