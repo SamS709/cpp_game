@@ -38,7 +38,7 @@ Env::~Env(){
 
 void Env::load_env_assets(){
     collider = new Collider();
-    bonus_box = new BonusBox(Vec2(width/2.0 - 50.0, height-height/2.0), Vec2(100.0,25.0));
+    bonuses.push_back(std::make_unique<BonusBox>(Vec2(100.0, height-height/2.0), Vec2(100.0,25.0)));
     MovableCircle *p1 = new MovableCircle(
         {static_cast<float>(width)/2.0f+250.0f, static_cast<float>(height)/2.0f},
         {-100.0, -5.0},
@@ -85,13 +85,21 @@ void Env::update_velocity_and_position(MovableAsset *a){
 void Env::update(int width){
     apply_external_forces();
     update_expected_positions(); 
-    collider->resolve_collisions(particles, characters, assets);
+    collider->resolve_collisions(particles, characters, assets, bonuses);
     update_velocities_and_positions();
     apply_damping();
     apply_friction();  // Apply friction AFTER velocity update
     handle_attacks();
     c1->update(width);
     c2->update(width);
+    for (auto it = bonuses.begin(); it != bonuses.end();){
+        it->get()->update(dt, particles);
+        if(it->get()->get_finished()){
+            it = bonuses.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Env::apply_damping() {
@@ -127,6 +135,7 @@ void Env::apply_friction() {
 void Env::draw_assets(QPainter &painter){
     for (MovableCircle *particle: particles) {
         particle->draw(painter);
+        qDebug()<<particle->get_pos().x;
         
     }
     // Draw obstacles
@@ -134,7 +143,9 @@ void Env::draw_assets(QPainter &painter){
     for (const auto& asset : assets) {
             asset->draw(painter);
     }
-    bonus_box->draw(painter);
+    for (const auto& bonus: bonuses){
+        bonus->draw(painter);
+    }
 
 }
 

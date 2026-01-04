@@ -56,7 +56,8 @@ private:
     float speed_run; 
     float speed_jump {1000.0};
     Collider *collider;
-    BonusBox *bonus_box;
+    
+    std::vector<std::unique_ptr<BonusBox>> bonuses;
     vector<MovableCircle*> particles;
     vector<Character*> characters;
     std::vector<std::unique_ptr<Asset>> assets;
