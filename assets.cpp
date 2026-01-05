@@ -117,7 +117,12 @@ MovableCircle::MovableCircle(Vec2 pos_, Vec2 v_, float mass_, float radius_)
 
 void MovableCircle::draw(QPainter &painter){
     const float r = get_radius();
-    painter.drawEllipse(QPointF(get_x(), get_y()), r, r);
+    painter.save();
+    painter.translate(get_x(), get_y());
+    painter.rotate(w);
+    painter.drawEllipse(QPointF(0, 0), r, r);
+    painter.drawEllipse(QPointF(5, 5), 0.5, 0.5);
+    painter.restore();
 }
 
 MovableRectangle::MovableRectangle(float mass_)

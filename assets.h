@@ -1,6 +1,7 @@
 ﻿#ifndef ASSET_H
 #define ASSET_H
 #include <QPainter>
+#include <QDebug>
 #include <cmath>
 
 struct Vec2 {
@@ -109,9 +110,9 @@ public:
     Vec2 get_v() const { return v;}
     float get_v_x() const { return v.x; }
     float get_v_y() const { return v.y; }
-    void set_v(Vec2 v_) { v = v_; }
-    void set_v_x(float v_x_) { v.x = v_x_; }
-    void set_v_y(float v_y_) { v.y = v_y_; }
+    virtual void set_v(Vec2 v_) { v = v_; }
+    virtual void set_v_x(float v_x_) { v.x = v_x_; }
+    virtual void set_v_y(float v_y_) { v.y = v_y_; }
 
     Vec2 get_pos_expected() const {return pos_exp;}
     
@@ -126,7 +127,7 @@ public:
     float get_damp() {return damp; }
     void set_damp(float damp_) {damp = damp_; }
 
-    void update_vel(float dt){ v.x = (pos_exp.x - pos.x) / dt; v.y = (pos_exp.y - pos.y) / dt; }
+    virtual void update_vel(float dt){ v.x = (pos_exp.x - pos.x) / dt; v.y = (pos_exp.y - pos.y) / dt; }
     void update_expected_pos(float dt){ pos_exp.x = pos.x + v.x * dt; pos_exp.y = pos.y + v.y * dt; }
     void update_pos(){ pos.x = pos_exp.x; pos.y = pos_exp.y; }
     void update_expected_pos_collision(float delta_x, float delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
@@ -154,8 +155,20 @@ public:
 
     float get_radius() const { return radius; }
     void set_radius(float radius_) { radius = radius_; }
+
     float get_inv_mass() {return inv_mass; }
     void set_mass(float mass_) override { mass = mass_; inv_mass = 1/mass;}
+
+    float get_w(){ return w; }
+    void set_x(float w_) { w = w_; }
+
+    void set_v (Vec2 v_) override{ v = v_; }
+    void set_v_x (float v_x_) override{ v.x = v_x_; }
+    void set_v_y (float v_y_) override{ v.y = v_y_; }
+
+    void update_vel (float dt) override{ v.x = (pos_exp.x - pos.x) / dt; v.y = (pos_exp.y - pos.y) / dt; w += v.x / radius;}
+
+
     void update_expected_pos_collision(Vec2 pos_exp_) override { pos_exp += pos_exp_*1.5;}
 
 
@@ -165,6 +178,7 @@ public:
 
 protected:
     float radius {0.5};
+    float w;
     float inv_mass;
 
 };
