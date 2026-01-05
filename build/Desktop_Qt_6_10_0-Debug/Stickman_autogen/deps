@@ -610,5 +610,7 @@ Stickman_autogen/timestamp: \
 	D:/Dev/cours/cpp_game/main.cpp \
 	D:/Dev/cours/cpp_game/mainwindow.cpp \
 	D:/Dev/cours/cpp_game/mainwindow.h \
+	D:/Dev/cours/cpp_game/utils.cpp \
+	D:/Dev/cours/cpp_game/utils.h \
 	D:/Dev/cours/cpp_game/mainwindow.ui \
 	C:/Qt/Tools/CMake_64/bin/cmake.exe

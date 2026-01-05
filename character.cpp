@@ -1,4 +1,5 @@
 #include "character.h"
+#include "utils.h"
 
 Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float max_hp_)
     : MovableRectangle(mass)
@@ -42,21 +43,9 @@ void Character::loadSpriteFrames(const QString &basePath)
 }
 
 void Character::load_move_frames(const QString &basePath){
-    move_frames.clear();
-    move_frames_asset_dims.clear();
-    for (int i = 1; i <=39; ++i) {
-        QString framePath = basePath + QString("/walk/walk_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &move_frames_asset_dims, &move_frames_character_dims, nullptr);
-            move_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "walk", 1, 39, move_frames, move_frames_asset_dims, move_frames_character_dims);
+    
     // Use first move frame as idle frame
     if (!move_frames.isEmpty()) {
         idleFrame = move_frames[5];
@@ -67,77 +56,26 @@ void Character::load_move_frames(const QString &basePath){
 }
 
 void Character::load_jump_frames(const QString &basePath){
-
-    jump_frames.clear();
-    for (int i = 0; i <= 63; ++i) {
-        QString framePath = basePath + QString("/jump/jump_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &jump_frames_asset_dims, &jump_frames_character_dims, nullptr);
-            jump_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
-
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "jump", 0, 63, jump_frames, jump_frames_asset_dims, jump_frames_character_dims);
 }
 
 void Character::load_slide_frames(const QString &basePath){
-
-    slide_frames.clear();
-    for (int i = 0; i <= 29; ++i) {
-        QString framePath = basePath + QString("/slide/slide_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &slide_frames_asset_dims, &slide_frames_character_dims, nullptr);
-            slide_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    
-    }
-
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "slide", 0, 29, slide_frames, slide_frames_asset_dims, slide_frames_character_dims);
 }
 
 void Character::load_lower_frames(const QString &basePath){
-    lower_frames.clear();
-    for (int i = 0; i <= 10; ++i) {
-        QString framePath = basePath + QString("/lower/lower_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &lower_frames_asset_dims, &lower_frames_character_dims, nullptr);
-            lower_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
-
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "lower", 0, 10, lower_frames, lower_frames_asset_dims, lower_frames_character_dims);
 }
 
 void Character::load_sword_attack_frames(const QString &basePath){
-    sword_attack_frames.clear();
-    for (int i = 1; i <= 53; ++i) {
-        QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &sword_attack_frames_asset_dims, &sword_attack_frames_character_dims, &sword_attack_frames_sword_dims);
-            sword_attack_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "sword_attack", 1, 53, sword_attack_frames, 
+                       sword_attack_frames_asset_dims, sword_attack_frames_character_dims, 
+                       &sword_attack_frames_sword_dims);
+    
     // set the dim of the sword to zero during first and last few frames of the attack 
     int ind = 0;
     for (vector<float> &sword_dim: sword_attack_frames_sword_dims) {
@@ -149,165 +87,6 @@ void Character::load_sword_attack_frames(const QString &basePath){
 }
 
 
-void Character::set_hitbox(QPixmap& sprite, vector<vector<float>>* asset_dims_, vector<vector<float>>* character_dims_, vector<vector<float>>* sword_dims_){
-    // Convert QPixmap to QImage to access pixels
-    QImage image = sprite.toImage();
-    
-    if (image.isNull()) {
-        return;
-    }
-
-    if(asset_dims_ == nullptr || character_dims_ == nullptr) {
-        return;
-    }
-    
-    int width = image.width();
-    int height = image.height();
-    
-    // Helper lambda to check if pixel is valid for hitbox (any visible pixel)
-    auto isAssetPixel = [](QRgb pixel) -> bool {
-        return (qAlpha(pixel) > 10);
-    };
-
-    auto isCharacterPixel = [](QRgb pixel) -> bool {
-        if (qAlpha(pixel) <= 10) return false;  // Must be visible
-        int r = qRed(pixel);
-        int g = qGreen(pixel);
-        int b = qBlue(pixel);
-        // Check if pixel is black (or very dark)
-        return (r < 5 && g < 5 && b < 5);
-    }; 
-
-    auto isSwordPixel = [](QRgb pixel) -> bool {
-        if (qAlpha(pixel) <= 10) return false;  // Must be visible
-        int r = qRed(pixel);
-        int g = qGreen(pixel);
-        int b = qBlue(pixel);
-        // Check if pixel is black (or very dark)
-        return (130 < r && r < 140 && 130 < g && g < 140 && 130 < b && b < 140);
-    }; 
-
-    
-    // Find left bounds
-    int leftBoundAsset = width;
-    int leftBoundCharacter = width;
-    int leftBoundSword = width;
-    for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-            QRgb pixel = image.pixel(x, y);
-            
-            if (leftBoundAsset == width && isAssetPixel(pixel)) {
-                leftBoundAsset = x;
-            }
-            if (leftBoundCharacter == width && isCharacterPixel(pixel)) {
-                leftBoundCharacter = x;
-            }
-            if (leftBoundSword == width && isSwordPixel(pixel)) {
-                leftBoundSword = x;
-            }
-        }
-        // if (leftBoundAsset < width) break;
-    }
-    
-    // Find right bounds
-    int rightBoundAsset = 0;
-    int rightBoundCharacter = 0;
-    int rightBoundSword = 0;
-    for (int x = width - 1; x >= 0; x--) {
-        for (int y = 0; y < height; y++) {
-            QRgb pixel = image.pixel(x, y);
-            if (rightBoundAsset == 0 && isAssetPixel(pixel)) {
-                rightBoundAsset = x;
-            }
-            if (rightBoundCharacter == 0 && isCharacterPixel(pixel)) {
-                rightBoundCharacter = x;
-            }
-            if (rightBoundSword == 0 && isSwordPixel(pixel)) {
-                rightBoundSword = x;
-            }
-        }
-        // if (rightBoundAsset > 0) break;
-    }
-    
-    // Find top bounds
-    int topBoundAsset = height;
-    int topBoundCharacter = height;
-    int topBoundSword = height;
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            QRgb pixel = image.pixel(x, y);
-            if (topBoundAsset == height && isAssetPixel(pixel)) {
-                topBoundAsset = y;
-            }
-            if (topBoundCharacter == height && isCharacterPixel(pixel)) {
-                topBoundCharacter = y;
-            }
-            if (topBoundSword == height && isSwordPixel(pixel)) {
-                topBoundSword = y;
-            }
-        }
-        // if (topBoundAsset < height) break;
-    }
-    
-    // Find bottom bounds
-    int bottomBoundAsset = 0;
-    int bottomBoundCharacter = 0;
-    int bottomBoundSword = 0;
-    for (int y = height - 1; y >= 0; y--) {
-        for (int x = 0; x < width; x++) {
-            QRgb pixel = image.pixel(x, y);
-            if (bottomBoundAsset == 0 && isAssetPixel(pixel)) {
-                bottomBoundAsset = y;
-            }
-            if (bottomBoundCharacter == 0 && isCharacterPixel(pixel)) {
-                bottomBoundCharacter = y;
-            }
-            if (bottomBoundSword == 0 && isSwordPixel(pixel)) {
-                bottomBoundSword = y;
-            }
-        }
-        // if (bottomBoundAsset > 0) break;
-    }
-    
-    // Calculate character dimensions
-    float widthAsset = rightBoundAsset - leftBoundAsset;
-    float heightAsset = bottomBoundAsset - topBoundAsset;
-    float widthCharacter = rightBoundCharacter - leftBoundCharacter;
-    float heightCharacter = bottomBoundCharacter - topBoundCharacter;
-    float widthSword = rightBoundSword - leftBoundSword;
-    float heightSword = bottomBoundSword - topBoundSword;
-    if(leftBoundSword == width && rightBoundSword == 0.0){
-            leftBoundSword = 0.0;
-            rightBoundSword = 0.0;
-            widthSword = 0.0;
-            heightSword = 0.0;
-    } 
-    
-    // Fill dims_ with computed dimensions [leftBound, topBound, width/2, height/2]
-    asset_dims_->push_back({static_cast<float>(leftBoundAsset), static_cast<float>(topBoundAsset), static_cast<float>(widthAsset) / 2.0f, static_cast<float>(heightAsset) / 2.0f});
-    character_dims_->push_back({static_cast<float>(leftBoundCharacter), static_cast<float>(topBoundCharacter), static_cast<float>(widthCharacter) / 2.0f, static_cast<float>(heightCharacter) / 2.0f});
-    if(sword_dims_!=nullptr){
-        sword_dims_->push_back({static_cast<float>(leftBoundAsset), static_cast<float>(topBoundAsset), static_cast<float>(widthAsset) / 2.0f, static_cast<float>(heightAsset) / 2.0f});
-    }
-    
-    // Draw bounding box on sprite if draw_baxes is true
-    if (draw_baxes) {
-        QPainter painter(&sprite);
-        painter.setPen(QPen(Qt::red, 2));
-        painter.drawRect(leftBoundAsset, topBoundAsset, widthAsset, heightAsset);
-        painter.setPen(QPen(Qt::green, 2));
-        painter.drawRect(leftBoundCharacter, topBoundCharacter, widthCharacter, heightCharacter);
-        if(sword_dims_!=nullptr){
-            painter.setPen(QPen(Qt::blue, 2));
-            painter.drawRect(leftBoundSword, topBoundSword, widthSword, heightSword);
-        }
-        
-    }
-    
-    qDebug() << "Hitbox bounds - Left:" << leftBoundAsset << "Right:" << rightBoundAsset 
-             << "Top:" << topBoundAsset << "Bottom:" << bottomBoundAsset 
-             << "Width:" << widthAsset << "Height:" << heightAsset;
-}
 
 void Character::update(int width)
 {

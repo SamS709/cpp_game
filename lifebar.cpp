@@ -1,29 +1,33 @@
 #include "lifebar.h"
+#include "utils.h"
 #include <algorithm>
 #include <QDebug>
 
 Lifebar::Lifebar(){
-    sprite = QPixmap("resources/images/assets/hp.png");
-    sprite = sprite.scaledToHeight(get_h() * im_scale, Qt::SmoothTransformation);
+    SpriteLoader loader(get_h() * im_scale, false);
+    vector<float> asset_dim, character_dim;
+    loader.loadSprite("resources/images/assets/hp.png", sprite, asset_dim, character_dim);
 }
 
 Lifebar::Lifebar(Vec2 dim_)
     :Rectangle(dim_)
     {
-        sprite = QPixmap("resources/images/assets/hp.png");
-        sprite = sprite.scaledToHeight(get_h() * im_scale, Qt::SmoothTransformation);
+        SpriteLoader loader(get_h() * im_scale, false);
+        vector<float> asset_dim, character_dim;
+        loader.loadSprite("resources/images/assets/hp.png", sprite, asset_dim, character_dim);
     }
 Lifebar::Lifebar(Vec2 pos_, Vec2 dims_)
     :Rectangle(pos_, dims_)
     {
-        sprite = QPixmap("resources/images/assets/hp.png");
-        sprite = sprite.scaledToHeight(get_h() * im_scale, Qt::SmoothTransformation);
-        
+        SpriteLoader loader(get_h() * im_scale, false);
+        vector<float> asset_dim, character_dim;
+        loader.loadSprite("resources/images/assets/hp.png", sprite, asset_dim, character_dim);
     }
 
 void Lifebar::reload_image(){
-    sprite = QPixmap("resources/images/assets/hp.png");
-    sprite = sprite.scaledToHeight(get_h() * im_scale, Qt::SmoothTransformation);
+    SpriteLoader loader(get_h() * im_scale, false);
+    vector<float> asset_dim, character_dim;
+    loader.loadSprite("resources/images/assets/hp.png", sprite, asset_dim, character_dim);
 }
 
 void Lifebar::draw(QPainter &painter) {
@@ -94,17 +98,13 @@ void BonusBox::reload_image(){
 void BonusBox::load_images(){
     set_color(120,120,120,120);
     sprites.clear();
-    for (int i = 1; i <=1; ++i) {
-        QString framePath = "resources/images/assets/bomb.png";
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(dims.y, Qt::SmoothTransformation);
-            sprites.append(sprite);
-            // qDebug() << "Loaded:" << framePath;
-        } else {
-            // qDebug() << "Failed to load:" << framePath;
-        }
+    
+    SpriteLoader loader(dims.y, false);
+    QPixmap sprite;
+    vector<float> asset_dim, character_dim;
+    
+    if (loader.loadSprite("resources/images/assets/bomb.png", sprite, asset_dim, character_dim)) {
+        sprites.append(sprite);
     }
 }
 

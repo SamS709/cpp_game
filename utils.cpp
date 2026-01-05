@@ -33,7 +33,7 @@ bool SpriteLoader::loadSequence(
         
         if (!sprite.isNull()) {
             sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(&sprite, &asset_dims, &character_dims, sword_dims);
+            set_hitbox(sprite, &asset_dims, &character_dims, sword_dims);
             sprites.append(sprite);
             anyLoaded = true;
             qDebug() << "Loaded:" << framePath;
@@ -65,7 +65,7 @@ bool SpriteLoader::loadSprite(
     vector<vector<float>> character_dims_temp;
     vector<vector<float>> sword_dims_temp;
     
-    set_hitbox(&sprite, &asset_dims_temp, &character_dims_temp, sword_dim ? &sword_dims_temp : nullptr);
+    set_hitbox(sprite, &asset_dims_temp, &character_dims_temp, sword_dim ? &sword_dims_temp : nullptr);
     
     if (!asset_dims_temp.empty()) asset_dim = asset_dims_temp[0];
     if (!character_dims_temp.empty()) character_dim = character_dims_temp[0];
