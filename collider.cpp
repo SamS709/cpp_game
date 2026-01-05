@@ -1,14 +1,14 @@
 #include "collider.h"
 #include "character.h"
 
-void Collider::resolve_collisions(std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses){
+void Collider::resolve_collisions(std::vector<MovableCircle*>& particles, std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses){
     add_static_contact_constraints(particles, characters, assets, bonuses);
     add_dynamic_contact_constraints(particles, characters);
     resolve_constraints(particles, characters);
 
 }
 
-void Collider::add_static_contact_constraints(std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses){
+void Collider::add_static_contact_constraints(std::vector<MovableCircle*>& particles, std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses){
         static_constraints.clear();
         c_static_constraint.clear();
         for (int i = 0; i < particles.size(); ++i) {
@@ -29,8 +29,13 @@ void Collider::add_static_contact_constraints(std::vector<MovableCircle*>& parti
                 }
             }
             for (auto &bonus : bonuses) {
-                check_contact_character_bonus(*characters[i], *bonus, particles);
+                check_contact_character_bonus(*characters[i], i, *bonus, particles);
                 
+            }
+            for (auto &particle : particles) {
+                if (Bomb* bomb = dynamic_cast<Bomb*>(particle)) {
+                    check_contact_character_bomb(*characters[i], i, *bomb);
+                }
             }
         }
         
@@ -185,7 +190,38 @@ bool Collider::check_contact_character_plane(const MovableRectangle& character, 
     return true;
 }
 
-void Collider::check_contact_character_bonus(const MovableRectangle& character, BonusBox& bonus, std::vector<MovableCircle*>& particles) {
+void Collider::check_contact_character_bomb(Character& character, int i, Bomb& bomb){
+    // Get character bounding box
+    const Vec2 char_pos(character.get_x_expected(), character.get_y_expected());
+    const float char_w = character.get_w();
+    const float char_h = character.get_h();
+    
+    float char_left = char_pos.x - char_w / 2.0;
+    float char_right = char_pos.x + char_w / 2.0;
+    float char_top = char_pos.y - char_h;
+    float char_bottom = char_pos.y;
+    
+    // Get bomb position and radius
+    Vec2 bomb_center = bomb.get_pos_expected();
+    float bomb_radius = bomb.get_radius();
+    
+    // Find closest point on rectangle to circle center
+    float closest_x = std::max(char_left, std::min(bomb_center.x, char_right));
+    float closest_y = std::max(char_top, std::min(bomb_center.y, char_bottom));
+    
+    // Calculate distance from closest point to circle center
+    float distance_x = bomb_center.x - closest_x;
+    float distance_y = bomb_center.y - closest_y;
+    float distance_squared = distance_x * distance_x + distance_y * distance_y;
+    
+    // Check if circle overlaps with rectangle
+    if (distance_squared < bomb_radius * bomb_radius && !bomb.get_exploded() && i != bomb.get_creator()) {
+        character.set_hp(character.get_hp() - bomb.get_damage());
+        bomb.explode();
+    }
+}
+
+void Collider::check_contact_character_bonus(const MovableRectangle& character, int i, BonusBox& bonus, std::vector<MovableCircle*>& particles) {
     const Vec2 char_pos(character.get_x_expected(), character.get_y_expected());
     const float char_w = character.get_w() ; 
     const float char_h = character.get_h();
@@ -205,7 +241,7 @@ void Collider::check_contact_character_bonus(const MovableRectangle& character, 
     bool overlap_y = char_bottom > rect_top && char_top < rect_bottom;
     
     if (!overlap_x || !overlap_y) return;
-    bonus.activate(character.get_v_x(), particles);
+    bonus.activate(character.get_v(), particles, i);
 }
 
 bool Collider::check_contact_character_rectangle(const MovableRectangle& character, int index, const Rectangle& rect) {

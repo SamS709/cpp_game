@@ -88,6 +88,7 @@ public:
     bool get_jumping() { return jumping; };
     bool get_sliding() {return sliding; };
     bool get_attacking() { return attacking; }
+    bool get_lowering   () { return lowering   ; }
     bool get_sword_attacking() {return sword_attacking; };
     bool get_right() { return facingRight; }
     bool get_right_pressed() { return right_pressed; }  // Check if right key is pressed
@@ -122,10 +123,12 @@ private:
     vector<vector<float>> move_frames_asset_dims;
     vector<vector<float>> jump_frames_asset_dims;
     vector<vector<float>> lower_frames_asset_dims;
+    vector<vector<float>> slide_frames_asset_dims;
     vector<vector<float>> sword_attack_frames_asset_dims;
     vector<vector<float>> move_frames_character_dims;
     vector<vector<float>> jump_frames_character_dims;
     vector<vector<float>> lower_frames_character_dims;
+    vector<vector<float>> slide_frames_character_dims;
     vector<vector<float>> sword_attack_frames_character_dims;
     vector<vector<float>> sword_attack_frames_sword_dims;
     QVector<QPixmap> jump_frames;
@@ -161,10 +164,10 @@ private:
     float speed_move;
     float speed_run;
     float speed_jump {2500.0};  // Initial upward velocity for jumps
-    float slide_dist {4.0};
-    float sword_attack_dist {1.0};
+    float slide_dist {5.0};
+    float sword_attack_dist {5.0};
     float total_jump_time {0.5};
-    float total_slide_time {0.5};
+    float total_slide_time {0.7};
     float total_sword_attack_time {0.5};
     float total_lower_time {0.1};
     float time_between_slides {1.0};

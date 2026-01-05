@@ -38,16 +38,25 @@ Env::~Env(){
 
 void Env::load_env_assets(){
     collider = new Collider();
-    bonuses.push_back(std::make_unique<BonusBox>(Vec2(100.0, height-height/2.0), Vec2(100.0,25.0)));
-    MovableCircle *p1 = new MovableCircle(
+    bonuses.push_back(std::make_unique<BonusBox>(Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    Bomb *p1 = new Bomb(
         {static_cast<float>(width)/2.0f+250.0f, static_cast<float>(height)/2.0f},
         {-100.0, -5.0},
         5.0,
+        5.0,
         20.0
     );
-    MovableCircle *p2 = new MovableCircle(
+    Bomb *p2 = new Bomb(
         {0.0f, static_cast<float>(height)/2.0f},
         {50.0, -5.0},
+        5.0,
+        5.0,
+        20.0
+    );
+    Bomb *p3 = new Bomb(
+        {250.0f, 10.0f},
+        {0.0, 0.0},
+        5.0,
         5.0,
         20.0
     );
@@ -55,6 +64,7 @@ void Env::load_env_assets(){
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
     particles.push_back(p1);
     particles.push_back(p2);
+    particles.push_back(p3);
     Vec2 pos = Vec2(width / 2 - 200, height/2);
     Vec2 dims = Vec2(400.0, 100.0);
     // assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0, 10)));
@@ -93,7 +103,7 @@ void Env::update(int width){
     c1->update(width);
     c2->update(width);
     for (auto it = bonuses.begin(); it != bonuses.end();){
-        it->get()->update(dt, particles);
+        it->get()->update(particles);
         if(it->get()->get_finished()){
             it = bonuses.erase(it);
         } else {
@@ -135,7 +145,6 @@ void Env::apply_friction() {
 void Env::draw_assets(QPainter &painter){
     for (MovableCircle *particle: particles) {
         particle->draw(painter);
-        qDebug()<<particle->get_pos().x;
         
     }
     // Draw obstacles
@@ -193,14 +202,19 @@ void Env::handle_sword_attack(Character* attacker, Character* defender){
     }
     
     float x_sword = attacker->get_x() + x_sword_offset;
-    float y_sword = attacker->get_y() + attacker->get_current_sword_dims()[1] - attacker->get_current_asset_dims()[1] - attacker->get_current_asset_dims()[3];
+    float y_sword = attacker->get_y() - (2.0 * attacker->get_current_asset_dims()[3] - attacker->get_current_sword_dims()[1]);
     float w_sword = 2.0 * attacker->get_current_sword_dims()[2];
     float h_sword = 2.0 * attacker->get_current_sword_dims()[3];
     // Attacked character dims
     float x_character = defender->get_x() + x_character_offset;
-    float y_character = defender->get_y() + defender->get_current_character_dims()[1] - defender->get_current_asset_dims()[1] - defender->get_current_asset_dims()[3];
+    float y_character = defender->get_y() - (2.0 * defender->get_current_asset_dims()[3] - defender->get_current_character_dims()[1]);
     float w_character = 2.0 * defender->get_current_character_dims()[2];
     float h_character = 2.0 * defender->get_current_character_dims()[3];
+    
+    qDebug() << "Sword: x=" << x_sword << "y=" << y_sword << "w=" << w_sword << "h=" << h_sword;
+    qDebug() << "Character: x=" << x_character << "y=" << y_character << "w=" << w_character << "h=" << h_character;
+    qDebug() << "Defender facing right:" << defender->get_right() << "Defender lowering:" << defender->get_lowering();
+    
     if (check_rectangles_overlap(x_sword, y_sword, w_sword, h_sword, x_character, y_character, w_character, h_character)) {
         qDebug()<<"Attack hit!";
         attacker->set_first_hit_sword_attack(false);
@@ -230,9 +244,10 @@ void Env::paint(QPainter *painter){
 }
 
 void Env::mousePressEvent(QMouseEvent* event) {
-        particles.push_back(new MovableCircle(
+        particles.push_back(new Bomb(
         Vec2(event->pos().x(), event->pos().y()),
         {0.0, 0.0},
+        5.0,
         3.0,
         10.0
     ));

@@ -26,6 +26,29 @@ private:
 
 };
 
+
+class Bomb: public MovableCircle {
+public:
+    Bomb() {inv_mass = 1 / mass; };
+    Bomb(float damage_);
+    Bomb(float damage_, float mass_);
+    Bomb(float damage_, float mass_, float radius_);
+    Bomb(Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_);
+
+    void explode();
+    void set_exploded(bool exploded_){exploded = exploded_;}
+    bool get_exploded() { return exploded; }
+    float get_damage(){ return damage; }
+    void set_creator(int creator_) {creator = creator_;}
+    int get_creator() {return creator; }
+
+private:
+    float damage {20.0};
+    bool exploded = false;
+    int creator;
+};
+
+
 class BonusBox: public Rectangle {
 
 public:
@@ -35,20 +58,21 @@ public:
     void draw(QPainter &painter) ;
     void load_images();
     void reload_image();
-    void update(float dt, std::vector<MovableCircle*>& particles);
-    void activate(float v_char, std::vector<MovableCircle*>& particles);
+    void update(std::vector<MovableCircle*>& particles);
+    void activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int i);
     bool get_activate() { return activated; }
     bool get_finished() { return finished; }
-    BonusBox();
-    BonusBox(Vec2 dim_);
-    BonusBox(Vec2 pos_, Vec2 dims_);
+    BonusBox(float dt_);
+    BonusBox(Vec2 dim_,float dt_);
+    BonusBox(Vec2 pos_, Vec2 dims_, float dt_);
 
 private:
-    vector<MovableCircle*> bombs;
-    int n_bombs = 10;
+    vector<Bomb*> bombs;
+    int n_bombs = 3;
     QVector<QPixmap> sprites;
     float scale;
     float t = 0.0f;
+    float dt;
     float bomb_time = 0.0f;
     float total_bomb_time = 5.0f;
     int b = 0;
@@ -58,7 +82,5 @@ private:
     bool finished = false;
 
 };
-
-
 
 #endif

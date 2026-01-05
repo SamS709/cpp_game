@@ -86,6 +86,7 @@ MovableAsset::MovableAsset(float mass_)
 
 MovableAsset::MovableAsset(Vec2 pos_, Vec2 v_, float mass_)
     : Asset(pos_)
+    , pos_exp(pos_)
     , v(v_)
     , mass(mass_)
     {

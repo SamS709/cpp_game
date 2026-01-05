@@ -55,6 +55,7 @@ private:
     float speed_move {75.0};
     float speed_run; 
     float speed_jump {1000.0};
+    float bomb_damages {20.0};
     Collider *collider;
     
     std::vector<std::unique_ptr<BonusBox>> bonuses;

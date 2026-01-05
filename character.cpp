@@ -88,13 +88,13 @@ void Character::load_jump_frames(const QString &basePath){
 void Character::load_slide_frames(const QString &basePath){
 
     slide_frames.clear();
-    for (int i = 0; i <= 4; ++i) {
-        QString framePath = basePath + QString("/slide/slide_%1.png").arg(i);
+    for (int i = 0; i <= 29; ++i) {
+        QString framePath = basePath + QString("/slide/slide_%1.png").arg(i, 3, 10, QChar('0'));
         QPixmap sprite(framePath);
         
         if (!sprite.isNull()) {
             sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            
+            set_hitbox(sprite, &slide_frames_asset_dims, &slide_frames_character_dims, nullptr);
             slide_frames.append(sprite);
             qDebug() << "Loaded:" << framePath;
         } else {
@@ -137,6 +137,14 @@ void Character::load_sword_attack_frames(const QString &basePath){
         } else {
             qDebug() << "Failed to load:" << framePath;
         }
+    }
+    // set the dim of the sword to zero during first and last few frames of the attack 
+    int ind = 0;
+    for (vector<float> &sword_dim: sword_attack_frames_sword_dims) {
+        if(ind < 20 || ind > sword_attack_frames_sword_dims.size() - 20){
+            sword_dim = {0.0f, 0.0f, 0.0f, 0.0f};
+        }
+        ind ++;
     }
 }
 
@@ -382,8 +390,12 @@ void Character::update_slide(){
     } else {
         // Calculate which frame to show based on elapsed time
         if (!slide_frames.isEmpty()) {
-            int target_frame = (int)((slide_time / total_slide_time) * slide_frames.size());
+            float p = slide_time / total_slide_time;
+            int target_frame = (int)(pow(p, 0.5f) * slide_frames.size());
             current_move_frame = std::min(target_frame, (int)slide_frames.size() - 1);
+            float delta_x = (static_cast<float>(facingRight)-0.5)*slide_dist*(1-p)*(1-p);
+            pos.x+= delta_x;
+            pos_exp.x+= delta_x;
         }
         
         // No horizontal movement during slide, just maintain direction
@@ -397,21 +409,20 @@ void Character::update_sword_attack(){
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
-            moving = true;
+            moving = true;  
         }
-    } else {
+    } else {    
         // Calculate which frame to show based on elapsed time
         if (!sword_attack_frames.isEmpty()) {
             float percentage = sword_attack_time / total_sword_attack_time;
             int target_frame = (int)(percentage * sword_attack_frames.size());
             if(percentage<0.5){
-                pos.x+=(facingRight-0.5)*2.0*0.6;
-                pos_exp.x+=(facingRight-0.5)*2.0*0.6;
+                pos.x+=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
+                pos_exp.x+=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
             } else{
-                pos.x-=(facingRight-0.5)*2.0*0.6;
-                pos_exp.x-=(facingRight-0.5)*2.0*0.6;
-            }
-            
+                pos.x-=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
+                pos_exp.x-=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
+            }               
             current_move_frame = std::min(target_frame, (int)sword_attack_frames.size() - 1);
         }
         
@@ -445,7 +456,6 @@ void Character::update_move(){
 void Character::draw(QPainter &painter)
 {
     
-    float delta_x = 0.0;
 
     if (moving && !move_frames.isEmpty()) {
         currentSprite = &move_frames[current_move_frame];
@@ -456,18 +466,11 @@ void Character::draw(QPainter &painter)
         current_asset_dims = jump_frames_asset_dims[current_move_frame];
         current_character_dims = jump_frames_character_dims[current_move_frame];
     } else if (sliding && !slide_frames.isEmpty()) {
-        delta_x = get_x_sliding(slide_time);
         currentSprite = &slide_frames[current_move_frame];
-        // Use move_frames dims since slide doesn't have its own
-        if (!move_frames_asset_dims.empty() && !move_frames_character_dims.empty()) {
-            current_asset_dims = move_frames_asset_dims[0];
-            current_character_dims = move_frames_character_dims[0];
-        }
-        if (slide_dir == "right") {
-            x += delta_x;
-        } else {
-            x-= delta_x;
-        }
+        current_asset_dims = slide_frames_asset_dims[current_move_frame];
+        current_character_dims = slide_frames_character_dims[current_move_frame];
+        currentSprite = &slide_frames[current_move_frame];
+        
     } else if (lowering && !lower_frames.isEmpty()) {
         currentSprite = &lower_frames[current_move_frame];
         current_asset_dims = lower_frames_asset_dims[current_move_frame];

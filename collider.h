@@ -24,7 +24,7 @@ public:
     
     // Single entry point for collision checking with any Asset type
     
-    void resolve_collisions(std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses);
+    void resolve_collisions(std::vector<MovableCircle*>& particles, std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses);
 
 
     
@@ -39,10 +39,11 @@ private:
     std::vector<BonusCollision> c_static_bonus;
     float penetration_threshold_static {5.0};
     float penetration_threshold_dynamic {0.02};
+    float bomb_damages;
 
     // Type-specific collision handlers
     
-    void add_static_contact_constraints(std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses);    
+    void add_static_contact_constraints(std::vector<MovableCircle*>& particles, std::vector<Character*>& characters, const std::vector<std::unique_ptr<Asset>>& assets, std::vector<std::unique_ptr<BonusBox>>& bonuses);    
     bool check_contact_particle(const MovableCircle& particle, int index, const Asset& asset);
     bool check_contact_characters(const MovableRectangle& character, int index, const Asset& asset);
     bool check_contact_particle_plane(const MovableCircle& particle, int index, const Plane& plane);
@@ -59,7 +60,8 @@ private:
     void enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2);
 
 
-    void check_contact_character_bonus(const MovableRectangle& character, BonusBox& bonus, std::vector<MovableCircle*>& particles);
+    void check_contact_character_bonus(const MovableRectangle& character, int i, BonusBox& bonus, std::vector<MovableCircle*>& particles);
+    void check_contact_character_bomb(Character& character, int i,Bomb& bomb);
 
 
     void resolve_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters);
