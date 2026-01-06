@@ -242,3 +242,12 @@ bool SpriteLoader::isSwordPixel(QRgb pixel) {
     int b = qBlue(pixel);
     return (130 < r && r < 140 && 130 < g && g < 140 && 130 < b && b < 140);
 }
+
+
+void VisualContainer::load_sprites(){
+    bomb_sprites.clear();
+    vector<vector<float>> asset_dims, character_dims;
+    loadSequence("resources/images/characters/redhat", "bomb", 1, 15, 
+                       bomb_sprites, asset_dims, character_dims);
+    
+}

@@ -29,7 +29,7 @@ void Character::set_lifebar_dims(float x, float y, float w, float h) {
     lifebar->set_y(y);
     lifebar->set_w(w);
     lifebar->set_h(h);
-    lifebar->reload_image();
+    // lifebar->reload_image();
 }
 
 void Character::loadSpriteFrames(const QString &basePath)
@@ -39,6 +39,7 @@ void Character::loadSpriteFrames(const QString &basePath)
     load_slide_frames(basePath);
     load_lower_frames(basePath);
     load_sword_attack_frames(basePath);
+    load_sword_attack_low_frames(basePath);
     
 }
 
@@ -86,27 +87,45 @@ void Character::load_sword_attack_frames(const QString &basePath){
     }
 }
 
+void Character::load_sword_attack_low_frames(const QString &basePath){
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "sword_attack_low", 1, 9, sword_attack_low_frames, 
+                       sword_attack_low_frames_asset_dims, sword_attack_low_frames_character_dims, 
+                       &sword_attack_low_frames_sword_dims);
+    
+    int ind = 0;
+    for (vector<float> &sword_dim: sword_attack_low_frames_sword_dims) {
+        if(ind < 3 || ind > sword_attack_low_frames_sword_dims.size() - 3){
+            sword_dim = {0.0f, 0.0f, 0.0f, 0.0f};
+        }
+        ind ++;
+    }
+}
+
 
 
 void Character::update(int width)
 {
+    qDebug()<<current_move_frame;
+    slide_time += time_between_frames/1000; // slide_time also counts when not sliding
+    sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
+    sword_attack_low_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
+    walk_step_time += time_between_frames/1000; // walk_step_time always counts
     // Move character based on input
     if (jumping) {
         update_jump();
     }
-    slide_time += time_between_frames/1000; // slide_time also counts when not sliding
-    if (sliding) {
+    else if (sliding) {
         update_slide();
     }
-    sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
-    if (sword_attacking){
-        update_sword_attack();
-    }
-    if (lowering){
+    else if (lowering){
         update_lower();
     }
-    walk_step_time += time_between_frames/1000; // walk_step_time always counts
-    if(moving){
+    else if (sword_attacking || sword_attacking_low){
+        update_sword_attack();
+    }
+    
+    else if(moving){
         update_move();
     } 
 
@@ -151,6 +170,7 @@ void Character::update_lower(){
         } else if (lowering_stop){
             lowering_stop = false;
             lowering = false;
+            normalized = 0.0;
         }
         current_move_frame = (int)(normalized * (num_frames - 1));
     }
@@ -182,9 +202,32 @@ void Character::update_slide(){
 }
 
 void Character::update_sword_attack(){
-    if(sword_attack_time > total_sword_attack_time) {
-        sword_attacking = false;
-        sword_attack_time = 0.0;
+    
+    float *attack_time;
+    float *total_attack_time;
+    float *attack_dist = &sword_attack_dist;
+    bool *s_attacking;
+    QVector<QPixmap> *attack_frames;
+
+    if(sword_attacking_low){
+        attack_time = &sword_attack_low_time;
+        total_attack_time = &total_sword_attack_low_time;
+        attack_dist = &sword_attack_low_dist;
+        s_attacking = &sword_attacking;
+        attack_frames = &sword_attack_low_frames;
+        
+    } else {
+        
+        attack_time = &sword_attack_time;
+        total_attack_time = &total_sword_attack_time;
+        attack_dist = &sword_attack_dist;
+        s_attacking = &sword_attacking;
+        attack_frames = &sword_attack_frames;
+    }
+    if(*attack_time > *total_attack_time) {
+        *s_attacking = false;
+        attacking = false;
+        *attack_time = 0.0;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
@@ -192,17 +235,18 @@ void Character::update_sword_attack(){
         }
     } else {    
         // Calculate which frame to show based on elapsed time
-        if (!sword_attack_frames.isEmpty()) {
-            float percentage = sword_attack_time / total_sword_attack_time;
-            int target_frame = (int)(percentage * sword_attack_frames.size());
+        if (!(*attack_frames).isEmpty()) {
+            float percentage = *attack_time / *total_attack_time;
+            int target_frame = (int)(percentage * (*attack_frames).size());
             if(percentage<0.5){
-                pos.x+=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
-                pos_exp.x+=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
+                pos.x+=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
+                pos_exp.x+=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
             } else{
-                pos.x-=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
-                pos_exp.x-=(static_cast<float>(facingRight)-0.5)*sword_attack_dist;
+                pos.x-=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
+                pos_exp.x-=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
             }               
-            current_move_frame = std::min(target_frame, (int)sword_attack_frames.size() - 1);
+            current_move_frame = std::min(target_frame, (int)(*attack_frames).size() - 1);
+            
         }
         
         // No horizontal movement during slide, just maintain direction
@@ -254,11 +298,18 @@ void Character::draw(QPainter &painter)
         currentSprite = &lower_frames[current_move_frame];
         current_asset_dims = lower_frames_asset_dims[current_move_frame];
         current_character_dims = lower_frames_character_dims[current_move_frame];
+        
     } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
         currentSprite = &sword_attack_frames[current_move_frame];
         current_asset_dims = sword_attack_frames_asset_dims[current_move_frame];
         current_character_dims = sword_attack_frames_character_dims[current_move_frame];
         current_sword_dims = sword_attack_frames_sword_dims[current_move_frame];
+        
+    } else if (sword_attacking_low && !sword_attack_low_frames.isEmpty()) {
+        currentSprite = &sword_attack_low_frames[current_move_frame];
+        current_asset_dims = sword_attack_low_frames_asset_dims[current_move_frame];
+        current_character_dims = sword_attack_low_frames_character_dims[current_move_frame];
+        current_sword_dims = sword_attack_low_frames_sword_dims[current_move_frame];
         
     } else if (!(idleFrame.isNull() | idle_dims.empty())) {
         current_asset_dims = idle_dims;
@@ -289,7 +340,7 @@ void Character::draw(QPainter &painter)
 }
 
 void Character::handle_rotate(QPainter &painter){
-    if(sliding || sword_attacking){
+    if(sliding || attacking){
         if (slide_dir=="left" || sword_attack_dir == "left"){
             painter.translate(get_x(), get_y());
             painter.scale(-1, 1);
@@ -392,6 +443,21 @@ void Character::set_sword_attacking(bool a)
         first_hit_sword_attack = true;
         attacking = a;
         sword_attack_time = 0.0;
+        current_move_frame = 0;
+        
+        sword_attack_dir = facingRight ? "right" : "left";
+        
+    }
+}
+
+void Character::set_sword_attacking_low(bool a)
+{
+    if (sword_attack_low_time > time_between_sword_attacks_low) {
+        moving = false;
+        sword_attacking_low = a;
+        first_hit_sword_attack_low = true;
+        attacking = a;
+        sword_attack_low_time = 0.0;
         current_move_frame = 0;
         
         sword_attack_dir = facingRight ? "right" : "left";

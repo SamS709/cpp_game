@@ -7,6 +7,7 @@
 #include <QKeyEvent>
 #include <vector>
 #include "lifebar.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -57,6 +58,7 @@ private:
     float speed_jump {1000.0};
     float bomb_damages {20.0};
     Collider *collider;
+    VisualContainer *visual_container;
     
     std::vector<std::unique_ptr<BonusBox>> bonuses;
     vector<MovableCircle*> particles;

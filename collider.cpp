@@ -215,7 +215,7 @@ void Collider::check_contact_character_bomb(Character& character, int i, Bomb& b
     float distance_squared = distance_x * distance_x + distance_y * distance_y;
     
     // Check if circle overlaps with rectangle
-    if (distance_squared < bomb_radius * bomb_radius && !bomb.get_exploded() && i != bomb.get_creator()) {
+    if (distance_squared < bomb_radius * bomb_radius && !bomb.get_explosion_started() && i != bomb.get_creator()) {
         character.set_hp(character.get_hp() - bomb.get_damage());
         bomb.explode();
     }

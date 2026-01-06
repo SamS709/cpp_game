@@ -38,27 +38,39 @@ Env::~Env(){
 
 void Env::load_env_assets(){
     collider = new Collider();
-    bonuses.push_back(std::make_unique<BonusBox>(Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    visual_container = new VisualContainer(100.0, false);
+    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(200.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(300.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(400.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(500.0, height-height/2.0), Vec2(100.0,25.0), dt));
+
     Bomb *p1 = new Bomb(
+        visual_container->bomb_sprites,
         {static_cast<float>(width)/2.0f+250.0f, static_cast<float>(height)/2.0f},
         {-100.0, -5.0},
         5.0,
         5.0,
-        20.0
+        20.0,
+        5.0
     );
     Bomb *p2 = new Bomb(
+        visual_container->bomb_sprites,
         {0.0f, static_cast<float>(height)/2.0f},
         {50.0, -5.0},
         5.0,
         5.0,
-        20.0
+        20.0,
+        5.0
     );
     Bomb *p3 = new Bomb(
+        visual_container->bomb_sprites,
         {250.0f, 10.0f},
         {0.0, 0.0},
         5.0,
         5.0,
-        20.0
+        20.0,
+        5.0
     );
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
@@ -211,10 +223,6 @@ void Env::handle_sword_attack(Character* attacker, Character* defender){
     float w_character = 2.0 * defender->get_current_character_dims()[2];
     float h_character = 2.0 * defender->get_current_character_dims()[3];
     
-    qDebug() << "Sword: x=" << x_sword << "y=" << y_sword << "w=" << w_sword << "h=" << h_sword;
-    qDebug() << "Character: x=" << x_character << "y=" << y_character << "w=" << w_character << "h=" << h_character;
-    qDebug() << "Defender facing right:" << defender->get_right() << "Defender lowering:" << defender->get_lowering();
-    
     if (check_rectangles_overlap(x_sword, y_sword, w_sword, h_sword, x_character, y_character, w_character, h_character)) {
         qDebug()<<"Attack hit!";
         attacker->set_first_hit_sword_attack(false);
@@ -245,11 +253,13 @@ void Env::paint(QPainter *painter){
 
 void Env::mousePressEvent(QMouseEvent* event) {
         particles.push_back(new Bomb(
+        visual_container->bomb_sprites,
         Vec2(event->pos().x(), event->pos().y()),
         {0.0, 0.0},
         5.0,
         3.0,
-        10.0
+        10.0,
+        5.0
     ));
     }
 
@@ -344,10 +354,15 @@ void Env::keyPressEvent(QKeyEvent *event){
 
         }
     } if (event->key() == Qt::Key_A) {
+        if(c2->get_lowering()){
+            c2->set_sword_attacking_low(true);
+        } else {
+            c2->set_sword_attacking(true);
+        }
         c2->set_lowering(false);
         c2->set_sliding(false);
         c2->set_jumping(false);
-        c2->set_sword_attacking(true);
+        
         
     } 
 

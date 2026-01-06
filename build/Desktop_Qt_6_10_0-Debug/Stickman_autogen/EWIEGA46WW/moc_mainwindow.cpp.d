@@ -6,6 +6,7 @@ D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/
   C:/Qt/6.10.1/mingw_64/include/QtCore/QRect \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QSize \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QSizeF \
+  C:/Qt/6.10.1/mingw_64/include/QtCore/QString \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QTimer \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QVector \
   C:/Qt/6.10.1/mingw_64/include/QtCore/q17memory.h \
@@ -419,4 +420,5 @@ D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/
   D:/Dev/cours/cpp_game/character.h \
   D:/Dev/cours/cpp_game/collider.h \
   D:/Dev/cours/cpp_game/env.h \
-  D:/Dev/cours/cpp_game/lifebar.h
+  D:/Dev/cours/cpp_game/lifebar.h \
+  D:/Dev/cours/cpp_game/utils.h

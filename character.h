@@ -24,6 +24,8 @@ public:
     void load_slide_frames(const QString &basePath);
     void load_lower_frames(const QString &basePath);
     void load_sword_attack_frames(const QString &basePath);
+    void load_sword_attack_low_frames(const QString &basePath);
+
 
 
     void update(int width);
@@ -43,7 +45,6 @@ public:
     void update_pos(){ pos.x = pos_exp.x; pos.y = pos_exp.y; }
     void update_expected_pos_collision(float delta_x, float delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
     void set_c_scale(float s) {c_scale = s;}
-    void set_hitbox(QPixmap& sprite, vector<vector<float>>* asset_dims_, vector<vector<float>>* character_dims_, vector<vector<float>>* sword_dims_);
     void set_draw_baxes(bool d) { draw_baxes = d; }
     void set_right(bool r);
     void set_right_pressed(bool r) {right_pressed = r;}
@@ -53,6 +54,7 @@ public:
     void set_sliding(bool s);
     void set_lowering(bool s);
     void set_sword_attacking(bool a);
+    void set_sword_attacking_low(bool a);    
     void set_speed_move(float s) {speed_move = s;}
     void set_speed_jump(float s) {speed_jump = s;}
     void set_speed_run(float s) {speed_run = s;}
@@ -91,9 +93,9 @@ public:
     bool get_lowering   () { return lowering   ; }
     bool get_sword_attacking() {return sword_attacking; };
     bool get_right() { return facingRight; }
-    bool get_right_pressed() { return right_pressed; }  // Check if right key is pressed
-    bool get_left_pressed() { return left_pressed; }    // Check if left key is pressed
-    bool get_first_hit_sword_attack() { return first_hit_sword_attack; }    // Check if left key is pressed
+    bool get_right_pressed() { return right_pressed; } 
+    bool get_left_pressed() { return left_pressed; }   
+    bool get_first_hit_sword_attack() { return first_hit_sword_attack; }   
 
 
     void handle_rotate(QPainter &painte);
@@ -111,30 +113,43 @@ private:
     bool lowering_stop = false;
     bool attacking = false;
     bool sword_attacking = false;
+    bool sword_attacking_low = false;    
     bool right;
     bool left;
     bool left_pressed;
     bool right_pressed;
     bool facingRight;
     bool first_hit_sword_attack;
+    bool first_hit_sword_attack_low;
+
     
     // Sprite animation
     QVector<QPixmap> move_frames;
     vector<vector<float>> move_frames_asset_dims;
-    vector<vector<float>> jump_frames_asset_dims;
-    vector<vector<float>> lower_frames_asset_dims;
-    vector<vector<float>> slide_frames_asset_dims;
-    vector<vector<float>> sword_attack_frames_asset_dims;
     vector<vector<float>> move_frames_character_dims;
+
+    QVector<QPixmap> jump_frames;
+    vector<vector<float>> jump_frames_asset_dims;
     vector<vector<float>> jump_frames_character_dims;
+
+    QVector<QPixmap> lower_frames; 
+    vector<vector<float>> lower_frames_asset_dims;
     vector<vector<float>> lower_frames_character_dims;
+
+    QVector<QPixmap> slide_frames;
+    vector<vector<float>> slide_frames_asset_dims;
     vector<vector<float>> slide_frames_character_dims;
+
+    QVector<QPixmap> sword_attack_frames; 
+    vector<vector<float>> sword_attack_frames_asset_dims;
     vector<vector<float>> sword_attack_frames_character_dims;
     vector<vector<float>> sword_attack_frames_sword_dims;
-    QVector<QPixmap> jump_frames;
-    QVector<QPixmap> slide_frames;
-    QVector<QPixmap> lower_frames;
-    QVector<QPixmap> sword_attack_frames;
+
+    QVector<QPixmap> sword_attack_low_frames;
+    vector<vector<float>> sword_attack_low_frames_asset_dims;
+    vector<vector<float>> sword_attack_low_frames_character_dims;
+    vector<vector<float>> sword_attack_low_frames_sword_dims;
+    
     QVector<float> bounds;
     Lifebar *lifebar;
     QPixmap *currentSprite = nullptr;
@@ -166,16 +181,22 @@ private:
     float speed_jump {2500.0};  // Initial upward velocity for jumps
     float slide_dist {5.0};
     float sword_attack_dist {5.0};
+    float sword_attack_low_dist {5.0};
+
     float total_jump_time {0.5};
     float total_slide_time {0.7};
     float total_sword_attack_time {0.5};
+    float total_sword_attack_low_time {0.5};
     float total_lower_time {0.1};
     float time_between_slides {1.0};
     float time_between_sword_attacks {1.0};
+    float time_between_sword_attacks_low {1.0};
+
     float lower_time {0.0};
     float jump_time;
     float slide_time;
-    float sword_attack_time;
+    float sword_attack_time = 0.0;
+    float sword_attack_low_time = 0.0;
     float walk_step_time {10000.0};
     float total_walk_step_time {0.5};  // Total duration for one walk cycle
     float time_between_frames;
@@ -184,6 +205,8 @@ private:
     float base_y {0.0};  // Base Y position when jump starts
     float hp {100.0};
     float sword_attack_damages {10.0};
+    float sword_attack_low_damages {10.0};
+
 };
 
 #endif // CHARACTER_H

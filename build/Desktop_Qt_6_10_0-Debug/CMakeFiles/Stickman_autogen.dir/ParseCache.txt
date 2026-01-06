@@ -9,6 +9,7 @@ D:/Dev/cours/cpp_game/mainwindow.h
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/QRect
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/QSize
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/QSizeF
+ mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/QString
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/QTimer
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/QVector
  mdp:C:/Qt/6.10.1/mingw_64/include/QtCore/q17memory.h
@@ -425,6 +426,7 @@ D:/Dev/cours/cpp_game/mainwindow.h
  mdp:D:/Dev/cours/cpp_game/env.h
  mdp:D:/Dev/cours/cpp_game/lifebar.h
  mdp:D:/Dev/cours/cpp_game/mainwindow.h
+ mdp:D:/Dev/cours/cpp_game/utils.h
 D:/Dev/cours/cpp_game/character.cpp
 D:/Dev/cours/cpp_game/env.cpp
 D:/Dev/cours/cpp_game/main.cpp

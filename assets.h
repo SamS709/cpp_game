@@ -174,7 +174,7 @@ public:
 
     float get_rest() const override { return 0.8; } 
 
-    void draw(QPainter &painter) ;
+    virtual void draw(QPainter &painter) ;
 
 protected:
     float radius {0.5};

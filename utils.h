@@ -58,4 +58,21 @@ private:
     bool isSwordPixel(QRgb pixel);
 };
 
+
+class VisualContainer: public SpriteLoader{
+
+public:
+
+    VisualContainer(float scale = 100.0f, bool draw_boxes = false)
+    : SpriteLoader(scale, draw_boxes ){
+        load_sprites();
+    };
+
+    void load_sprites();
+
+    QVector<QPixmap> bomb_sprites;
+
+
+};
+
 #endif // UTILS_H

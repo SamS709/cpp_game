@@ -24,11 +24,6 @@ Lifebar::Lifebar(Vec2 pos_, Vec2 dims_)
         loader.loadSprite("resources/images/assets/hp.png", sprite, asset_dim, character_dim);
     }
 
-void Lifebar::reload_image(){
-    SpriteLoader loader(get_h() * im_scale, false);
-    vector<float> asset_dim, character_dim;
-    loader.loadSprite("resources/images/assets/hp.png", sprite, asset_dim, character_dim);
-}
 
 void Lifebar::draw(QPainter &painter) {
     float offset {0.0};
@@ -49,39 +44,43 @@ void Lifebar::draw(QPainter &painter) {
 }
 
 
-BonusBox::BonusBox(float dt_)
+BonusBox::BonusBox(QVector<QPixmap> bomb_sprites_, float dt_)
     :dt(dt_)
+    , bomb_sprites(bomb_sprites_)
     {
-        load_images();
+        sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
 
-BonusBox::BonusBox(Vec2 dims_, float dt_)
+BonusBox::BonusBox(QVector<QPixmap> bomb_sprites_, Vec2 dims_, float dt_)
     :Rectangle(Vec2(dims_.y, dims_.y))
     ,dt(dt_)
+    , bomb_sprites(bomb_sprites_)
     {
-        load_images();
+        sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
-BonusBox::BonusBox(Vec2 pos_, Vec2 dims_, float dt_)
+BonusBox::BonusBox(QVector<QPixmap> bomb_sprites_, Vec2 pos_, Vec2 dims_, float dt_)
     :Rectangle(pos_, Vec2(dims_.y, dims_.y))
     ,dt(dt_)
+    , bomb_sprites(bomb_sprites_)
     {
-        load_images();
-        
+        sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
 
-void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int i){
+void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int j){
     activated = true;
     visual = false;
     if(b == 0 && first_activated){
         for (int i = 0; i < n_bombs; i++) {
             Bomb* bomb = new Bomb(
+                                bomb_sprites,
                                 get_pos() + i * 10.0,
                                 v_char * 3.0,
                                 5.0,
                                 5.0,
-                                5.0
+                                5.0,
+                                bomb_explosion_time
                                 );
-            bomb->set_creator(i);
+            bomb->set_creator(j);
             bomb->update_expected_pos(dt);
             bombs.push_back(bomb);
             particles.push_back(bomb);
@@ -91,28 +90,15 @@ void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int
 
 }
 
-void BonusBox::reload_image(){
-    load_images();
-}
 
-void BonusBox::load_images(){
-    set_color(120,120,120,120);
-    sprites.clear();
-    
-    SpriteLoader loader(dims.y, false);
-    QPixmap sprite;
-    vector<float> asset_dim, character_dim;
-    
-    if (loader.loadSprite("resources/images/assets/bomb.png", sprite, asset_dim, character_dim)) {
-        sprites.append(sprite);
-    }
-}
+
 
 void BonusBox::update(std::vector<MovableCircle*>& particles){
     t+=dt;
     if(activated && b==0){
         for (Bomb* bomb : bombs) {
-            if(bomb->get_exploded()){
+            bomb->update(dt); 
+            if(bomb->get_explosion_finished()){
                 auto it = std::find(particles.begin(), particles.end(), bomb);
                 if (it != particles.end()) {
                     particles.erase(it);
@@ -120,7 +106,13 @@ void BonusBox::update(std::vector<MovableCircle*>& particles){
                 }
             }
                 
-        }   
+        }
+        if (bomb_time>total_bomb_time-bomb_explosion_time && !explosion_started){
+            for (Bomb* bomb : bombs) {
+                bomb->set_explosion_started(true);
+            }
+            explosion_started = true;
+        }    
         if(bomb_time>total_bomb_time){
             // Remove bombs from particles vector
             for (Bomb* bomb : bombs) {
@@ -147,45 +139,85 @@ void BonusBox::draw(QPainter &painter) {
         painter.drawRect(get_x(), get_y(), get_w(), get_h());
         painter.drawPixmap(get_x() + (-sprites[b].width() + get_w()) / 2.0 , get_y() + (-sprites[b].height() + get_h()) / 2.0 , sprites[b]);
     }
-    // if (activated) {
-    //     // Draw bombs
-    //     if (b == 0) {
-    //         for (MovableCircle* bomb:bombs){
-    //             bomb->draw(painter);
-    //         }
-    //     }
-    // }
-    
-    
        
 }
 
 
-Bomb::Bomb(float damage_)
+Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float explosion_time_)
     : MovableCircle()
+    , sprites(bomb_sprites_)
     , damage(damage_)
+    , total_explosion_time(explosion_time_)
     {
-
+        rescale_sprites(bomb_sprites_);
     }
-Bomb::Bomb(float damage_, float mass_)
+Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float mass_, float explosion_time_)
     : MovableCircle(mass_)
+    , sprites(bomb_sprites_)
     , damage(damage_)
+    , total_explosion_time(explosion_time_)
     {
-
+        rescale_sprites(bomb_sprites_);
     }
-Bomb::Bomb(float damage_, float mass_, float radius_)
+Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float mass_, float radius_, float explosion_time_)
     : MovableCircle(mass_, radius_)
     , damage(damage_)
+    , total_explosion_time(explosion_time_)
     {
-
+        rescale_sprites(bomb_sprites_);
     }
-Bomb::Bomb(Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_)
+Bomb::Bomb(QVector<QPixmap> bomb_sprites_, Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_, float explosion_time_)
     : MovableCircle(pos_, v_, mass_, radius_)
     , damage(damage_)
+    , total_explosion_time(explosion_time_)
     {
-
+        rescale_sprites(bomb_sprites_);
     }
 
+void Bomb::rescale_sprites(QVector<QPixmap> bomb_sprites_){
+    for (const QPixmap& sprite : bomb_sprites_) {
+        sprites.append(sprite.scaledToHeight(radius * 8.0, Qt::SmoothTransformation));
+    }
+    if (!sprites.isEmpty()) {
+        current_sprite = &sprites[0];
+    }
+}
+
+void Bomb::draw(QPainter& painter) {
+    if (current_sprite && !current_sprite->isNull()) {
+        painter.save();
+        
+        
+        painter.translate(get_x(), get_y());
+        if(!explosion_started){
+            painter.rotate(w); 
+        }
+        
+        painter.drawPixmap(-current_sprite->width() / 2.0, 
+                          -current_sprite->height() / 2.0, 
+                          *current_sprite);
+        
+        painter.restore();
+    }
+}
+
+void Bomb::update(float dt){
+    if (explosion_started){
+        explosion_time += dt;
+        if (!sprites.isEmpty()) {
+            float p = explosion_time / total_explosion_time;
+            int target_frame = (int)(p * sprites.size());
+            current_sprite = &sprites[std::min(target_frame, (int)sprites.size() - 1)];
+            if(p==1.0f){
+                explosion_finished = true;
+            }
+        }
+    }
+    
+
+}
+
+
 void Bomb::explode(){
-    exploded = true;
+    explosion_started = true;
 }
