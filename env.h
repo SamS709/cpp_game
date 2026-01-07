@@ -6,7 +6,7 @@
 #include "character.h"
 #include <QKeyEvent>
 #include <vector>
-#include "lifebar.h"
+#include "graphic_assets.h"
 #include "utils.h"
 
 using namespace std;

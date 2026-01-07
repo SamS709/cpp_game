@@ -18,8 +18,6 @@ Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float m
 {
     loadSpriteFrames("resources/images/characters/redhat");
     current_asset_dims = move_frames_asset_dims[0];
-    set_x(pos_.x);
-    set_y(pos_.y);
     lifebar = new Lifebar();
     
 }
@@ -89,13 +87,13 @@ void Character::load_sword_attack_frames(const QString &basePath){
 
 void Character::load_sword_attack_low_frames(const QString &basePath){
     SpriteLoader loader(c_scale, draw_baxes);
-    loader.loadSequence(basePath, "sword_attack_low", 1, 9, sword_attack_low_frames, 
+    loader.loadSequence(basePath, "sword_attack_low", 1, 17, sword_attack_low_frames, 
                        sword_attack_low_frames_asset_dims, sword_attack_low_frames_character_dims, 
                        &sword_attack_low_frames_sword_dims);
     
     int ind = 0;
     for (vector<float> &sword_dim: sword_attack_low_frames_sword_dims) {
-        if(ind < 3 || ind > sword_attack_low_frames_sword_dims.size() - 3){
+        if(ind < 2 || ind > sword_attack_low_frames_sword_dims.size() - 2){
             sword_dim = {0.0f, 0.0f, 0.0f, 0.0f};
         }
         ind ++;
@@ -106,7 +104,9 @@ void Character::load_sword_attack_low_frames(const QString &basePath){
 
 void Character::update(int width)
 {
-    qDebug()<<current_move_frame;
+    if (projectile_attacking){
+        projectile->update(time_between_frames/1000.0f);
+    }
     slide_time += time_between_frames/1000; // slide_time also counts when not sliding
     sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
     sword_attack_low_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
@@ -171,6 +171,9 @@ void Character::update_lower(){
             lowering_stop = false;
             lowering = false;
             normalized = 0.0;
+            if(sword_attacking_low){
+                sword_attack_low_time = 0.0f;
+            }
         }
         current_move_frame = (int)(normalized * (num_frames - 1));
     }
@@ -213,7 +216,7 @@ void Character::update_sword_attack(){
         attack_time = &sword_attack_low_time;
         total_attack_time = &total_sword_attack_low_time;
         attack_dist = &sword_attack_low_dist;
-        s_attacking = &sword_attacking;
+        s_attacking = &sword_attacking_low;
         attack_frames = &sword_attack_low_frames;
         
     } else {
@@ -337,6 +340,9 @@ void Character::draw(QPainter &painter)
         painter.restore();
     }   
     lifebar->draw(painter);
+    if(projectile_attacking) {
+        projectile->draw(painter);
+    }
 }
 
 void Character::handle_rotate(QPainter &painter){
@@ -390,11 +396,17 @@ void Character::set_left(bool l)
 
 void Character::set_jumping(bool jumping_)
 {
+    if(jumping && jumping_){
+        double_jumping = jumping_;
+    }
     jumping = jumping_;
     current_move_frame = 0;
     sliding = false;
     if (jumping_) {
         set_v_y(-speed_jump);
+    }
+    else{
+        double_jumping = false;;
     }
 }
 
@@ -402,9 +414,7 @@ void Character::set_sliding(bool s)
 {
     if (slide_time > time_between_slides) {
         moving = false;
-        qDebug() << "set true";
-        qDebug() << "Sliding = " << sliding;
-        qDebug() << "slide_time" << slide_time << ">" << time_between_slides;
+
         sliding = s;
         slide_time = 0.0;
         current_move_frame = 0;
@@ -418,10 +428,9 @@ void Character::set_sliding(bool s)
     }
 }
 
-void Character::set_lowering(bool s)
+void Character::set_lowering(bool s , bool combo)
 {
 
-    qDebug()<<s;
     if(lowering != s) {
         lower_time = 0.0f;
     }
@@ -430,8 +439,15 @@ void Character::set_lowering(bool s)
         lowering_start = true;
         lowering_stop = false;
     } else {
-        lowering_start = false;
-        lowering_stop = true;
+        if (combo) {
+            lowering = false;
+            lowering_start = false;
+            lowering_stop = false;
+        } else {
+            lowering = false;
+            lowering_start = false;
+            lowering_stop = true;
+        }
     }
 }
 
@@ -455,7 +471,7 @@ void Character::set_sword_attacking_low(bool a)
     if (sword_attack_low_time > time_between_sword_attacks_low) {
         moving = false;
         sword_attacking_low = a;
-        first_hit_sword_attack_low = true;
+        first_hit_sword_attack = true;
         attacking = a;
         sword_attack_low_time = 0.0;
         current_move_frame = 0;
@@ -463,6 +479,15 @@ void Character::set_sword_attacking_low(bool a)
         sword_attack_dir = facingRight ? "right" : "left";
         
     }
+}
+
+void Character::set_projectile_attacking(bool a) {
+    projectile_attacking = a;
+    projectile->set_x(get_x());
+    projectile->set_y(get_y());
+    float v_projectile = 100.0f;
+    projectile->set_v_x(2.0f * v_projectile * (static_cast<float>(facingRight) - 0.5f));
+    projectile->update_expected_pos(5);
 }
 
 

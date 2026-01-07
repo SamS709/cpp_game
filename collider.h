@@ -2,7 +2,7 @@
 #define COLLIDER_H
 
 #include "assets.h"
-#include "lifebar.h"
+#include "graphic_assets.h"
 #include <vector>
 #include <cmath>
 

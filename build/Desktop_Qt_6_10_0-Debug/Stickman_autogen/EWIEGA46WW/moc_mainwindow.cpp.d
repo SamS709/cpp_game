@@ -420,5 +420,5 @@ D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/
   D:/Dev/cours/cpp_game/character.h \
   D:/Dev/cours/cpp_game/collider.h \
   D:/Dev/cours/cpp_game/env.h \
-  D:/Dev/cours/cpp_game/lifebar.h \
+  D:/Dev/cours/cpp_game/graphic_assets.h \
   D:/Dev/cours/cpp_game/utils.h

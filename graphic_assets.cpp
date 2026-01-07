@@ -1,4 +1,4 @@
-#include "lifebar.h"
+#include "graphic_assets.h"
 #include "utils.h"
 #include <algorithm>
 #include <QDebug>
@@ -44,21 +44,21 @@ void Lifebar::draw(QPainter &painter) {
 }
 
 
-BonusBox::BonusBox(QVector<QPixmap> bomb_sprites_, float dt_)
+BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, float dt_)
     :dt(dt_)
     , bomb_sprites(bomb_sprites_)
     {
         sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
 
-BonusBox::BonusBox(QVector<QPixmap> bomb_sprites_, Vec2 dims_, float dt_)
+BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, Vec2 dims_, float dt_)
     :Rectangle(Vec2(dims_.y, dims_.y))
     ,dt(dt_)
     , bomb_sprites(bomb_sprites_)
     {
         sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
-BonusBox::BonusBox(QVector<QPixmap> bomb_sprites_, Vec2 pos_, Vec2 dims_, float dt_)
+BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, Vec2 pos_, Vec2 dims_, float dt_)
     :Rectangle(pos_, Vec2(dims_.y, dims_.y))
     ,dt(dt_)
     , bomb_sprites(bomb_sprites_)
@@ -143,7 +143,7 @@ void BonusBox::draw(QPainter &painter) {
 }
 
 
-Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float explosion_time_)
+Bomb::Bomb(const QVector<QPixmap>& bomb_sprites_, float damage_, float explosion_time_)
     : MovableCircle()
     , sprites(bomb_sprites_)
     , damage(damage_)
@@ -151,7 +151,7 @@ Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float explosion_time_)
     {
         rescale_sprites(bomb_sprites_);
     }
-Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float mass_, float explosion_time_)
+Bomb::Bomb(const QVector<QPixmap>& bomb_sprites_, float damage_, float mass_, float explosion_time_)
     : MovableCircle(mass_)
     , sprites(bomb_sprites_)
     , damage(damage_)
@@ -159,14 +159,14 @@ Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float mass_, float exp
     {
         rescale_sprites(bomb_sprites_);
     }
-Bomb::Bomb(QVector<QPixmap> bomb_sprites_, float damage_, float mass_, float radius_, float explosion_time_)
+Bomb::Bomb(const QVector<QPixmap>& bomb_sprites_, float damage_, float mass_, float radius_, float explosion_time_)
     : MovableCircle(mass_, radius_)
     , damage(damage_)
     , total_explosion_time(explosion_time_)
     {
         rescale_sprites(bomb_sprites_);
     }
-Bomb::Bomb(QVector<QPixmap> bomb_sprites_, Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_, float explosion_time_)
+Bomb::Bomb(const QVector<QPixmap>& bomb_sprites_, Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_, float explosion_time_)
     : MovableCircle(pos_, v_, mass_, radius_)
     , damage(damage_)
     , total_explosion_time(explosion_time_)
@@ -174,7 +174,7 @@ Bomb::Bomb(QVector<QPixmap> bomb_sprites_, Vec2 pos_, Vec2 v_, float damage_, fl
         rescale_sprites(bomb_sprites_);
     }
 
-void Bomb::rescale_sprites(QVector<QPixmap> bomb_sprites_){
+void Bomb::rescale_sprites(const QVector<QPixmap>& bomb_sprites_){
     for (const QPixmap& sprite : bomb_sprites_) {
         sprites.append(sprite.scaledToHeight(radius * 8.0, Qt::SmoothTransformation));
     }
@@ -219,5 +219,87 @@ void Bomb::update(float dt){
 
 
 void Bomb::explode(){
+    explosion_started = true;
+}
+
+
+
+
+Projectile::Projectile(const QVector<QPixmap>& projectile_sprites_, float damage_, float disparition_time_)
+    : MovableCircle()
+    , sprites(projectile_sprites_)
+    , damage(damage_)
+    , total_disparition_time(disparition_time_)
+    {
+        rescale_sprites(projectile_sprites_);
+    }
+Projectile::Projectile(const QVector<QPixmap>& projectile_sprites_, float damage_, float mass_, float disparition_time_)
+    : MovableCircle(mass_)
+    , sprites(projectile_sprites_)
+    , damage(damage_)
+    , total_disparition_time(disparition_time_)
+    {
+        rescale_sprites(projectile_sprites_);
+    }
+Projectile::Projectile(const QVector<QPixmap>& projectile_sprites_, float damage_, float mass_, float radius_, float disparition_time_)
+    : MovableCircle(mass_, radius_)
+    , damage(damage_)
+    , total_disparition_time(disparition_time_)
+    {
+        rescale_sprites(projectile_sprites_);
+    }
+Projectile::Projectile(const QVector<QPixmap>& projectile_sprites_, Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_, float disparition_time_)
+    : MovableCircle(pos_, v_, mass_, radius_)
+    , damage(damage_)
+    , total_disparition_time(disparition_time_)
+    {
+        rescale_sprites(projectile_sprites_);
+    }
+
+void Projectile::rescale_sprites(const QVector<QPixmap>& projectile_sprites_){
+    for (const QPixmap& sprite : projectile_sprites_) {
+        sprites.append(sprite.scaledToHeight(radius * 8.0, Qt::SmoothTransformation));
+    }
+    if (!sprites.isEmpty()) {
+        current_sprite = &sprites[0];
+    }
+}
+
+// void Projectile::draw(QPainter& painter) {
+//     if (current_sprite && !current_sprite->isNull()) {
+//         painter.save();
+        
+        
+//         painter.translate(get_x(), get_y());
+//         if(!explosion_started){
+//             painter.rotate(w); 
+//         }
+        
+//         painter.drawPixmap(-current_sprite->width() / 2.0, 
+//                           -current_sprite->height() / 2.0, 
+//                           *current_sprite);
+        
+//         painter.restore();
+//     }
+// }
+
+void Projectile::update(float dt){
+    if (explosion_started){
+        disparition_time += dt;
+        if (!sprites.isEmpty()) {
+            float p = disparition_time / total_disparition_time;
+            int target_frame = (int)(p * sprites.size());
+            current_sprite = &sprites[std::min(target_frame, (int)sprites.size() - 1)];
+            if(p==1.0f){
+                explosion_finished = true;
+            }
+        }
+    }
+    
+
+}
+
+
+void Projectile::explode(){
     explosion_started = true;
 }

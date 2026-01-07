@@ -3,7 +3,7 @@
 #include <cmath>
 
 bool Env::check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2) {
-    return (x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2);
+    return (x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2);
 }
 
 Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
@@ -14,6 +14,7 @@ Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
     , height(height_) {
 
         // Load sprite frames
+        
         c1->set_speed_move(speed_move);
         c1->set_speed_jump(speed_jump);
         c1->set_speed_run(speed_run);
@@ -39,6 +40,8 @@ Env::~Env(){
 void Env::load_env_assets(){
     collider = new Collider();
     visual_container = new VisualContainer(100.0, false);
+    c1->set_projectile_sprites(&(visual_container->projectile_sprites));
+    c2->set_projectile_sprites(&(visual_container->projectile_sprites));
     bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
     bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(200.0, height-height/2.0), Vec2(100.0,25.0), dt));
     bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(300.0, height-height/2.0), Vec2(100.0,25.0), dt));
@@ -214,14 +217,15 @@ void Env::handle_sword_attack(Character* attacker, Character* defender){
     }
     
     float x_sword = attacker->get_x() + x_sword_offset;
-    float y_sword = attacker->get_y() - (2.0 * attacker->get_current_asset_dims()[3] - attacker->get_current_sword_dims()[1]);
+    float y_sword = attacker->get_y() - attacker->get_current_asset_dims()[1] - 2.0 * attacker->get_current_asset_dims()[3] + attacker->get_current_sword_dims()[1];
     float w_sword = 2.0 * attacker->get_current_sword_dims()[2];
     float h_sword = 2.0 * attacker->get_current_sword_dims()[3];
     // Attacked character dims
     float x_character = defender->get_x() + x_character_offset;
-    float y_character = defender->get_y() - (2.0 * defender->get_current_asset_dims()[3] - defender->get_current_character_dims()[1]);
+    float y_character = defender->get_y() - defender->get_current_asset_dims()[1] - 2.0 * defender->get_current_asset_dims()[3] + defender->get_current_character_dims()[1];
     float w_character = 2.0 * defender->get_current_character_dims()[2];
     float h_character = 2.0 * defender->get_current_character_dims()[3];
+    
     
     if (check_rectangles_overlap(x_sword, y_sword, w_sword, h_sword, x_character, y_character, w_character, h_character)) {
         qDebug()<<"Attack hit!";
@@ -232,12 +236,13 @@ void Env::handle_sword_attack(Character* attacker, Character* defender){
 
 void Env::handle_attacks(){
     if (c1->get_attacking()){
-        if (c1->get_sword_attacking() && c1->get_first_hit_sword_attack()) {
+        if ((c1->get_sword_attacking() || c1->get_sword_attacking_low()) && c1->get_first_hit_sword_attack()) {
             handle_sword_attack(c1, c2);
         }
     }
     if (c2->get_attacking()){
-        if (c2->get_sword_attacking() && c2->get_first_hit_sword_attack()) {
+        if ((c2->get_sword_attacking() || c2->get_sword_attacking_low()) && c2->get_first_hit_sword_attack()) {
+            qDebug("attack started");
             handle_sword_attack(c2, c1);
         }
     }
@@ -279,10 +284,8 @@ void Env::keyPressEvent(QKeyEvent *event){
         if (!c1->get_jumping() && !c1->get_sliding() && !c1->get_sword_attacking()) {
             if (c1->get_moving()){
                 c1->set_sliding(true);
-                qDebug()<<"sliding";
             } else {
                 c1->set_lowering(true);
-                qDebug()<<"lowering";
             }
         }
     }
@@ -317,7 +320,7 @@ void Env::keyPressEvent(QKeyEvent *event){
     
     // Character 2 controls 
     if (event->key() == Qt::Key_Z) {
-        if (!c2->get_jumping()) {
+        if (!c2->get_double_jumping()) {
             c2->set_moving(false);
             c2->set_sword_attacking(false);
             c2->set_jumping(true);            
@@ -359,12 +362,17 @@ void Env::keyPressEvent(QKeyEvent *event){
         } else {
             c2->set_sword_attacking(true);
         }
-        c2->set_lowering(false);
+        c2->set_lowering(false, true);
         c2->set_sliding(false);
         c2->set_jumping(false);
         
         
+    } if (event->key() == Qt::Key_E) {
+        c2->set_projectile_attacking(true);
+        
+        
     } 
+
 
 }
 

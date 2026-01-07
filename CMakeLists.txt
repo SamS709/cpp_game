@@ -23,8 +23,8 @@ set(PROJECT_SOURCES
         env.h
         assets.cpp
         assets.h
-        lifebar.cpp
-        lifebar.h
+        graphic_assets.cpp
+        graphic_assets.h
         collider.cpp
         collider.h
         utils.cpp

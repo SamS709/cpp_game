@@ -249,5 +249,10 @@ void VisualContainer::load_sprites(){
     vector<vector<float>> asset_dims, character_dims;
     loadSequence("resources/images/characters/redhat", "bomb", 1, 15, 
                        bomb_sprites, asset_dims, character_dims);
+    projectile_sprites.clear();
+    asset_dims.clear();
+    character_dims.clear();
+    loadSequence("resources/images/characters/redhat", "bomb", 1, 15, 
+                       projectile_sprites, asset_dims, character_dims);
     
 }

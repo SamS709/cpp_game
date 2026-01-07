@@ -9,7 +9,7 @@
 #include <vector>
 #include "assets.h"
 #include <QDebug>
-#include "lifebar.h"
+#include "graphic_assets.h"
 
 using namespace std;
 
@@ -52,15 +52,18 @@ public:
     void set_left_pressed(bool l) {left_pressed = l;}
     void set_jumping(bool j);
     void set_sliding(bool s);
-    void set_lowering(bool s);
+    void set_lowering(bool s, bool combo = false);
     void set_sword_attacking(bool a);
-    void set_sword_attacking_low(bool a);    
+    void set_sword_attacking_low(bool a);   
+    void set_projectile_attacking(bool a);
     void set_speed_move(float s) {speed_move = s;}
     void set_speed_jump(float s) {speed_jump = s;}
     void set_speed_run(float s) {speed_run = s;}
     void set_hp(float hp_) {hp = hp_; lifebar->set_percentage(hp/max_hp);}
     void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
     void set_lifebar_dims(float x, float y, float w, float h);
+    void set_projectile_sprites(QVector<QPixmap> *projectile_sprites_) {projectile_sprites = projectile_sprites_;
+    projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 5.0, 1.0, 2.0, 0.5);}
 
     float get_rest() const override { return 0.0; } // No bounce for characters
 
@@ -86,12 +89,15 @@ public:
 
 
 
-    bool get_moving() { return moving; };
-    bool get_jumping() { return jumping; };
+    bool get_moving() { return moving; }
+    bool get_jumping() { return jumping; }
+    bool get_double_jumping() { return double_jumping; }
     bool get_sliding() {return sliding; };
     bool get_attacking() { return attacking; }
-    bool get_lowering   () { return lowering   ; }
-    bool get_sword_attacking() {return sword_attacking; };
+    bool get_lowering   () { return lowering; }
+    bool get_sword_attacking() {return sword_attacking; }
+    bool get_sword_attacking_low() { return sword_attacking_low; }
+    bool get_projectile_attacking(){ return projectile_attacking; }
     bool get_right() { return facingRight; }
     bool get_right_pressed() { return right_pressed; } 
     bool get_left_pressed() { return left_pressed; }   
@@ -107,20 +113,21 @@ private:
     float y;
     bool moving = false;
     bool jumping = false;
+    bool double_jumping = false;
     bool sliding = false;
     bool lowering = false;
     bool lowering_start = false;
     bool lowering_stop = false;
     bool attacking = false;
     bool sword_attacking = false;
-    bool sword_attacking_low = false;    
+    bool sword_attacking_low = false;   
+    bool projectile_attacking; 
     bool right;
     bool left;
     bool left_pressed;
     bool right_pressed;
     bool facingRight;
     bool first_hit_sword_attack;
-    bool first_hit_sword_attack_low;
 
     
     // Sprite animation
@@ -161,7 +168,10 @@ private:
     
 
     QPixmap idleFrame;
-    
+
+    Projectile *projectile; 
+    QVector<QPixmap> *projectile_sprites; 
+
     int current_move_frame;
     int current_jump_frame;
     int frameCounter;
@@ -181,7 +191,7 @@ private:
     float speed_jump {2500.0};  // Initial upward velocity for jumps
     float slide_dist {5.0};
     float sword_attack_dist {5.0};
-    float sword_attack_low_dist {5.0};
+    float sword_attack_low_dist {10.0};
 
     float total_jump_time {0.5};
     float total_slide_time {0.7};
@@ -201,7 +211,7 @@ private:
     float total_walk_step_time {0.5};  // Total duration for one walk cycle
     float time_between_frames;
     float c_scale = 100.0;
-    bool draw_baxes = true;
+    bool draw_baxes = false;
     float base_y {0.0};  // Base Y position when jump starts
     float hp {100.0};
     float sword_attack_damages {10.0};

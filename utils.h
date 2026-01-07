@@ -71,6 +71,7 @@ public:
     void load_sprites();
 
     QVector<QPixmap> bomb_sprites;
+    QVector<QPixmap> projectile_sprites;
 
 
 };
