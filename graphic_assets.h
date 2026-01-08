@@ -104,26 +104,30 @@ public:
     Projectile(const QVector<QPixmap>& projectile_sprites_, Vec2 pos_, Vec2 v_, float damage_, float mass_, float radius_, float disparition_time_);
 
     void explode();
-    void set_explosion_started(bool exploded_){explosion_started = exploded_;}
-    bool get_explosion_started() { return explosion_started; }
-    void set_explosion_finished(bool exploded_){explosion_finished = exploded_;}
-    bool get_explosion_finished() { return explosion_finished; }
+    void set_hit_started(bool hitted_){hit_started = hitted_;}
+    bool get_hit_started() { return hit_started; }
+    void set_hit_finished(bool hitted_){hit_finished = hitted_;}
+    bool get_hit_finished() { return hit_finished; }
+    // void set_first_hit(bool hitted_){first_hit = hitted_;}
+    // bool get_first_hit() { return first_hit; }
     float get_damage(){ return damage; }
     void set_creator(int creator_) {creator = creator_;}
     int get_creator() {return creator; }
-    // void draw(QPainter& painter) override;
+    
+    void draw(QPainter& painter) override;
     void rescale_sprites(const QVector<QPixmap>& projectile_sprites_);
     void update(float dt);
+    void set_disparition_time(float t){ disparition_time = t; }
 
 
 private:
     QVector<QPixmap> sprites;
     QPixmap *current_sprite = nullptr;
     float damage {20.0};
-    bool explosion_started = false;
-    bool explosion_finished = false;
+    bool hit_started = false;
+    bool hit_finished = false;
     int creator;
-    float total_disparition_time = 1.5;
+    float total_disparition_time = 0.15;
     float disparition_time = 0.0;
 };
 

@@ -47,8 +47,9 @@ public:
     float get_y() const { return pos.y; }
     QColor get_color() const { return color; }
     void set_color(int r, int g, int b, int a) { color = QColor(r, g, b, a); }
-    void set_x(float x_) { pos.x = x_; }
-    void set_y(float y_) { pos.y = y_; }
+    virtual void set_pos(Vec2 pos_) { pos = pos_; }
+    virtual void set_x(float x_) { pos.x = x_; }
+    virtual void set_y(float y_) { pos.y = y_; }
     float get_h() const { return dims.y; }
     float get_w() const { return dims.x; }
     void set_h(float h_) { dims.y = h_; }
@@ -110,9 +111,13 @@ public:
     Vec2 get_v() const { return v;}
     float get_v_x() const { return v.x; }
     float get_v_y() const { return v.y; }
-    virtual void set_v(Vec2 v_) { v = v_; }
+    virtual void set_v(Vec2 v_, float dt) { v = v_; update_pos(); update_expected_pos(dt);}
     virtual void set_v_x(float v_x_) { v.x = v_x_; }
     virtual void set_v_y(float v_y_) { v.y = v_y_; }
+
+    virtual void set_pos(Vec2 pos_) { pos = pos_; pos_exp = pos_;}
+    virtual void set_x(float x_) { pos.x = x_; pos_exp.x = x_; }
+    virtual void set_y(float y_) { pos.y = y_; pos_exp.y = y_; }
 
     Vec2 get_pos_expected() const {return pos_exp;}
     
@@ -160,11 +165,8 @@ public:
     void set_mass(float mass_) override { mass = mass_; inv_mass = 1/mass;}
 
     float get_w(){ return w; }
-    void set_x(float w_) { w = w_; }
+    void set_w(float w_) { w = w_; }
 
-    void set_v (Vec2 v_) override{ v = v_; }
-    void set_v_x (float v_x_) override{ v.x = v_x_; }
-    void set_v_y (float v_y_) override{ v.y = v_y_; }
 
     void update_vel (float dt) override{ v.x = (pos_exp.x - pos.x) / dt; v.y = (pos_exp.y - pos.y) / dt; w += v.x / radius;}
 

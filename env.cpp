@@ -129,7 +129,7 @@ void Env::update(int width){
 
 void Env::apply_damping() {
     for(MovableCircle *particle: particles){
-        particle->set_v(particle->get_v() * particle->get_damp());
+        particle->set_v(particle->get_v() * particle->get_damp(), dt);
     }
 
 }
@@ -150,7 +150,7 @@ void Env::apply_friction() {
         if (tangentSpeed > 0.0001) {
             Vec2 frictionDir = tangentVel / tangentSpeed;
             float frictionMag = std::min(friction * std::abs(normalVel), tangentSpeed);
-            particle->set_v(particle->get_v() - frictionDir * frictionMag);
+            particle->set_v(particle->get_v() - frictionDir * frictionMag, dt);
         }
         
     }

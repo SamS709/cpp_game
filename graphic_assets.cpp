@@ -265,35 +265,43 @@ void Projectile::rescale_sprites(const QVector<QPixmap>& projectile_sprites_){
     }
 }
 
-// void Projectile::draw(QPainter& painter) {
-//     if (current_sprite && !current_sprite->isNull()) {
-//         painter.save();
+void Projectile::draw(QPainter& painter) {
+    if (current_sprite && !current_sprite->isNull() && !hit_finished) {
+        painter.save();
         
         
-//         painter.translate(get_x(), get_y());
-//         if(!explosion_started){
-//             painter.rotate(w); 
-//         }
+        painter.translate(get_x(), get_y());
+        if(!hit_started){
+            painter.rotate(w); 
+        }
         
-//         painter.drawPixmap(-current_sprite->width() / 2.0, 
-//                           -current_sprite->height() / 2.0, 
-//                           *current_sprite);
+        painter.drawPixmap(-current_sprite->width() / 2.0, 
+                          -current_sprite->height() / 2.0, 
+                          *current_sprite);
         
-//         painter.restore();
-//     }
-// }
+        painter.restore();
+    }
+}
 
 void Projectile::update(float dt){
-    if (explosion_started){
+    
+    if (hit_started){
         disparition_time += dt;
         if (!sprites.isEmpty()) {
             float p = disparition_time / total_disparition_time;
             int target_frame = (int)(p * sprites.size());
             current_sprite = &sprites[std::min(target_frame, (int)sprites.size() - 1)];
-            if(p==1.0f){
-                explosion_finished = true;
+            if(p>=1.0f){
+                disparition_time = 0.0f;
+                hit_finished = true;
+                hit_started = false;
+                current_sprite = &sprites[0];
             }
         }
+    } else{
+        update_expected_pos(dt);
+        update_vel(dt);
+        update_pos();
     }
     
 
@@ -301,5 +309,5 @@ void Projectile::update(float dt){
 
 
 void Projectile::explode(){
-    explosion_started = true;
+    hit_started = true;
 }

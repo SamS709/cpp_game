@@ -104,14 +104,14 @@ void Character::load_sword_attack_low_frames(const QString &basePath){
 
 void Character::update(int width)
 {
-    if (projectile_attacking){
-        projectile->update(time_between_frames/1000.0f);
+    slide_time += time_between_frames/1000.0f; // slide_time also counts when not sliding
+    sword_attack_time += time_between_frames/1000.0f; // sword_attack_time also counts when not attacking
+    sword_attack_low_time += time_between_frames/1000.0f; // sword_attack_time also counts when not attacking
+    walk_step_time += time_between_frames/1000.0f; // walk_step_time always counts
+    if (projectile_attacking && !projectile->get_hit_finished()){
+        projectile_time += time_between_frames/1000.0f;
+        update_projectile();
     }
-    slide_time += time_between_frames/1000; // slide_time also counts when not sliding
-    sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
-    sword_attack_low_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
-    walk_step_time += time_between_frames/1000; // walk_step_time always counts
-    // Move character based on input
     if (jumping) {
         update_jump();
     }
@@ -131,6 +131,13 @@ void Character::update(int width)
 
     checkBounds(width);
     
+}
+
+void Character::update_projectile(){
+    if(projectile_time > total_projectile_time){
+        set_projectile_attacking(false);
+    }
+    projectile->update(time_between_frames/1000.0f);
 }
 
 void Character::update_jump(){
@@ -483,11 +490,16 @@ void Character::set_sword_attacking_low(bool a)
 
 void Character::set_projectile_attacking(bool a) {
     projectile_attacking = a;
+    if(a){
+        projectile_time = 0.0f;
+        projectile->set_hit_started(false);
+        projectile->set_hit_finished(false);
+        projectile->set_disparition_time(0.0);
+    }
     projectile->set_x(get_x());
-    projectile->set_y(get_y());
-    float v_projectile = 100.0f;
-    projectile->set_v_x(2.0f * v_projectile * (static_cast<float>(facingRight) - 0.5f));
-    projectile->update_expected_pos(5);
+    projectile->set_y(get_y() - get_h()/2.0);
+    float v_projectile = 1000.0f;
+    projectile->set_v_x(v_projectile * 2.0f * (static_cast<float>(facingRight) - 0.5f));
 }
 
 

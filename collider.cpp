@@ -384,6 +384,57 @@ void Collider::add_dynamic_contact_constraints(const std::vector<MovableCircle*>
             }
         }
     }
+    for (int i = 0; i < characters.size(); i++){
+        for(int j = 0; j < characters.size(); j++) {
+            if(j != i){
+                check_contact_character_projectile(characters[i], characters[j]);
+            }
+        }
+    }
+}
+
+void Collider::check_contact_character_projectile(const Character* character1, const Character* character2){
+    // Check if character1 has a projectile that's active
+    
+    if (!character1->get_projectile_attacking()) {
+        return;
+    }
+    
+    Projectile* proj = character1->projectile;
+    
+    // Get projectile circle properties (x, y, radius)
+    float proj_x = proj->get_x();
+    float proj_y = proj->get_y();
+    float proj_radius = proj->get_radius();
+    
+    // Get character2 rectangle properties (x, y, w, h)
+    // Note: character y is at the bottom, extends upward (y-h to y)
+    float char_x = character2->get_x();
+    float char_y = character2->get_y();
+    float char_w = character2->get_w();
+    float char_h = character2->get_h();
+    
+    // Character rectangle bounds: x to x+w (horizontal), y-h to y (vertical, y points down)
+    float rect_left = char_x;
+    float rect_right = char_x + char_w;
+    float rect_top = char_y - char_h;  // Top is above bottom since y points down
+    float rect_bottom = char_y;
+    
+    // Find the closest point on the rectangle to the circle center
+    float closest_x = std::max(rect_left, std::min(proj_x, rect_right));
+    float closest_y = std::max(rect_top, std::min(proj_y, rect_bottom));
+    
+    // Calculate distance between circle center and closest point
+    float distance_x = proj_x - closest_x;
+    float distance_y = proj_y - closest_y;
+    float distance_squared = distance_x * distance_x + distance_y * distance_y;
+    
+    // Check if there's a collision
+    if (distance_squared < (proj_radius * proj_radius) && !proj->get_hit_started()) {
+        qDebug() << "Projectile hit character!";
+        proj->set_hit_started(true);
+
+    }
 }
 
 void Collider::resolve_dynamic_constraints_particles(const std::vector<MovableCircle*>& particles){

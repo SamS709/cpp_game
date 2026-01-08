@@ -34,6 +34,8 @@ public:
     void update_slide();
     void update_lower();
     void update_sword_attack();
+    void update_projectile();
+
 
     void draw(QPainter &painter);    
     void set_x(float x_) {pos.x = x_;}
@@ -63,7 +65,7 @@ public:
     void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
     void set_lifebar_dims(float x, float y, float w, float h);
     void set_projectile_sprites(QVector<QPixmap> *projectile_sprites_) {projectile_sprites = projectile_sprites_;
-    projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 5.0, 1.0, 2.0, 0.5);}
+    projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 5.0, 1.0, 10.0, 0.5);}
 
     float get_rest() const override { return 0.0; } // No bounce for characters
 
@@ -89,25 +91,27 @@ public:
 
 
 
-    bool get_moving() { return moving; }
-    bool get_jumping() { return jumping; }
-    bool get_double_jumping() { return double_jumping; }
-    bool get_sliding() {return sliding; };
-    bool get_attacking() { return attacking; }
-    bool get_lowering   () { return lowering; }
-    bool get_sword_attacking() {return sword_attacking; }
-    bool get_sword_attacking_low() { return sword_attacking_low; }
-    bool get_projectile_attacking(){ return projectile_attacking; }
-    bool get_right() { return facingRight; }
-    bool get_right_pressed() { return right_pressed; } 
-    bool get_left_pressed() { return left_pressed; }   
-    bool get_first_hit_sword_attack() { return first_hit_sword_attack; }   
+    bool get_moving() const { return moving; }
+    bool get_jumping() const { return jumping; }
+    bool get_double_jumping() const { return double_jumping; }
+    bool get_sliding() const {return sliding; };
+    bool get_attacking() const { return attacking; }
+    bool get_lowering   () const { return lowering; }
+    bool get_sword_attacking() const {return sword_attacking; }
+    bool get_sword_attacking_low() const { return sword_attacking_low; }
+    bool get_projectile_attacking() const { return projectile_attacking; }
+    bool get_right() const { return facingRight; }
+    bool get_right_pressed() const { return right_pressed; } 
+    bool get_left_pressed() const { return left_pressed; }   
+    bool get_first_hit_sword_attack() const { return first_hit_sword_attack; }   
 
 
     void handle_rotate(QPainter &painte);
     
     void checkBounds(int windowWidth);   
 
+
+    Projectile *projectile; 
 private:
     float x;
     float y;
@@ -169,7 +173,6 @@ private:
 
     QPixmap idleFrame;
 
-    Projectile *projectile; 
     QVector<QPixmap> *projectile_sprites; 
 
     int current_move_frame;
@@ -201,6 +204,8 @@ private:
     float time_between_slides {1.0};
     float time_between_sword_attacks {1.0};
     float time_between_sword_attacks_low {1.0};
+    float projectile_time;
+    float total_projectile_time {4.0};
 
     float lower_time {0.0};
     float jump_time;
