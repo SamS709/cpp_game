@@ -171,7 +171,7 @@ public:
     void update_vel (float dt) override{ v.x = (pos_exp.x - pos.x) / dt; v.y = (pos_exp.y - pos.y) / dt; w += v.x / radius;}
 
 
-    void update_expected_pos_collision(Vec2 pos_exp_) override { pos_exp += pos_exp_*1.5;}
+    void update_expected_pos_collision(Vec2 pos_exp_) override { pos_exp += pos_exp_;}
 
 
     float get_rest() const override { return 0.8; } 

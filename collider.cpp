@@ -63,8 +63,13 @@ bool Collider::check_contact_particle_plane(const MovableCircle& particle, int i
     float distance = toCenter.dot(plane.get_norm());
     float distance_real = toCenter_real.dot(plane.get_norm());
     
-    // Only collide if particle is on the correct side
-    if (distance_real < 0) return false; 
+    // Use a larger margin to catch fast-moving particles
+    const float safety_margin = radius * 2.0f;  
+    bool was_on_correct_side = distance_real >= -safety_margin;
+    bool crossed_plane = (distance_real >= 0 && distance < radius) || 
+                        (distance_real > 0 && distance < 0);
+    // Only reject collision if particle is clearly far behind the plane
+    if (!was_on_correct_side && !crossed_plane ) return false; 
     
     float penetration = radius - distance;
     if (penetration <= 0) return false; 
@@ -76,35 +81,12 @@ bool Collider::check_contact_particle_plane(const MovableCircle& particle, int i
     StaticConstraint constraint;
     constraint.index = index;
 
-    // Check collision type based on position along plane
-    if (s < 0.0) {
-        // Left edge: circular cap around init_point
-        float dist = (center - plane.get_pos()).length();
-        if (dist > radius) return false;
-        
-        // Recalculate for point collision
-        constraint.penetration = radius - dist;
-        constraint.normal = (center - plane.get_pos()).normalized();
-        constraint.contactPoint = center - constraint.normal * radius;
-        
-    } else if (s > plane.get_w()) {
-        // Right edge: circular cap around end_point
-        Vec2 end_point = plane.get_pos() + tangent * plane.get_w();
-        float dist = (center - end_point).length();
-        if (dist > radius) return false;
-        
-        // Recalculate for point collision
-        constraint.penetration = radius - dist;
-        constraint.normal = (center - end_point).normalized();
-        constraint.contactPoint = center - constraint.normal * radius;
-        
-    } else {
-        // Flat face collision: use original plane normal
+    if(!(s < 0.0) && !(s > plane.get_w())) {
         constraint.normal = plane.get_norm();
         constraint.penetration = penetration;
         constraint.contactPoint = center - plane.get_norm() * radius;
     }
-    // constraint.penetration *=0.99;
+    
     static_constraints.push_back(constraint);
     return true;
 }
@@ -323,11 +305,9 @@ void Collider::resolve_static_constraints_characters(const std::vector<Character
 
 void Collider::resolve_static_constraints_particles(const std::vector<MovableCircle*>& particles) {
     int solver_iterations = 1;
-    int its;
   
     for (const auto& constraint : static_constraints) {
-        its = constraint.penetration < penetration_threshold_static ? 1 : solver_iterations;
-        for (int it = 0; it < its; it++) {
+        for (int it = 0; it < solver_iterations; it++) {
             enforce_static_ground_constraints(constraint, *particles[constraint.index]);
         }
     }

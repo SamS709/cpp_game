@@ -74,7 +74,7 @@ void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int
             Bomb* bomb = new Bomb(
                                 bomb_sprites,
                                 get_pos() + i * 10.0,
-                                v_char * 3.0,
+                                {5.0 * v_char.x, 2.0 * v_char.y},
                                 5.0,
                                 5.0,
                                 5.0,
