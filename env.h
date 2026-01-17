@@ -44,6 +44,8 @@ public:
 private:
     Character *c1;
     Character *c2;
+    CommandPanel* panel1;
+    CommandPanel* panel2;
     float t;
     float dt;
     float g = 2500;

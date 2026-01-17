@@ -45,6 +45,74 @@ void Lifebar::draw(QPainter &painter) {
 }
 
 
+CommandPanel::CommandPanel()
+    : Rectangle()
+{
+    set_color(50, 50, 50, 200);
+}
+
+CommandPanel::CommandPanel(Vec2 pos_, Vec2 dims_)
+    : Rectangle(pos_, dims_)
+{
+    set_color(50, 50, 50, 100);
+}
+
+void CommandPanel::draw(QPainter &painter) {
+
+    // Key dimensions
+    float keySize = 20;
+    float keySpacing = 5;
+    float centerX = get_x() + get_w() / 2.0;
+    float startY = get_y();
+    
+    // Font setup for keys
+    QFont keyFont = painter.font();
+    keyFont.setPointSize(10);
+    keyFont.setBold(true);
+    
+    QFont labelFont = painter.font();
+    labelFont.setPointSize(5);
+    
+    // Helper lambda to draw a key
+    auto drawKey = [&](float x, float y, const QString& key, const QString& label, bool labelBelow = true) {
+        // Draw key background (lighter color)
+        painter.setBrush(QColor(80, 80, 80, 50));
+        painter.setPen(QPen(QColor(150, 150, 150), 2));
+        painter.drawRoundedRect(x, y, keySize, keySize, 3, 3);
+        
+        // Draw key letter
+        painter.setPen(Qt::white);
+        painter.setFont(keyFont);
+        painter.drawText(QRectF(x, y, keySize, keySize), Qt::AlignCenter, key);
+        
+        // Draw label 
+        painter.setFont(labelFont);
+        painter.setPen(QColor(150, 150, 150));
+        if (labelBelow) {
+            painter.drawText(QRectF(x - 10, y + keySize - 1.0, keySize + 20, 15), Qt::AlignCenter, label);
+        } else {
+            painter.drawText(QRectF(x - 10, y - 17, keySize + 20, 15), Qt::AlignCenter, label);
+        }
+    };
+    
+    if (player == 1) {
+        drawKey(centerX - keySize / 2.0, startY, "Z", "Jump", false);
+        drawKey(centerX - keySize * 1.5 - keySpacing, startY + keySize + keySpacing, "Q", "Left");
+        drawKey(centerX - keySize / 2.0, startY + keySize + keySpacing, "S", "Down");
+        drawKey(centerX + keySize / 2.0 + keySpacing, startY + keySize + keySpacing, "D", "Right");
+        drawKey(centerX - keySize - keySpacing / 2.0, startY + (keySize + keySpacing) * 2 + 10, "A", "Sword");
+        drawKey(centerX + keySpacing / 2.0, startY + (keySize + keySpacing) * 2 + 10, "E", "Projectile");
+    } else {
+        drawKey(centerX - keySize / 2.0, startY, "↑", "Jump", false);
+        drawKey(centerX - keySize * 1.5 - keySpacing, startY + keySize + keySpacing, "←", "Left");
+        drawKey(centerX - keySize / 2.0, startY + keySize + keySpacing, "↓", "Down");
+        drawKey(centerX + keySize / 2.0 + keySpacing, startY + keySize + keySpacing, "→", "Right");
+        drawKey(centerX - keySize - keySpacing / 2.0, startY + (keySize + keySpacing) * 2 + 10, "0", "Sword");
+        drawKey(centerX + keySpacing / 2.0, startY + (keySize + keySpacing) * 2 + 10, "1", "Projectile");
+    }
+}
+
+
 BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, float dt_)
     :dt(dt_)
     , bomb_sprites(bomb_sprites_)

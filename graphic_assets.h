@@ -26,6 +26,20 @@ private:
 };
 
 
+class CommandPanel: public Rectangle {
+
+public:
+
+    void draw(QPainter &painter) override;
+    CommandPanel();
+    CommandPanel(Vec2 pos_, Vec2 dims_);
+    void set_player(int player_) { player = player_; }
+
+private:
+    int player = 1; 
+};
+
+
 class Bomb: public MovableCircle {
 public:
     Bomb(const QVector<QPixmap>& bomb_sprites_) {inv_mass = 1 / mass; sprites = bomb_sprites_;};

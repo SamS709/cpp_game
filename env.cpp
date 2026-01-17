@@ -14,6 +14,11 @@ Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
     , height(height_) {
 
         // Load sprite frames
+        panel1 = new CommandPanel(Vec2(10, 100), Vec2(150, 100));
+        panel1->set_player(1);
+
+        panel2 = new CommandPanel(Vec2(width - 160, 100), Vec2(150, 100));
+        panel2->set_player(2);
         
         c1->set_speed_move(speed_move);
         c1->set_speed_jump(speed_jump);
@@ -170,6 +175,8 @@ void Env::draw_assets(QPainter &painter){
     for (const auto& bonus: bonuses){
         bonus->draw(painter);
     }
+    panel1->draw(painter);
+    panel2->draw(painter);
 
 }
 
