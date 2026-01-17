@@ -54,7 +54,7 @@ private:
     bool explosion_started = false;
     bool explosion_finished = false;
     int creator;
-    float total_explosion_time = 1.5;
+    float total_explosion_time;
     float explosion_time = 0.0;
 };
 
@@ -84,7 +84,7 @@ private:
     float dt;
     float bomb_time = 0.0f;
     float total_bomb_time = 5.0f;
-    float bomb_explosion_time = 0.5f;
+    float bomb_explosion_time = 0.2f;
     int b = 0;
     bool visual = true;
     bool first_activated = true;

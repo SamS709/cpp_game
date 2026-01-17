@@ -97,16 +97,24 @@ void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int
 void BonusBox::update(std::vector<MovableCircle*>& particles){
     t+=dt;
     if(activated && b==0){
+        // Update all bombs first
         for (Bomb* bomb : bombs) {
             bomb->update(dt); 
+        }
+        
+        // Remove finished bombs 
+        for (auto it = bombs.begin(); it != bombs.end(); ) {
+            Bomb* bomb = *it;
             if(bomb->get_explosion_finished()){
-                auto it = std::find(particles.begin(), particles.end(), bomb);
-                if (it != particles.end()) {
-                    particles.erase(it);
-                    delete bomb;
+                auto particle_it = std::find(particles.begin(), particles.end(), bomb);
+                if (particle_it != particles.end()) {
+                    particles.erase(particle_it);
                 }
+                delete bomb;
+                it = bombs.erase(it); 
+            } else {
+                ++it;
             }
-                
         }
         if (bomb_time>total_bomb_time-bomb_explosion_time && !explosion_started){
             for (Bomb* bomb : bombs) {
@@ -203,13 +211,14 @@ void Bomb::draw(QPainter& painter) {
 }
 
 void Bomb::update(float dt){
-    if (explosion_started){
+    if (explosion_started && !explosion_finished){
+        set_v(Vec2(0.0F, 0.0f), dt);
         explosion_time += dt;
         if (!sprites.isEmpty()) {
             float p = explosion_time / total_explosion_time;
             int target_frame = (int)(p * sprites.size());
             current_sprite = &sprites[std::min(target_frame, (int)sprites.size() - 1)];
-            if(p==1.0f){
+            if(explosion_time>=total_explosion_time){
                 explosion_finished = true;
                 set_y(0.0);
             }
