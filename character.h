@@ -65,7 +65,7 @@ public:
     void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
     void set_lifebar_dims(float x, float y, float w, float h);
     void set_projectile_sprites(QVector<QPixmap> *projectile_sprites_) {projectile_sprites = projectile_sprites_;
-    projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 5.0, 1.0, 10.0, 0.5);}
+    projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 10.0, 1.0, 15.0, 0.05);}
 
     float get_rest() const override { return 0.0; } // No bounce for characters
 
@@ -86,7 +86,7 @@ public:
     float get_current_sprite_width() {return currentSprite->width();}
     float get_sword_attack_damages() { return sword_attack_damages; }
     vector<float> get_current_asset_dims() {return current_asset_dims; }
-    vector<float> get_current_character_dims() {return current_character_dims; }
+    vector<float> get_current_character_dims() const {return current_character_dims; }
     vector<float> get_current_sword_dims() {return current_sword_dims; }
 
 
@@ -205,7 +205,8 @@ private:
     float time_between_sword_attacks {1.0};
     float time_between_sword_attacks_low {1.0};
     float projectile_time;
-    float total_projectile_time {4.0};
+    float total_projectile_time {5.0};
+    float projectile_min_time {1.0};
 
     float lower_time {0.0};
     float jump_time;

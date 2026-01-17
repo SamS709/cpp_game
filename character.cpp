@@ -19,6 +19,7 @@ Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float m
     loadSpriteFrames("resources/images/characters/redhat");
     current_asset_dims = move_frames_asset_dims[0];
     lifebar = new Lifebar();
+    projectile_time = projectile_min_time + 0.1f;
     
 }
 
@@ -129,6 +130,12 @@ void Character::update(int width)
         update_move();
     } 
 
+    else if (!(idleFrame.isNull() | idle_dims.empty())) {
+        current_asset_dims = idle_dims;
+        current_character_dims = idle_character_dims;
+        currentSprite = &idleFrame;
+    }
+
     checkBounds(width);
     
 }
@@ -137,7 +144,7 @@ void Character::update_projectile(){
     if(projectile_time > total_projectile_time){
         set_projectile_attacking(false);
     }
-    projectile->update(time_between_frames/1000.0f);
+    projectile->update(time_between_frames/1000.0f, projectile_time, projectile_min_time);
 }
 
 void Character::update_jump(){
@@ -160,6 +167,9 @@ void Character::update_jump(){
         current_move_frame = (int)(normalized * (num_frames - 1));
         current_move_frame = std::max(0, std::min(current_move_frame, num_frames - 1));
     }
+    currentSprite = &jump_frames[current_move_frame];
+    current_asset_dims = jump_frames_asset_dims[current_move_frame];
+    current_character_dims = jump_frames_character_dims[current_move_frame];
 }
 
 
@@ -184,6 +194,9 @@ void Character::update_lower(){
         }
         current_move_frame = (int)(normalized * (num_frames - 1));
     }
+    currentSprite = &lower_frames[current_move_frame];
+    current_asset_dims = lower_frames_asset_dims[current_move_frame];
+    current_character_dims = lower_frames_character_dims[current_move_frame];
 }
 
 
@@ -209,6 +222,10 @@ void Character::update_slide(){
         
         // No horizontal movement during slide, just maintain direction
     }
+    currentSprite = &slide_frames[current_move_frame];
+    current_asset_dims = slide_frames_asset_dims[current_move_frame];
+    current_character_dims = slide_frames_character_dims[current_move_frame];
+    currentSprite = &slide_frames[current_move_frame];
 }
 
 void Character::update_sword_attack(){
@@ -218,6 +235,10 @@ void Character::update_sword_attack(){
     float *attack_dist = &sword_attack_dist;
     bool *s_attacking;
     QVector<QPixmap> *attack_frames;
+    vector<vector<float>> *attack_frames_asset_dims;
+    vector<vector<float>> *attack_frames_character_dims;
+    vector<vector<float>> *attack_frames_sword_dims;
+
 
     if(sword_attacking_low){
         attack_time = &sword_attack_low_time;
@@ -225,6 +246,9 @@ void Character::update_sword_attack(){
         attack_dist = &sword_attack_low_dist;
         s_attacking = &sword_attacking_low;
         attack_frames = &sword_attack_low_frames;
+        attack_frames_asset_dims = &sword_attack_low_frames_asset_dims;
+        attack_frames_character_dims = &sword_attack_low_frames_character_dims;
+        attack_frames_sword_dims = &sword_attack_low_frames_sword_dims;
         
     } else {
         
@@ -233,6 +257,9 @@ void Character::update_sword_attack(){
         attack_dist = &sword_attack_dist;
         s_attacking = &sword_attacking;
         attack_frames = &sword_attack_frames;
+        attack_frames_asset_dims = &sword_attack_frames_asset_dims;
+        attack_frames_character_dims = &sword_attack_frames_character_dims;
+        attack_frames_sword_dims = &sword_attack_frames_sword_dims;
     }
     if(*attack_time > *total_attack_time) {
         *s_attacking = false;
@@ -256,11 +283,15 @@ void Character::update_sword_attack(){
                 pos_exp.x-=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
             }               
             current_move_frame = std::min(target_frame, (int)(*attack_frames).size() - 1);
-            
+            currentSprite = &(*attack_frames)[current_move_frame];
+            current_asset_dims = (*attack_frames_asset_dims)[current_move_frame];
+            current_character_dims = (*attack_frames_character_dims)[current_move_frame];
+            current_sword_dims = (*attack_frames_sword_dims)[current_move_frame];
         }
         
         // No horizontal movement during slide, just maintain direction
     }
+    
 }
 
 void Character::update_move(){
@@ -284,49 +315,14 @@ void Character::update_move(){
         current_move_frame = 0;
         walk_step_time = 0.0;
     }
+    currentSprite = &move_frames[current_move_frame];
+    current_asset_dims = move_frames_asset_dims[current_move_frame];
+    current_character_dims = move_frames_character_dims[current_move_frame];
 }
 
 void Character::draw(QPainter &painter)
 {
-    
 
-    if (moving && !move_frames.isEmpty()) {
-        currentSprite = &move_frames[current_move_frame];
-        current_asset_dims = move_frames_asset_dims[current_move_frame];
-        current_character_dims = move_frames_character_dims[current_move_frame];
-    } else if (jumping && !jump_frames.isEmpty()) {
-        currentSprite = &jump_frames[current_move_frame];
-        current_asset_dims = jump_frames_asset_dims[current_move_frame];
-        current_character_dims = jump_frames_character_dims[current_move_frame];
-    } else if (sliding && !slide_frames.isEmpty()) {
-        currentSprite = &slide_frames[current_move_frame];
-        current_asset_dims = slide_frames_asset_dims[current_move_frame];
-        current_character_dims = slide_frames_character_dims[current_move_frame];
-        currentSprite = &slide_frames[current_move_frame];
-        
-    } else if (lowering && !lower_frames.isEmpty()) {
-        currentSprite = &lower_frames[current_move_frame];
-        current_asset_dims = lower_frames_asset_dims[current_move_frame];
-        current_character_dims = lower_frames_character_dims[current_move_frame];
-        
-    } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
-        currentSprite = &sword_attack_frames[current_move_frame];
-        current_asset_dims = sword_attack_frames_asset_dims[current_move_frame];
-        current_character_dims = sword_attack_frames_character_dims[current_move_frame];
-        current_sword_dims = sword_attack_frames_sword_dims[current_move_frame];
-        
-    } else if (sword_attacking_low && !sword_attack_low_frames.isEmpty()) {
-        currentSprite = &sword_attack_low_frames[current_move_frame];
-        current_asset_dims = sword_attack_low_frames_asset_dims[current_move_frame];
-        current_character_dims = sword_attack_low_frames_character_dims[current_move_frame];
-        current_sword_dims = sword_attack_low_frames_sword_dims[current_move_frame];
-        
-    } else if (!(idleFrame.isNull() | idle_dims.empty())) {
-        current_asset_dims = idle_dims;
-        current_character_dims = idle_character_dims;
-        currentSprite = &idleFrame;
-    }
-    
     // Update dims based on current sprite
     if (currentSprite && !currentSprite->isNull()) {
         set_w(2*current_asset_dims[2]);
@@ -489,17 +485,21 @@ void Character::set_sword_attacking_low(bool a)
 }
 
 void Character::set_projectile_attacking(bool a) {
-    projectile_attacking = a;
-    if(a){
-        projectile_time = 0.0f;
+    if(a && projectile_time>projectile_min_time){
+        projectile_attacking = a;
+        projectile_time = 0.0;
         projectile->set_hit_started(false);
         projectile->set_hit_finished(false);
         projectile->set_disparition_time(0.0);
+        projectile->set_x(get_x());
+        projectile->set_y(get_y() - get_h()/2.0);
+        float v_projectile = 1000.0f;
+        projectile->set_v_x(v_projectile * 2.0f * (static_cast<float>(facingRight) - 0.5f));
+    } else if(!a) {
+        projectile_attacking = a;
+        projectile_time = projectile_min_time + 0.1;
     }
-    projectile->set_x(get_x());
-    projectile->set_y(get_y() - get_h()/2.0);
-    float v_projectile = 1000.0f;
-    projectile->set_v_x(v_projectile * 2.0f * (static_cast<float>(facingRight) - 0.5f));
+    
 }
 
 

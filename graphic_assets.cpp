@@ -210,6 +210,7 @@ void Bomb::update(float dt){
             current_sprite = &sprites[std::min(target_frame, (int)sprites.size() - 1)];
             if(p==1.0f){
                 explosion_finished = true;
+                set_y(0.0);
             }
         }
     }
@@ -258,7 +259,7 @@ Projectile::Projectile(const QVector<QPixmap>& projectile_sprites_, Vec2 pos_, V
 
 void Projectile::rescale_sprites(const QVector<QPixmap>& projectile_sprites_){
     for (const QPixmap& sprite : projectile_sprites_) {
-        sprites.append(sprite.scaledToHeight(radius * 8.0, Qt::SmoothTransformation));
+        sprites.append(sprite.scaledToHeight(radius, Qt::SmoothTransformation));
     }
     if (!sprites.isEmpty()) {
         current_sprite = &sprites[0];
@@ -283,19 +284,22 @@ void Projectile::draw(QPainter& painter) {
     }
 }
 
-void Projectile::update(float dt){
+void Projectile::update(float dt, float& projectile_time, float projectile_min_time){
     
     if (hit_started){
         disparition_time += dt;
         if (!sprites.isEmpty()) {
+            qDebug()<<disparition_time;
             float p = disparition_time / total_disparition_time;
             int target_frame = (int)(p * sprites.size());
             current_sprite = &sprites[std::min(target_frame, (int)sprites.size() - 1)];
-            if(p>=1.0f){
+            if(disparition_time>=total_disparition_time){
                 disparition_time = 0.0f;
+                projectile_time = projectile_min_time + 0.1;
                 hit_finished = true;
                 hit_started = false;
                 current_sprite = &sprites[0];
+                set_pos({10.0, 10.0});
             }
         }
     } else{
@@ -309,5 +313,4 @@ void Projectile::update(float dt){
 
 
 void Projectile::explode(){
-    hit_started = true;
 }

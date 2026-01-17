@@ -116,8 +116,10 @@ public:
     
     void draw(QPainter& painter) override;
     void rescale_sprites(const QVector<QPixmap>& projectile_sprites_);
-    void update(float dt);
+    void update(float dt, float &projectil_time, float projectile_min_time);
     void set_disparition_time(float t){ disparition_time = t; }
+    float get_min_lifetime() { return min_lifetime; }
+    void set_min_lifetime(float t){ min_lifetime = t; }
 
 
 private:
@@ -127,8 +129,9 @@ private:
     bool hit_started = false;
     bool hit_finished = false;
     int creator;
-    float total_disparition_time = 0.15;
+    float total_disparition_time = 0.00;
     float disparition_time = 0.0;
+    float min_lifetime = 0.5;
 };
 
 #endif

@@ -409,10 +409,11 @@ void Collider::check_contact_character_projectile(const Character* character1, c
     
     // Get character2 rectangle properties (x, y, w, h)
     // Note: character y is at the bottom, extends upward (y-h to y)
+    std::vector<float> char_dims = character2->get_current_character_dims();
     float char_x = character2->get_x();
     float char_y = character2->get_y();
-    float char_w = character2->get_w();
-    float char_h = character2->get_h();
+    float char_w = 0.0;
+    float char_h = 2.0 * char_dims[2];
     
     // Character rectangle bounds: x to x+w (horizontal), y-h to y (vertical, y points down)
     float rect_left = char_x;
