@@ -18,7 +18,7 @@ Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float m
 {
     loadSpriteFrames("resources/images/characters/redhat");
     current_asset_dims = move_frames_asset_dims[0];
-    lifebar = new Lifebar();
+    lifebar = new Lifebar(Vec2(100,20));
     projectile_time = projectile_min_time + 0.1f;
     
 }

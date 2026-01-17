@@ -28,11 +28,12 @@ Lifebar::Lifebar(Vec2 pos_, Vec2 dims_)
 void Lifebar::draw(QPainter &painter) {
     float offset {0.0};
     if(get_x()==0.0) {
-        offset = sprite.width() / 3.0; 
+        offset = sprite.width() / 4.0; 
     }
     else {
         offset = -sprite.width();
     }
+    // qDebug()<<sprite.width();
     painter.setPen(Qt::NoPen);
     painter.setBrush(get_color());
     painter.drawRect(get_x() + 2 * offset + sprite.width() * 1.5, get_y(), get_w() * p, get_h());
