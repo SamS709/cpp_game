@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 
+std::mt19937 Env::rng;
+
 bool Env::check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2) {
     return (x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2);
 }
@@ -12,8 +14,13 @@ Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
     , dt(dt_ / 1000.0)
     , width(width_)
     , height(height_) {
-
-        // Load sprite frames
+        ground_height = 100.0f;
+        float margin_w = 70.0f;
+        float margin_h = margin_w * height / width;
+        bonuses_spawn_ranges[0] = margin_w;
+        bonuses_spawn_ranges[1] = margin_h;
+        bonuses_spawn_ranges[2] = width - 2.0 * margin_w;
+        bonuses_spawn_ranges[3] = height - 2.0 * margin_h - ground_height;
         panel1 = new CommandPanel(Vec2(10, 100), Vec2(150, 100));
         panel1->set_player(1);
 
@@ -33,6 +40,8 @@ Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
         characters.push_back(c2);
 
         load_env_assets();
+        rng.seed(std::random_device{}());
+
     }
 
 
@@ -47,48 +56,18 @@ void Env::load_env_assets(){
     visual_container = new VisualContainer(100.0, false);
     c1->set_projectile_sprites(&(visual_container->projectile_sprites));
     c2->set_projectile_sprites(&(visual_container->projectile_sprites));
-    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(200.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(300.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(400.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(500.0, height-height/2.0), Vec2(100.0,25.0), dt));
-
-    Bomb *p1 = new Bomb(
-        visual_container->bomb_sprites,
-        {static_cast<float>(width)/2.0f+250.0f, static_cast<float>(height)/2.0f},
-        {-100.0, -5.0},
-        5.0,
-        5.0,
-        20.0,
-        5.0
-    );
-    Bomb *p2 = new Bomb(
-        visual_container->bomb_sprites,
-        {0.0f, static_cast<float>(height)/2.0f},
-        {50.0, -5.0},
-        5.0,
-        5.0,
-        20.0,
-        5.0
-    );
-    Bomb *p3 = new Bomb(
-        visual_container->bomb_sprites,
-        {250.0f, 10.0f},
-        {0.0, 0.0},
-        5.0,
-        5.0,
-        20.0,
-        5.0
-    );
+    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(200.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(300.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(400.0, height-height/2.0), Vec2(100.0,25.0), dt));
+    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(500.0, height-height/2.0), Vec2(100.0,25.0), dt));
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
-    particles.push_back(p1);
-    particles.push_back(p2);
-    particles.push_back(p3);
     Vec2 pos = Vec2(width / 2 - 200, height/2);
     Vec2 dims = Vec2(400.0, 100.0);
-    // assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0, 10)));
-    assets.push_back(std::make_unique<Rectangle>(Vec2(-100.0, height - 100.0), Vec2(width + 200.0, 100)));
+    // Ground
+    assets.push_back(std::make_unique<Rectangle>(Vec2(-100.0, height - ground_height), Vec2(width + 200.0, ground_height)));
+    // Platform
     assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0,25.0)));
 
 }
@@ -122,6 +101,23 @@ void Env::update(int width){
     handle_attacks();
     c1->update(width);
     c2->update(width);
+    update_bonuses();
+    
+}
+
+void Env::update_bonuses(){
+    bonus_time += dt;
+    if (bonus_time > bonus_sample_time && bonuses.size()< 6) {
+        bonus_time = 0.0f;
+        bool value = std::rand() & 1;
+        if(value) {
+            std::uniform_real_distribution<float> dist_x(bonuses_spawn_ranges[0], bonuses_spawn_ranges[2]);
+            float x = dist_x(rng);    
+            std::uniform_real_distribution<float> dist_y(bonuses_spawn_ranges[1], bonuses_spawn_ranges[3]);
+            float y = dist_y(rng);
+            bonuses.push_back(std::make_unique<BonusBox>(1, visual_container, Vec2(x, y), Vec2(100.0,25.0), dt));
+        }
+    }
     for (auto it = bonuses.begin(); it != bonuses.end();){
         it->get()->update(particles);
         if(it->get()->get_finished()){
@@ -177,6 +173,14 @@ void Env::draw_assets(QPainter &painter){
     }
     panel1->draw(painter);
     panel2->draw(painter);
+
+    painter.setBrush(QColor(200,200,200));
+
+    // Uncomment to debut the area of random spawn of bonus box
+    // painter.drawRect(static_cast<int>(bonuses_spawn_ranges[0]), static_cast<int>(bonuses_spawn_ranges[1]), static_cast<int>(bonuses_spawn_ranges[2]), static_cast<int>(bonuses_spawn_ranges[3]));
+
+    c1->draw((painter));
+    c2->draw((painter));
 
 }
 
@@ -257,8 +261,7 @@ void Env::handle_attacks(){
 
 void Env::paint(QPainter *painter){
     draw_assets(*painter);
-    c1->draw((*painter));
-    c2->draw((*painter));
+    
     
 
 }

@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <algorithm>
 #include <QDebug>
+#include "character.h"
 
 Lifebar::Lifebar(){
     SpriteLoader loader(get_h() * im_scale, false);
@@ -113,29 +114,35 @@ void CommandPanel::draw(QPainter &painter) {
 }
 
 
-BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, float dt_)
-    :dt(dt_)
-    , bomb_sprites(bomb_sprites_)
+BonusBox::BonusBox(int b_, const VisualContainer *vc, float dt_)
+    :b(b_),
+    dt(dt_)
+    , bomb_sprites(vc->bomb_sprites)
     {
-        sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
 
-BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, Vec2 dims_, float dt_)
+BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 dims_, float dt_)
     :Rectangle(Vec2(dims_.y, dims_.y))
-    ,dt(dt_)
-    , bomb_sprites(bomb_sprites_)
+    ,b(b_),
+    dt(dt_)
+    , bomb_sprites(vc->bomb_sprites)
     {
-        sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
-BonusBox::BonusBox(const QVector<QPixmap> &bomb_sprites_, Vec2 pos_, Vec2 dims_, float dt_)
+BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 pos_, Vec2 dims_, float dt_)
     :Rectangle(pos_, Vec2(dims_.y, dims_.y))
-    ,dt(dt_)
-    , bomb_sprites(bomb_sprites_)
+    ,b(b_),
+    dt(dt_)
+    , bomb_sprites(vc->bomb_sprites)
     {
-        sprites.append(bomb_sprites_[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
     }
 
-void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int j){
+void BonusBox::activate(Character& character, std::vector<MovableCircle*>& particles, int j){
     activated = true;
     visual = false;
     if(b == 0 && first_activated){
@@ -143,7 +150,7 @@ void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int
             Bomb* bomb = new Bomb(
                                 bomb_sprites,
                                 get_pos() + i * 10.0,
-                                {5.0 * v_char.x, 2.0 * v_char.y},
+                                {5.0 * character.get_v_x(), 2.0 * character.get_v_y()},
                                 5.0,
                                 5.0,
                                 5.0,
@@ -154,7 +161,12 @@ void BonusBox::activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int
             bombs.push_back(bomb);
             particles.push_back(bomb);
         }
+    } else if (b == 1 && first_activated) {
+        character.set_speed_multiplier(2.0);
+    } else if (b == 2 && first_activated) {
+        character.set_hp(character.get_hp() + 10);
     }
+
     first_activated = false;
 
 }
@@ -203,6 +215,9 @@ void BonusBox::update(std::vector<MovableCircle*>& particles){
             finished = true;
         }
         bomb_time += dt;
+    }
+    else if (activated && b == 1) {
+        finished = true;
     }
 }
 

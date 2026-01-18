@@ -8,6 +8,8 @@
 #include <vector>
 #include "graphic_assets.h"
 #include "utils.h"
+#include <random>
+
 
 using namespace std;
 
@@ -37,6 +39,7 @@ public:
     
     void draw_assets(QPainter &painter);
     void handle_attacks();
+    void update_bonuses();
     void handle_sword_attack(Character* attacker, Character* defender);
 
     bool check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2);
@@ -53,12 +56,16 @@ private:
     float friction = 0.001;
     float width;
     float height;
+    float ground_height;
     float life_bar_width {100.0};
     float rest {0.8};
     float speed_move {75.0};
     float speed_run; 
     float speed_jump {1000.0};
     float bomb_damages {20.0};
+    float bonus_sample_time {5.0};
+    float bonus_time {0.0};
+    float bonus_next_spawn_time {10.0}; 
     Collider *collider;
     VisualContainer *visual_container;
     
@@ -66,6 +73,8 @@ private:
     vector<MovableCircle*> particles;
     vector<Character*> characters;
     std::vector<std::unique_ptr<Asset>> assets;
+    float bonuses_spawn_ranges[4];
+    static std::mt19937 rng;
     
 
 };

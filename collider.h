@@ -61,7 +61,7 @@ private:
     void enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2);
 
 
-    void check_contact_character_bonus(const MovableRectangle& character, int i, BonusBox& bonus, std::vector<MovableCircle*>& particles);
+    void check_contact_character_bonus(Character& character, int i, BonusBox& bonus, std::vector<MovableCircle*>& particles);
     void check_contact_character_bomb(Character& character, int i,Bomb& bomb);
 
 

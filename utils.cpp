@@ -254,5 +254,9 @@ void VisualContainer::load_sprites(){
     character_dims.clear();
     loadSequence("resources/images/characters/redhat", "projectile", 1, 2, 
                        projectile_sprites, asset_dims, character_dims);
+    asset_dims.clear();
+    character_dims.clear();
+    vector<float> asset_dim, character_dim;
+    loadSprite("resources/images/assets/speed.png", speed_sprite, asset_dim, character_dim);
     
 }

@@ -203,7 +203,7 @@ void Collider::check_contact_character_bomb(Character& character, int i, Bomb& b
     }
 }
 
-void Collider::check_contact_character_bonus(const MovableRectangle& character, int i, BonusBox& bonus, std::vector<MovableCircle*>& particles) {
+void Collider::check_contact_character_bonus(Character& character, int i, BonusBox& bonus, std::vector<MovableCircle*>& particles) {
     const Vec2 char_pos(character.get_x_expected(), character.get_y_expected());
     const float char_w = character.get_w() ; 
     const float char_h = character.get_h();
@@ -223,7 +223,8 @@ void Collider::check_contact_character_bonus(const MovableRectangle& character, 
     bool overlap_y = char_bottom > rect_top && char_top < rect_bottom;
     
     if (!overlap_x || !overlap_y) return;
-    bonus.activate(character.get_v(), particles, i);
+    bonus.activate(character, particles, i);
+        
 }
 
 bool Collider::check_contact_character_rectangle(const MovableRectangle& character, int index, const Rectangle& rect) {

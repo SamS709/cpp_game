@@ -5,6 +5,10 @@
 #include "QPixmap"
 #include "assets.h"
 #include <vector>
+#include "utils.h"
+
+// Forward declaration
+class Character;
 
 using namespace std;
 
@@ -81,12 +85,12 @@ public:
     int get_bonus() const { return b; }
     void draw(QPainter &painter) override;
     void update(std::vector<MovableCircle*>& particles);
-    void activate(Vec2 v_char, std::vector<MovableCircle*>& particles, int i);
+    void activate(Character& character, std::vector<MovableCircle*>& particles, int i);
     bool get_activate() { return activated; }
     bool get_finished() { return finished; }
-    BonusBox(const QVector<QPixmap>& bomb_sprites_, float dt_);
-    BonusBox(const QVector<QPixmap>& bomb_sprites_, Vec2 dim_,float dt_);
-    BonusBox(const QVector<QPixmap>& bomb_sprites_, Vec2 pos_, Vec2 dims_, float dt_);
+    BonusBox(int b_, const VisualContainer *vc, float dt_);
+    BonusBox(int b_, const VisualContainer *vc, Vec2 dim_,float dt_);
+    BonusBox(int b_, const VisualContainer *vc, Vec2 pos_, Vec2 dims_, float dt_);
 
 private:
     vector<Bomb*> bombs;

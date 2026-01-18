@@ -62,6 +62,7 @@ public:
     void set_speed_jump(float s) {speed_jump = s;}
     void set_speed_run(float s) {speed_run = s;}
     void set_hp(float hp_) {hp = hp_; lifebar->set_percentage(hp/max_hp);}
+    void set_speed_multiplier(float s_m_) { speed_multiplier = s_m_;}
     void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
     void set_lifebar_dims(float x, float y, float w, float h);
     void set_projectile_sprites(QVector<QPixmap> *projectile_sprites_) {projectile_sprites = projectile_sprites_;
@@ -222,6 +223,7 @@ private:
     float hp {100.0};
     float sword_attack_damages {10.0};
     float sword_attack_low_damages {10.0};
+    float speed_multiplier {1.0};
 
 };
 

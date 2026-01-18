@@ -72,6 +72,7 @@ public:
 
     QVector<QPixmap> bomb_sprites;
     QVector<QPixmap> projectile_sprites;
+    QPixmap speed_sprite;
 
 
 };
