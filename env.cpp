@@ -31,10 +31,14 @@ Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
         c1->set_speed_jump(speed_jump);
         c1->set_speed_run(speed_run);
         c1->set_hp(max_hp);
+        c1->set_projectile_damages(projectile_damages);
         c2->set_speed_move(speed_move);
         c2->set_speed_jump(speed_jump);
         c2->set_speed_run(speed_run);
         c2->set_hp(max_hp);
+        c2->set_projectile_damages(projectile_damages);
+
+
 
         characters.push_back(c1);
         characters.push_back(c2);
@@ -56,19 +60,20 @@ void Env::load_env_assets(){
     visual_container = new VisualContainer(100.0, false);
     c1->set_projectile_sprites(&(visual_container->projectile_sprites));
     c2->set_projectile_sprites(&(visual_container->projectile_sprites));
-    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(100.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(200.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(300.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(400.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    // bonuses.push_back(std::make_unique<BonusBox>(visual_container->bomb_sprites, Vec2(500.0, height-height/2.0), Vec2(100.0,25.0), dt));
-    c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
+    c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     Vec2 pos = Vec2(width / 2 - 200, height/2);
     Vec2 dims = Vec2(400.0, 100.0);
     // Ground
     assets.push_back(std::make_unique<Rectangle>(Vec2(-100.0, height - ground_height), Vec2(width + 200.0, ground_height)));
-    // Platform
-    assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0,25.0)));
+    // Platforms
+    float platfor_width = 100.0f;
+    std::unique_ptr<Rectangle> p1 = std::make_unique<Rectangle>(Vec2(150.0, height-height/3.0), Vec2(platfor_width,25.0));
+    p1->set_color(50,50,50,255);
+    assets.push_back(std::move(p1));
+    std::unique_ptr<Rectangle> p2 = std::make_unique<Rectangle>(Vec2(width - (platfor_width + 150.0), height-height/3.0), Vec2(platfor_width,25.0));
+    p2->set_color(50,50,50,255);
+    assets.push_back(std::move(p2));
 
 }
 
@@ -115,7 +120,9 @@ void Env::update_bonuses(){
             float x = dist_x(rng);    
             std::uniform_real_distribution<float> dist_y(bonuses_spawn_ranges[1], bonuses_spawn_ranges[3]);
             float y = dist_y(rng);
-            bonuses.push_back(std::make_unique<BonusBox>(1, visual_container, Vec2(x, y), Vec2(100.0,25.0), dt));
+            std::uniform_int_distribution<int> dist_b(0, n_bonuses - 1);
+            int b = dist_b(rng);
+            bonuses.push_back(std::make_unique<BonusBox>(b, visual_container, Vec2(x, y), Vec2(100.0,25.0), dt));
         }
     }
     for (auto it = bonuses.begin(); it != bonuses.end();){

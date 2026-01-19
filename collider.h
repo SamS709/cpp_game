@@ -56,7 +56,7 @@ private:
     void enforce_static_ground_constraints(const StaticConstraint& constraint, MovableAsset& movable_asset);
 
     void add_dynamic_contact_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters);
-    void check_contact_character_projectile(const Character* character1, const Character* characters);
+    void check_contact_character_projectile(const Character* character1, Character* character2);
     void resolve_dynamic_constraints_particles(const std::vector<MovableCircle*>& particles);
     void enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2);
 

@@ -103,12 +103,14 @@ private:
     float bomb_time = 0.0f;
     float total_bomb_time = 5.0f;
     float bomb_explosion_time = 0.2f;
+    float speed_time = 5.0f;
     int b = 0;
     bool visual = true;
     bool first_activated = true;
     bool activated = false;
     bool finished = false;
     bool explosion_started = false;
+    Character* c;
 
 };
 

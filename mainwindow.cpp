@@ -47,7 +47,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     
     painter.setRenderHint(QPainter::Antialiasing);
     // Draw background
-    painter.fillRect(rect(), QColor(200, 230, 255));
+    painter.fillRect(rect(), QColor(240, 240, 240));
     env->paint(&painter);
     
 }

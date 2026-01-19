@@ -258,5 +258,8 @@ void VisualContainer::load_sprites(){
     character_dims.clear();
     vector<float> asset_dim, character_dim;
     loadSprite("resources/images/assets/speed.png", speed_sprite, asset_dim, character_dim);
+    asset_dim.clear();
+    character_dim.clear();
+    loadSprite("resources/images/assets/hp.png", hp_sprite, asset_dim, character_dim);
     
 }

@@ -374,7 +374,7 @@ void Collider::add_dynamic_contact_constraints(const std::vector<MovableCircle*>
     }
 }
 
-void Collider::check_contact_character_projectile(const Character* character1, const Character* character2){
+void Collider::check_contact_character_projectile(const Character* character1, Character* character2){
     // Check if character1 has a projectile that's active
     
     if (!character1->get_projectile_attacking()) {
@@ -415,7 +415,7 @@ void Collider::check_contact_character_projectile(const Character* character1, c
     if (distance_squared < (proj_radius * proj_radius) && !proj->get_hit_started()) {
         qDebug() << "Projectile hit character!";
         proj->set_hit_started(true);
-
+        character2->set_hp(character2->get_hp() - character2->get_projectile_damages());
     }
 }
 

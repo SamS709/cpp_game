@@ -121,6 +121,14 @@ BonusBox::BonusBox(int b_, const VisualContainer *vc, float dt_)
     {
         sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
         sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+        if(b == 0) {
+            set_color(255, 50, 50, 255);
+        } else if(b == 1) {
+            set_color(50, 50, 255, 255);
+        } else if(b == 2) {
+            set_color(50, 255, 50, 255);
+        }
     }
 
 BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 dims_, float dt_)
@@ -131,6 +139,14 @@ BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 dims_, float dt_)
     {
         sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
         sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+        if(b == 0) {
+            set_color(255, 50, 50, 255);
+        } else if(b == 1) {
+            set_color(50, 50, 255, 255);
+        } else if(b == 2) {
+            set_color(50, 255, 50, 255);
+        }
     }
 BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 pos_, Vec2 dims_, float dt_)
     :Rectangle(pos_, Vec2(dims_.y, dims_.y))
@@ -140,17 +156,26 @@ BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 pos_, Vec2 dims_, flo
     {
         sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
         sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+        sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+        if(b == 0) {
+            set_color(200, 50, 50, 255);
+        } else if(b == 1) {
+            set_color(50, 50, 200, 255);
+        } else if(b == 2) {
+            set_color(100, 200, 100, 255);
+        }
     }
 
 void BonusBox::activate(Character& character, std::vector<MovableCircle*>& particles, int j){
     activated = true;
     visual = false;
+    c = &character;
     if(b == 0 && first_activated){
         for (int i = 0; i < n_bombs; i++) {
             Bomb* bomb = new Bomb(
                                 bomb_sprites,
-                                get_pos() + i * 10.0,
-                                {5.0 * character.get_v_x(), 2.0 * character.get_v_y()},
+                                get_pos() + (i-1) * 20.0,
+                                {5.0f * character.get_v_x(), character.get_v_y()},
                                 5.0,
                                 5.0,
                                 5.0,
@@ -217,6 +242,11 @@ void BonusBox::update(std::vector<MovableCircle*>& particles){
         bomb_time += dt;
     }
     else if (activated && b == 1) {
+        if(t > speed_time) {
+            c->set_speed_multiplier(1.0);
+            finished = true;
+        }
+    } else if (activated && b == 2) {
         finished = true;
     }
 }
@@ -225,10 +255,10 @@ void BonusBox::draw(QPainter &painter) {
     if(visual){
         painter.setPen(Qt::NoPen);
         painter.setBrush(get_color());
-        painter.drawRect(get_x() , get_y(), get_w(), get_h());
+        painter.drawRoundedRect(get_x() , get_y(), get_w(), get_h(), 3, 3);
         painter.setPen(QPen(Qt::black, 2));
         painter.setBrush(Qt::NoBrush);
-        painter.drawRect(get_x(), get_y(), get_w(), get_h());
+        painter.drawRoundedRect(get_x() , get_y(), get_w(), get_h(), 3, 3);
         painter.drawPixmap(get_x() + (-sprites[b].width() + get_w()) / 2.0 , get_y() + (-sprites[b].height() + get_h()) / 2.0 , sprites[b]);
     }
        

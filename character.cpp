@@ -320,6 +320,18 @@ void Character::update_move(){
     current_character_dims = move_frames_character_dims[current_move_frame];
 }
 
+void Character::set_hp(float hp_) {
+    float real_hp = hp_;
+    if (hp_ < 0) {
+        is_dead = true;
+        real_hp = 0.0;
+    } else if (hp_ > max_hp) {
+        real_hp = max_hp;
+    } 
+    hp = real_hp; 
+    lifebar->set_percentage(real_hp/max_hp);
+}
+
 void Character::draw(QPainter &painter)
 {
 

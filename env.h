@@ -63,9 +63,11 @@ private:
     float speed_run; 
     float speed_jump {1000.0};
     float bomb_damages {20.0};
+    float projectile_damages {10.0};
     float bonus_sample_time {5.0};
     float bonus_time {0.0};
     float bonus_next_spawn_time {10.0}; 
+    int n_bonuses {3};
     Collider *collider;
     VisualContainer *visual_container;
     

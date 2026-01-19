@@ -42,7 +42,10 @@ public:
     void set_y(float y_) {pos.y = y_;}
     void set_x_expected(float x_expected_) { pos_exp.x = x_expected_ ; }
     void set_y_expected(float y_expected_) { pos_exp.y = y_expected_; }
-    void update_vel(float dt){ v.x = (get_x_expected() - get_x()) / dt; v.y = (get_y_expected() - get_y()) / dt; }
+    void set_v(Vec2 v_, float dt) override { v = v_ ; update_pos(); update_expected_pos(dt);}
+    void set_v_x(float v_x_) override { v.x = v_x_ * speed_multiplier; }
+    void set_v_y(float v_y_) override { v.y = v_y_; }
+    void update_vel(float dt){ v.x =  (get_x_expected() - get_x()) / dt; v.y = (get_y_expected() - get_y()) / dt; }
     void update_expected_pos(float dt){ pos_exp.x = get_x() + v.x * dt; pos_exp.y = get_y() + v.y * dt; }
     void update_pos(){ pos.x = pos_exp.x; pos.y = pos_exp.y; }
     void update_expected_pos_collision(float delta_x, float delta_y){ pos_exp.x += delta_x; pos_exp.y += delta_y; }
@@ -61,10 +64,11 @@ public:
     void set_speed_move(float s) {speed_move = s;}
     void set_speed_jump(float s) {speed_jump = s;}
     void set_speed_run(float s) {speed_run = s;}
-    void set_hp(float hp_) {hp = hp_; lifebar->set_percentage(hp/max_hp);}
+    void set_hp(float hp_);
     void set_speed_multiplier(float s_m_) { speed_multiplier = s_m_;}
     void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
     void set_lifebar_dims(float x, float y, float w, float h);
+    void set_projectile_damages(float p_d_) { projectile_damages = p_d_; }
     void set_projectile_sprites(QVector<QPixmap> *projectile_sprites_) {projectile_sprites = projectile_sprites_;
     projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 10.0, 1.0, 15.0, 0.05);}
 
@@ -86,6 +90,7 @@ public:
     float get_hp() const { return hp; }
     float get_current_sprite_width() {return currentSprite->width();}
     float get_sword_attack_damages() { return sword_attack_damages; }
+    float get_projectile_damages() { return projectile_damages; }
     vector<float> get_current_asset_dims() {return current_asset_dims; }
     vector<float> get_current_character_dims() const {return current_character_dims; }
     vector<float> get_current_sword_dims() {return current_sword_dims; }
@@ -105,6 +110,7 @@ public:
     bool get_right_pressed() const { return right_pressed; } 
     bool get_left_pressed() const { return left_pressed; }   
     bool get_first_hit_sword_attack() const { return first_hit_sword_attack; }   
+    bool get_is_dead() { return is_dead; }
 
 
     void handle_rotate(QPainter &painte);
@@ -133,6 +139,7 @@ private:
     bool right_pressed;
     bool facingRight;
     bool first_hit_sword_attack;
+    bool is_dead = false;
 
     
     // Sprite animation
@@ -222,6 +229,7 @@ private:
     float base_y {0.0};  // Base Y position when jump starts
     float hp {100.0};
     float sword_attack_damages {10.0};
+    float projectile_damages;
     float sword_attack_low_damages {10.0};
     float speed_multiplier {1.0};
 
