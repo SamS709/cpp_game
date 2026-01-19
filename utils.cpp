@@ -25,10 +25,12 @@ bool SpriteLoader::loadSequence(
     bool anyLoaded = false;
     
     for (int i = startFrame; i <= endFrame; ++i) {
-        QString framePath = basePath + QString("/%1/%2_%3.png")
-            .arg(sequenceName)
-            .arg(sequenceName)
-            .arg(i, 3, 10, QChar('0'));
+        QString framePath = QDir(basePath).filePath(
+            QString("%1/%2_%3.png")
+                .arg(sequenceName)
+                .arg(sequenceName)
+                .arg(i, 3, 10, QChar('0'))
+        );
         
         QPixmap sprite(framePath);
         

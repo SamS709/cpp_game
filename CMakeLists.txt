@@ -62,12 +62,21 @@ target_link_libraries(Stickman PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.Stickman)
 endif()
+
+# Set WIN32_EXECUTABLE only on Windows to create a GUI application
+# On Linux, this should be omitted to allow console output
+if(WIN32)
+    set(WIN32_EXECUTABLE_OPTION WIN32_EXECUTABLE TRUE)
+else()
+    set(WIN32_EXECUTABLE_OPTION)
+endif()
+
 set_target_properties(Stickman PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+    ${WIN32_EXECUTABLE_OPTION}
 )
 
 include(GNUInstallDirs)

@@ -7,6 +7,7 @@
 #include <QString>
 #include <QVector>
 #include <QDebug>
+#include <QDir>
 #include <vector>
 #include <functional>
 
