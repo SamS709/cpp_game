@@ -321,15 +321,21 @@
 		],
 		[ "D:/Dev/cours/cpp_game/env.h", "MU", "EWIEGA46WW/moc_env.cpp", null ],
 		[
-			"D:/Dev/cours/cpp_game/lifebar.h",
+			"D:/Dev/cours/cpp_game/graphic_assets.h",
 			"MU",
-			"EWIEGA46WW/moc_lifebar.cpp",
+			"EWIEGA46WW/moc_graphic_assets.cpp",
 			null
 		],
 		[
 			"D:/Dev/cours/cpp_game/mainwindow.h",
 			"MU",
 			"EWIEGA46WW/moc_mainwindow.cpp",
+			null
+		],
+		[
+			"D:/Dev/cours/cpp_game/utils.h",
+			"MU",
+			"EWIEGA46WW/moc_utils.cpp",
 			null
 		]
 	],
@@ -408,9 +414,10 @@
 		[ "D:/Dev/cours/cpp_game/character.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/collider.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/env.cpp", "MU", null ],
-		[ "D:/Dev/cours/cpp_game/lifebar.cpp", "MU", null ],
+		[ "D:/Dev/cours/cpp_game/graphic_assets.cpp", "MU", null ],
 		[ "D:/Dev/cours/cpp_game/main.cpp", "MU", null ],
-		[ "D:/Dev/cours/cpp_game/mainwindow.cpp", "MU", null ]
+		[ "D:/Dev/cours/cpp_game/mainwindow.cpp", "MU", null ],
+		[ "D:/Dev/cours/cpp_game/utils.cpp", "MU", null ]
 	],
 	"UIC_OPTIONS" : [],
 	"UIC_SEARCH_PATHS" : [],

@@ -58,8 +58,11 @@ The health bar dynamically changes color based on remaining health:
 
 ## Character Actions
 
+<<<<<<< HEAD
 The animations are made using sequence of pngs, loaded as QPixmap, stores in QVector (one per action). Each frame (QPixmap) am is chooseen programatically depending on the action.
 
+=======
+>>>>>>> dev
 ### Jump
 <img src="resources/images/readme/jump.png" alt="Jump" width="200">
 

@@ -2,8 +2,10 @@
 #include <algorithm>
 #include <cmath>
 
+std::mt19937 Env::rng;
+
 bool Env::check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2) {
-    return (x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2);
+    return (x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2);
 }
 
 Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
@@ -12,21 +14,38 @@ Env::Env(Character *c1_, Character *c2_, float dt_, float width_, float height_)
     , dt(dt_ / 1000.0)
     , width(width_)
     , height(height_) {
+        ground_height = 100.0f;
+        float margin_w = 70.0f;
+        float margin_h = margin_w * height / width;
+        bonuses_spawn_ranges[0] = margin_w;
+        bonuses_spawn_ranges[1] = margin_h;
+        bonuses_spawn_ranges[2] = width - 2.0 * margin_w;
+        bonuses_spawn_ranges[3] = height - 2.0 * margin_h - ground_height;
+        panel1 = new CommandPanel(Vec2(10, 100), Vec2(150, 100));
+        panel1->set_player(1);
 
-        // Load sprite frames
+        panel2 = new CommandPanel(Vec2(width - 160, 100), Vec2(150, 100));
+        panel2->set_player(2);
+        
         c1->set_speed_move(speed_move);
         c1->set_speed_jump(speed_jump);
         c1->set_speed_run(speed_run);
         c1->set_hp(max_hp);
+        c1->set_projectile_damages(projectile_damages);
         c2->set_speed_move(speed_move);
         c2->set_speed_jump(speed_jump);
         c2->set_speed_run(speed_run);
         c2->set_hp(max_hp);
+        c2->set_projectile_damages(projectile_damages);
+
+
 
         characters.push_back(c1);
         characters.push_back(c2);
 
         load_env_assets();
+        rng.seed(std::random_device{}());
+
     }
 
 
@@ -38,145 +57,27 @@ Env::~Env(){
 
 void Env::load_env_assets(){
     collider = new Collider();
-    MovableCircle *p1 = new MovableCircle(
-        {static_cast<float>(width)/2.0f+250.0f, static_cast<float>(height)/2.0f},
-        {-100.0, -5.0},
-        5.0,
-        20.0
-    );
-    MovableCircle *p2 = new MovableCircle(
-        {0.0f, static_cast<float>(height)/2.0f},
-        {50.0, -5.0},
-        5.0,
-        20.0
-    );
-    c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
+    visual_container = new VisualContainer(100.0, false);
+    c1->set_projectile_sprites(&(visual_container->projectile_sprites));
+    c2->set_projectile_sprites(&(visual_container->projectile_sprites));
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
-    particles.push_back(p1);
-    particles.push_back(p2);
+    c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     Vec2 pos = Vec2(width / 2 - 200, height/2);
     Vec2 dims = Vec2(400.0, 100.0);
-    // assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0, 10)));
-    assets.push_back(std::make_unique<Rectangle>(Vec2(-100.0, height - 100.0), Vec2(width + 200.0, 100)));
-    assets.push_back(std::make_unique<Rectangle>(Vec2(width/2.0 - 50.0, height-height/3.0), Vec2(100.0,25.0)));
+    // Ground
+    std::unique_ptr<Rectangle> ground = std::make_unique<Rectangle>(Vec2(-100.0, height - ground_height), Vec2(width + 200.0, ground_height));
+    ground->set_color(150,150,150,255);
+    assets.push_back(std::move(ground));
+    // Platforms
+    float platfor_width = 100.0f;
+    std::unique_ptr<Rectangle> p1 = std::make_unique<Rectangle>(Vec2(150.0, height-height/3.0), Vec2(platfor_width,25.0));
+    p1->set_color(50,50,50,255);
+    assets.push_back(std::move(p1));
+    std::unique_ptr<Rectangle> p2 = std::make_unique<Rectangle>(Vec2(width - (platfor_width + 150.0), height-height/3.0), Vec2(platfor_width,25.0));
+    p2->set_color(50,50,50,255);
+    assets.push_back(std::move(p2));
 
 }
-
-// void Env::apply_static_constraints(){
-
-//     // particles and ground
-//     for (MovableCircle *particle: particles) {
-//         apply_static_constraint(particle);
-//         resolve_aabb_collision(particle, obstacle);
-//     }       
-//     // Charaters and ground
-//     apply_static_constraint(c1);
-//     apply_static_constraint(c2);
-    
-//     // Characters and obstacle (AABB collision)
-//     resolve_aabb_collision(c1, obstacle);
-//     resolve_aabb_collision(c2, obstacle);
-
-// }
-
-// void Env::apply_static_constraint(MovableAsset *a){
-//     float collision_dist = (a->get_y_expected() + a->get_h() / 2.0) - ground->get_y();
-//     if (collision_dist >= 0) {
-//         float delta_y = -collision_dist;
-//         int sim_res = 3;
-//         for(int it = 0; it<sim_res; it++) {
-//             a->update_expected_pos_collision(0.0, delta_y);
-//         }
-        
-        
-//         // float v_y = a->get_v_y();
-//         // if (v_y > 0) {
-//         //     a->set_v_y(-a->get_rest()*v_y);
-//         //     a->update_expected_pos(dt);
-//         //     qDebug()<<v_y;
-//         // }
-        
-//         // End jump when character lands on ground
-//         Character* character = dynamic_cast<Character*>(a);
-//         if (character && character->get_jumping()) {
-//             character->set_jumping(false);
-//             // Resume moving if direction key is still pressed
-//             if (character->get_right_pressed() || character->get_left_pressed()) {
-//                 character->set_moving(true);
-//             }
-//         }
-//     }
-// }
-
-// void Env::resolve_aabb_collision(MovableAsset *movable, Rectangle *rect){
-//     // Get positions and dimensions
-//     float m_x = movable->get_x_expected();
-//     float m_y = movable->get_y_expected();
-//     float m_w = movable->get_w();
-//     float m_h = movable->get_h();
-    
-//     float r_x = rect->get_x();
-//     float r_y = rect->get_y();
-//     float r_w = rect->get_w();
-//     float r_h = rect->get_h();
-    
-//     // Convert character center position to AABB (top-left corner)
-//     float m_left = m_x - m_w / 2.0;
-//     float m_right = m_x + m_w / 2.0;
-//     float m_top = m_y - m_h / 2.0;
-//     float m_bottom = m_y + m_h / 2.0;
-    
-//     // Check for AABB overlap
-//     bool overlap = !(m_right < r_x || r_x + r_w < m_left ||
-//                      m_bottom < r_y || r_y + r_h < m_top);
-    
-//     if (!overlap) return;
-    
-//     // Calculate penetration depths
-//     float overlap_left = m_right - r_x;
-//     float overlap_right = (r_x + r_w) - m_left;
-//     float overlap_top = m_bottom - r_y;
-//     float overlap_bottom = (r_y + r_h) - m_top;
-    
-//     float overlap_x = (overlap_left < overlap_right) ? overlap_left : overlap_right;
-//     float overlap_y = (overlap_top < overlap_bottom) ? overlap_top : overlap_bottom;
-    
-//     // Resolve along minimum penetration axis
-//     if (overlap_x < overlap_y) {
-//         // Horizontal 
-//         float delta_x = (m_x < r_x) ? -overlap_left : overlap_right;
-//         movable->update_expected_pos_collision(delta_x, 0.0);
-        
-//         // horizontal velocity
-//         float v_x = movable->get_v_x();
-//         if ((m_x < r_x && v_x > 0) || (m_x > r_x && v_x < 0)) {
-//             movable->set_v_x(-movable->get_rest() * v_x);
-//         }
-//     } else {
-//         // Vertical resolution
-//         float delta_y = (m_y < r_y) ? -overlap_top : overlap_bottom;
-//         movable->update_expected_pos_collision(0.0, delta_y);
-        
-//         // vertical velocity
-//         float v_y = movable->get_v_y();
-        
-//         // Bounce
-//         if ((m_y < r_y && v_y > 0) || (m_y > r_y && v_y < 0)) {    
-//             movable->set_v_y(-movable->get_rest() * v_y);
-            
-//         }
-
-//         Character* character = dynamic_cast<Character*>(movable);        
-//         // End jump when character lands on top of rectangle
-//         if (character && character->get_jumping() && m_y < r_y && v_y > 0) {
-//             character->set_jumping(false);
-//             // Resume moving if direction key is still pressed
-//             if (character->get_right_pressed() || character->get_left_pressed()) {
-//                 character->set_moving(true);
-//             }
-//         }
-//     }
-// }
 
 
 
@@ -200,35 +101,47 @@ void Env::update_velocity_and_position(MovableAsset *a){
 void Env::update(int width){
     apply_external_forces();
     update_expected_positions(); 
-    collider->resolve_collisions(particles, characters, assets);
+    collider->resolve_collisions(particles, characters, assets, bonuses);
     update_velocities_and_positions();
     apply_damping();
     apply_friction();  // Apply friction AFTER velocity update
     handle_attacks();
     c1->update(width);
     c2->update(width);
+    update_bonuses();
+    
+}
+
+void Env::update_bonuses(){
+    bonus_time += dt;
+    if (bonus_time > bonus_sample_time && bonuses.size()< 6) {
+        bonus_time = 0.0f;
+        bool value = std::rand() & 1;
+        if(value) {
+            std::uniform_real_distribution<float> dist_x(bonuses_spawn_ranges[0], bonuses_spawn_ranges[2]);
+            float x = dist_x(rng);    
+            std::uniform_real_distribution<float> dist_y(bonuses_spawn_ranges[1], bonuses_spawn_ranges[3]);
+            float y = dist_y(rng);
+            std::uniform_int_distribution<int> dist_b(0, n_bonuses - 1);
+            int b = dist_b(rng);
+            bonuses.push_back(std::make_unique<BonusBox>(b, visual_container, Vec2(x, y), Vec2(100.0,25.0), dt));
+        }
+    }
+    for (auto it = bonuses.begin(); it != bonuses.end();){
+        it->get()->update(particles);
+        if(it->get()->get_finished()){
+            it = bonuses.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 void Env::apply_damping() {
     for(MovableCircle *particle: particles){
-        particle->set_v(particle->get_v() * particle->get_damp());
+        particle->set_v(particle->get_v() * particle->get_damp(), dt);
     }
-    
-    // // Apply damping to characters
-    // c1->set_v(c1->get_v() * c1->get_damp());
-    // c2->set_v(c2->get_v() * c2->get_damp());
-    
-    // // Additional energy loss when in contact with ground/surfaces
-    // if (c1->get_has_contact()) {
-    //     Vec2 vel = c1->get_v();
-    //     vel *= 0.5;  // 5% energy loss on contact
-    //     c1->set_v(vel);
-    // }
-    // if (c2->get_has_contact()) {
-    //     Vec2 vel = c2->get_v();
-    //     vel *= 0.5;  // 5% energy loss on contact
-    //     c2->set_v(vel);
-    // }
+
 }
 
 void Env::apply_friction() {
@@ -247,7 +160,7 @@ void Env::apply_friction() {
         if (tangentSpeed > 0.0001) {
             Vec2 frictionDir = tangentVel / tangentSpeed;
             float frictionMag = std::min(friction * std::abs(normalVel), tangentSpeed);
-            particle->set_v(particle->get_v() - frictionDir * frictionMag);
+            particle->set_v(particle->get_v() - frictionDir * frictionMag, dt);
         }
         
     }
@@ -264,6 +177,19 @@ void Env::draw_assets(QPainter &painter){
     for (const auto& asset : assets) {
             asset->draw(painter);
     }
+    for (const auto& bonus: bonuses){
+        bonus->draw(painter);
+    }
+    panel1->draw(painter);
+    panel2->draw(painter);
+
+    painter.setBrush(QColor(200,200,200));
+
+    // Uncomment to debut the area of random spawn of bonus box
+    // painter.drawRect(static_cast<int>(bonuses_spawn_ranges[0]), static_cast<int>(bonuses_spawn_ranges[1]), static_cast<int>(bonuses_spawn_ranges[2]), static_cast<int>(bonuses_spawn_ranges[3]));
+
+    c1->draw((painter));
+    c2->draw((painter));
 
 }
 
@@ -311,14 +237,16 @@ void Env::handle_sword_attack(Character* attacker, Character* defender){
     }
     
     float x_sword = attacker->get_x() + x_sword_offset;
-    float y_sword = attacker->get_y() + attacker->get_current_sword_dims()[1] - attacker->get_current_asset_dims()[1] - attacker->get_current_asset_dims()[3];
+    float y_sword = attacker->get_y() - attacker->get_current_asset_dims()[1] - 2.0 * attacker->get_current_asset_dims()[3] + attacker->get_current_sword_dims()[1];
     float w_sword = 2.0 * attacker->get_current_sword_dims()[2];
     float h_sword = 2.0 * attacker->get_current_sword_dims()[3];
     // Attacked character dims
     float x_character = defender->get_x() + x_character_offset;
-    float y_character = defender->get_y() + defender->get_current_character_dims()[1] - defender->get_current_asset_dims()[1] - defender->get_current_asset_dims()[3];
+    float y_character = defender->get_y() - defender->get_current_asset_dims()[1] - 2.0 * defender->get_current_asset_dims()[3] + defender->get_current_character_dims()[1];
     float w_character = 2.0 * defender->get_current_character_dims()[2];
     float h_character = 2.0 * defender->get_current_character_dims()[3];
+    
+    
     if (check_rectangles_overlap(x_sword, y_sword, w_sword, h_sword, x_character, y_character, w_character, h_character)) {
         qDebug()<<"Attack hit!";
         attacker->set_first_hit_sword_attack(false);
@@ -328,12 +256,13 @@ void Env::handle_sword_attack(Character* attacker, Character* defender){
 
 void Env::handle_attacks(){
     if (c1->get_attacking()){
-        if (c1->get_sword_attacking() && c1->get_first_hit_sword_attack()) {
+        if ((c1->get_sword_attacking() || c1->get_sword_attacking_low()) && c1->get_first_hit_sword_attack()) {
             handle_sword_attack(c1, c2);
         }
     }
     if (c2->get_attacking()){
-        if (c2->get_sword_attacking() && c2->get_first_hit_sword_attack()) {
+        if ((c2->get_sword_attacking() || c2->get_sword_attacking_low()) && c2->get_first_hit_sword_attack()) {
+            qDebug("attack started");
             handle_sword_attack(c2, c1);
         }
     }
@@ -341,18 +270,20 @@ void Env::handle_attacks(){
 
 void Env::paint(QPainter *painter){
     draw_assets(*painter);
-    c1->draw((*painter));
-    c2->draw((*painter));
+    
     
 
 }
 
 void Env::mousePressEvent(QMouseEvent* event) {
-        particles.push_back(new MovableCircle(
+        particles.push_back(new Bomb(
+        visual_container->bomb_sprites,
         Vec2(event->pos().x(), event->pos().y()),
         {0.0, 0.0},
+        5.0,
         3.0,
-        10.0
+        10.0,
+        5.0
     ));
     }
 
@@ -362,7 +293,7 @@ void Env::keyPressEvent(QKeyEvent *event){
 
     // Character 1 controls 
     if (event->key() == Qt::Key_Up) {
-        if (!c1->get_jumping()) {
+        if (!c1->get_double_jumping()) {
             c1->set_moving(false);
             c1->set_sword_attacking(false);
             c1->set_jumping(true);            
@@ -372,10 +303,8 @@ void Env::keyPressEvent(QKeyEvent *event){
         if (!c1->get_jumping() && !c1->get_sliding() && !c1->get_sword_attacking()) {
             if (c1->get_moving()){
                 c1->set_sliding(true);
-                qDebug()<<"sliding";
             } else {
                 c1->set_lowering(true);
-                qDebug()<<"lowering";
             }
         }
     }
@@ -401,16 +330,25 @@ void Env::keyPressEvent(QKeyEvent *event){
 
         }
     } if (event->key() == Qt::Key_0) {
-        c1->set_lowering(false);
+        if(c1->get_lowering()){
+            c1->set_sword_attacking_low(true);
+        } else {
+            c1->set_sword_attacking(true);
+        }
+        c1->set_lowering(false, true);
         c1->set_sliding(false);
         c1->set_jumping(false);
-        c1->set_sword_attacking(true);
+        
+        
+    } if (event->key() == Qt::Key_1) {
+        c1->set_projectile_attacking(true);
+        
         
     }
     
     // Character 2 controls 
     if (event->key() == Qt::Key_Z) {
-        if (!c2->get_jumping()) {
+        if (!c2->get_double_jumping()) {
             c2->set_moving(false);
             c2->set_sword_attacking(false);
             c2->set_jumping(true);            
@@ -447,12 +385,22 @@ void Env::keyPressEvent(QKeyEvent *event){
 
         }
     } if (event->key() == Qt::Key_A) {
-        c2->set_lowering(false);
+        if(c2->get_lowering()){
+            c2->set_sword_attacking_low(true);
+        } else {
+            c2->set_sword_attacking(true);
+        }
+        c2->set_lowering(false, true);
         c2->set_sliding(false);
         c2->set_jumping(false);
-        c2->set_sword_attacking(true);
+        
+        
+    } if (event->key() == Qt::Key_E) {
+        c2->set_projectile_attacking(true);
+        
         
     } 
+
 
 }
 
@@ -486,6 +434,7 @@ void Env::keyReleaseEvent(QKeyEvent *event){
         c1->set_lowering(false);
     } else if (event->key() == Qt::Key_0) {
         c1->set_sword_attacking(false);
+        c1->set_sword_attacking_low(false);
     }
     
     // Character 2 key releases

@@ -1,6 +1,7 @@
 #include "character.h"
+#include "utils.h"
 
-Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float max_hp_)
+Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float max_hp_, vector<int> color_)
     : MovableRectangle(mass)
     , time_between_frames(time_betwwen_frames_)
     , max_hp(max_hp_)
@@ -15,11 +16,11 @@ Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float m
     , framesPerSprite(100)  // Change sprite every 5 updates (~12 FPS at 60 FPS)
     , jump_height(500)
 {
+    set_color(color_[0], color_[1], color_[2], color_[3]);
     loadSpriteFrames("resources/images/characters/redhat");
     current_asset_dims = move_frames_asset_dims[0];
-    set_x(pos_.x);
-    set_y(pos_.y);
-    lifebar = new Lifebar();
+    lifebar = new Lifebar(Vec2(100,20));
+    projectile_time = projectile_min_time + 0.1f;
     
 }
 
@@ -28,7 +29,7 @@ void Character::set_lifebar_dims(float x, float y, float w, float h) {
     lifebar->set_y(y);
     lifebar->set_w(w);
     lifebar->set_h(h);
-    lifebar->reload_image();
+    // lifebar->reload_image();
 }
 
 void Character::loadSpriteFrames(const QString &basePath)
@@ -38,25 +39,14 @@ void Character::loadSpriteFrames(const QString &basePath)
     load_slide_frames(basePath);
     load_lower_frames(basePath);
     load_sword_attack_frames(basePath);
+    load_sword_attack_low_frames(basePath);
     
 }
 
 void Character::load_move_frames(const QString &basePath){
-    move_frames.clear();
-    move_frames_asset_dims.clear();
-    for (int i = 1; i <=39; ++i) {
-        QString framePath = basePath + QString("/walk/walk_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &move_frames_asset_dims, &move_frames_character_dims, nullptr);
-            move_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "walk", 1, 39, move_frames, move_frames_asset_dims, move_frames_character_dims);
+    
     // Use first move frame as idle frame
     if (!move_frames.isEmpty()) {
         idleFrame = move_frames[5];
@@ -67,264 +57,95 @@ void Character::load_move_frames(const QString &basePath){
 }
 
 void Character::load_jump_frames(const QString &basePath){
-
-    jump_frames.clear();
-    for (int i = 0; i <= 63; ++i) {
-        QString framePath = basePath + QString("/jump/jump_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &jump_frames_asset_dims, &jump_frames_character_dims, nullptr);
-            jump_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
-
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "jump", 0, 63, jump_frames, jump_frames_asset_dims, jump_frames_character_dims);
 }
 
 void Character::load_slide_frames(const QString &basePath){
-
-    slide_frames.clear();
-    for (int i = 0; i <= 4; ++i) {
-        QString framePath = basePath + QString("/slide/slide_%1.png").arg(i);
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            
-            slide_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    
-    }
-
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "slide", 0, 29, slide_frames, slide_frames_asset_dims, slide_frames_character_dims);
 }
 
 void Character::load_lower_frames(const QString &basePath){
-    lower_frames.clear();
-    for (int i = 0; i <= 10; ++i) {
-        QString framePath = basePath + QString("/lower/lower_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &lower_frames_asset_dims, &lower_frames_character_dims, nullptr);
-            lower_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
-        }
-    }
-
+    SpriteLoader loader(c_scale, draw_baxes);
+    loader.loadSequence(basePath, "lower", 0, 10, lower_frames, lower_frames_asset_dims, lower_frames_character_dims);
 }
 
 void Character::load_sword_attack_frames(const QString &basePath){
-    sword_attack_frames.clear();
-    for (int i = 1; i <= 53; ++i) {
-        QString framePath = basePath + QString("/sword_attack/sword_attack_%1.png").arg(i, 3, 10, QChar('0'));
-        QPixmap sprite(framePath);
-        
-        if (!sprite.isNull()) {
-            sprite = sprite.scaledToHeight(c_scale, Qt::SmoothTransformation);
-            set_hitbox(sprite, &sword_attack_frames_asset_dims, &sword_attack_frames_character_dims, &sword_attack_frames_sword_dims);
-            sword_attack_frames.append(sprite);
-            qDebug() << "Loaded:" << framePath;
-        } else {
-            qDebug() << "Failed to load:" << framePath;
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "sword_attack", 1, 53, sword_attack_frames, 
+                       sword_attack_frames_asset_dims, sword_attack_frames_character_dims, 
+                       &sword_attack_frames_sword_dims);
+    
+    // set the dim of the sword to zero during first and last few frames of the attack 
+    int ind = 0;
+    for (vector<float> &sword_dim: sword_attack_frames_sword_dims) {
+        if(ind < 20 || ind > sword_attack_frames_sword_dims.size() - 20){
+            sword_dim = {0.0f, 0.0f, 0.0f, 0.0f};
         }
+        ind ++;
+    }
+}
+
+void Character::load_sword_attack_low_frames(const QString &basePath){
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "sword_attack_low", 1, 17, sword_attack_low_frames, 
+                       sword_attack_low_frames_asset_dims, sword_attack_low_frames_character_dims, 
+                       &sword_attack_low_frames_sword_dims);
+    
+    int ind = 0;
+    for (vector<float> &sword_dim: sword_attack_low_frames_sword_dims) {
+        if(ind < 2 || ind > sword_attack_low_frames_sword_dims.size() - 2){
+            sword_dim = {0.0f, 0.0f, 0.0f, 0.0f};
+        }
+        ind ++;
     }
 }
 
 
-void Character::set_hitbox(QPixmap& sprite, vector<vector<float>>* asset_dims_, vector<vector<float>>* character_dims_, vector<vector<float>>* sword_dims_){
-    // Convert QPixmap to QImage to access pixels
-    QImage image = sprite.toImage();
-    
-    if (image.isNull()) {
-        return;
-    }
-
-    if(asset_dims_ == nullptr || character_dims_ == nullptr) {
-        return;
-    }
-    
-    int width = image.width();
-    int height = image.height();
-    
-    // Helper lambda to check if pixel is valid for hitbox (any visible pixel)
-    auto isAssetPixel = [](QRgb pixel) -> bool {
-        return (qAlpha(pixel) > 10);
-    };
-
-    auto isCharacterPixel = [](QRgb pixel) -> bool {
-        if (qAlpha(pixel) <= 10) return false;  // Must be visible
-        int r = qRed(pixel);
-        int g = qGreen(pixel);
-        int b = qBlue(pixel);
-        // Check if pixel is black (or very dark)
-        return (r < 5 && g < 5 && b < 5);
-    }; 
-
-    auto isSwordPixel = [](QRgb pixel) -> bool {
-        if (qAlpha(pixel) <= 10) return false;  // Must be visible
-        int r = qRed(pixel);
-        int g = qGreen(pixel);
-        int b = qBlue(pixel);
-        // Check if pixel is black (or very dark)
-        return (130 < r && r < 140 && 130 < g && g < 140 && 130 < b && b < 140);
-    }; 
-
-    
-    // Find left bounds
-    int leftBoundAsset = width;
-    int leftBoundCharacter = width;
-    int leftBoundSword = width;
-    for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-            QRgb pixel = image.pixel(x, y);
-            
-            if (leftBoundAsset == width && isAssetPixel(pixel)) {
-                leftBoundAsset = x;
-            }
-            if (leftBoundCharacter == width && isCharacterPixel(pixel)) {
-                leftBoundCharacter = x;
-            }
-            if (leftBoundSword == width && isSwordPixel(pixel)) {
-                leftBoundSword = x;
-            }
-        }
-        // if (leftBoundAsset < width) break;
-    }
-    
-    // Find right bounds
-    int rightBoundAsset = 0;
-    int rightBoundCharacter = 0;
-    int rightBoundSword = 0;
-    for (int x = width - 1; x >= 0; x--) {
-        for (int y = 0; y < height; y++) {
-            QRgb pixel = image.pixel(x, y);
-            if (rightBoundAsset == 0 && isAssetPixel(pixel)) {
-                rightBoundAsset = x;
-            }
-            if (rightBoundCharacter == 0 && isCharacterPixel(pixel)) {
-                rightBoundCharacter = x;
-            }
-            if (rightBoundSword == 0 && isSwordPixel(pixel)) {
-                rightBoundSword = x;
-            }
-        }
-        // if (rightBoundAsset > 0) break;
-    }
-    
-    // Find top bounds
-    int topBoundAsset = height;
-    int topBoundCharacter = height;
-    int topBoundSword = height;
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            QRgb pixel = image.pixel(x, y);
-            if (topBoundAsset == height && isAssetPixel(pixel)) {
-                topBoundAsset = y;
-            }
-            if (topBoundCharacter == height && isCharacterPixel(pixel)) {
-                topBoundCharacter = y;
-            }
-            if (topBoundSword == height && isSwordPixel(pixel)) {
-                topBoundSword = y;
-            }
-        }
-        // if (topBoundAsset < height) break;
-    }
-    
-    // Find bottom bounds
-    int bottomBoundAsset = 0;
-    int bottomBoundCharacter = 0;
-    int bottomBoundSword = 0;
-    for (int y = height - 1; y >= 0; y--) {
-        for (int x = 0; x < width; x++) {
-            QRgb pixel = image.pixel(x, y);
-            if (bottomBoundAsset == 0 && isAssetPixel(pixel)) {
-                bottomBoundAsset = y;
-            }
-            if (bottomBoundCharacter == 0 && isCharacterPixel(pixel)) {
-                bottomBoundCharacter = y;
-            }
-            if (bottomBoundSword == 0 && isSwordPixel(pixel)) {
-                bottomBoundSword = y;
-            }
-        }
-        // if (bottomBoundAsset > 0) break;
-    }
-    
-    // Calculate character dimensions
-    float widthAsset = rightBoundAsset - leftBoundAsset;
-    float heightAsset = bottomBoundAsset - topBoundAsset;
-    float widthCharacter = rightBoundCharacter - leftBoundCharacter;
-    float heightCharacter = bottomBoundCharacter - topBoundCharacter;
-    float widthSword = rightBoundSword - leftBoundSword;
-    float heightSword = bottomBoundSword - topBoundSword;
-    if(leftBoundSword == width && rightBoundSword == 0.0){
-            leftBoundSword = 0.0;
-            rightBoundSword = 0.0;
-            widthSword = 0.0;
-            heightSword = 0.0;
-    } 
-    
-    // Fill dims_ with computed dimensions [leftBound, topBound, width/2, height/2]
-    asset_dims_->push_back({static_cast<float>(leftBoundAsset), static_cast<float>(topBoundAsset), static_cast<float>(widthAsset) / 2.0f, static_cast<float>(heightAsset) / 2.0f});
-    character_dims_->push_back({static_cast<float>(leftBoundCharacter), static_cast<float>(topBoundCharacter), static_cast<float>(widthCharacter) / 2.0f, static_cast<float>(heightCharacter) / 2.0f});
-    if(sword_dims_!=nullptr){
-        sword_dims_->push_back({static_cast<float>(leftBoundAsset), static_cast<float>(topBoundAsset), static_cast<float>(widthAsset) / 2.0f, static_cast<float>(heightAsset) / 2.0f});
-    }
-    
-    // Draw bounding box on sprite if draw_baxes is true
-    if (draw_baxes) {
-        QPainter painter(&sprite);
-        painter.setPen(QPen(Qt::red, 2));
-        painter.drawRect(leftBoundAsset, topBoundAsset, widthAsset, heightAsset);
-        painter.setPen(QPen(Qt::green, 2));
-        painter.drawRect(leftBoundCharacter, topBoundCharacter, widthCharacter, heightCharacter);
-        if(sword_dims_!=nullptr){
-            painter.setPen(QPen(Qt::blue, 2));
-            painter.drawRect(leftBoundSword, topBoundSword, widthSword, heightSword);
-        }
-        
-    }
-    
-    qDebug() << "Hitbox bounds - Left:" << leftBoundAsset << "Right:" << rightBoundAsset 
-             << "Top:" << topBoundAsset << "Bottom:" << bottomBoundAsset 
-             << "Width:" << widthAsset << "Height:" << heightAsset;
-}
 
 void Character::update(int width)
 {
-    // Move character based on input
+    slide_time += time_between_frames/1000.0f; // slide_time also counts when not sliding
+    sword_attack_time += time_between_frames/1000.0f; // sword_attack_time also counts when not attacking
+    sword_attack_low_time += time_between_frames/1000.0f; // sword_attack_time also counts when not attacking
+    walk_step_time += time_between_frames/1000.0f; // walk_step_time always counts
+    if (projectile_attacking && !projectile->get_hit_finished()){
+        projectile_time += time_between_frames/1000.0f;
+        update_projectile();
+    }
     if (jumping) {
         update_jump();
     }
-    slide_time += time_between_frames/1000; // slide_time also counts when not sliding
-    if (sliding) {
+    else if (sliding) {
         update_slide();
     }
-    sword_attack_time += time_between_frames/1000; // sword_attack_time also counts when not attacking
-    if (sword_attacking){
-        update_sword_attack();
-    }
-    if (lowering){
+    else if (lowering){
         update_lower();
     }
-    walk_step_time += time_between_frames/1000; // walk_step_time always counts
-    if(moving){
+    else if (sword_attacking || sword_attacking_low){
+        update_sword_attack();
+    }
+    
+    else if(moving){
         update_move();
     } 
 
+    else if (!(idleFrame.isNull() | idle_dims.empty())) {
+        current_asset_dims = idle_dims;
+        current_character_dims = idle_character_dims;
+        currentSprite = &idleFrame;
+    }
+
     checkBounds(width);
     
+}
+
+void Character::update_projectile(){
+    if(projectile_time > total_projectile_time){
+        set_projectile_attacking(false);
+    }
+    projectile->update(time_between_frames/1000.0f, projectile_time, projectile_min_time);
 }
 
 void Character::update_jump(){
@@ -347,6 +168,9 @@ void Character::update_jump(){
         current_move_frame = (int)(normalized * (num_frames - 1));
         current_move_frame = std::max(0, std::min(current_move_frame, num_frames - 1));
     }
+    currentSprite = &jump_frames[current_move_frame];
+    current_asset_dims = jump_frames_asset_dims[current_move_frame];
+    current_character_dims = jump_frames_character_dims[current_move_frame];
 }
 
 
@@ -364,9 +188,16 @@ void Character::update_lower(){
         } else if (lowering_stop){
             lowering_stop = false;
             lowering = false;
+            normalized = 0.0;
+            if(sword_attacking_low){
+                sword_attack_low_time = 0.0f;
+            }
         }
         current_move_frame = (int)(normalized * (num_frames - 1));
     }
+    currentSprite = &lower_frames[current_move_frame];
+    current_asset_dims = lower_frames_asset_dims[current_move_frame];
+    current_character_dims = lower_frames_character_dims[current_move_frame];
 }
 
 
@@ -382,41 +213,86 @@ void Character::update_slide(){
     } else {
         // Calculate which frame to show based on elapsed time
         if (!slide_frames.isEmpty()) {
-            int target_frame = (int)((slide_time / total_slide_time) * slide_frames.size());
+            float p = slide_time / total_slide_time;
+            int target_frame = (int)(pow(p, 0.5f) * slide_frames.size());
             current_move_frame = std::min(target_frame, (int)slide_frames.size() - 1);
+            float delta_x = (static_cast<float>(facingRight)-0.5)*slide_dist*(1-p)*(1-p);
+            pos.x+= delta_x;
+            pos_exp.x+= delta_x;
         }
         
         // No horizontal movement during slide, just maintain direction
     }
+    currentSprite = &slide_frames[current_move_frame];
+    current_asset_dims = slide_frames_asset_dims[current_move_frame];
+    current_character_dims = slide_frames_character_dims[current_move_frame];
+    currentSprite = &slide_frames[current_move_frame];
 }
 
 void Character::update_sword_attack(){
-    if(sword_attack_time > total_sword_attack_time) {
-        sword_attacking = false;
-        sword_attack_time = 0.0;
+    
+    float *attack_time;
+    float *total_attack_time;
+    float *attack_dist = &sword_attack_dist;
+    bool *s_attacking;
+    QVector<QPixmap> *attack_frames;
+    vector<vector<float>> *attack_frames_asset_dims;
+    vector<vector<float>> *attack_frames_character_dims;
+    vector<vector<float>> *attack_frames_sword_dims;
+
+
+    if(sword_attacking_low){
+        attack_time = &sword_attack_low_time;
+        total_attack_time = &total_sword_attack_low_time;
+        attack_dist = &sword_attack_low_dist;
+        s_attacking = &sword_attacking_low;
+        attack_frames = &sword_attack_low_frames;
+        attack_frames_asset_dims = &sword_attack_low_frames_asset_dims;
+        attack_frames_character_dims = &sword_attack_low_frames_character_dims;
+        attack_frames_sword_dims = &sword_attack_low_frames_sword_dims;
+        
+    } else {
+        
+        attack_time = &sword_attack_time;
+        total_attack_time = &total_sword_attack_time;
+        attack_dist = &sword_attack_dist;
+        s_attacking = &sword_attacking;
+        attack_frames = &sword_attack_frames;
+        attack_frames_asset_dims = &sword_attack_frames_asset_dims;
+        attack_frames_character_dims = &sword_attack_frames_character_dims;
+        attack_frames_sword_dims = &sword_attack_frames_sword_dims;
+    }
+    if(*attack_time > *total_attack_time) {
+        *s_attacking = false;
+        attacking = false;
+        *attack_time = 0.0;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
-            moving = true;
+            moving = true;  
         }
-    } else {
+    } else {    
         // Calculate which frame to show based on elapsed time
-        if (!sword_attack_frames.isEmpty()) {
-            float percentage = sword_attack_time / total_sword_attack_time;
-            int target_frame = (int)(percentage * sword_attack_frames.size());
+        if (!(*attack_frames).isEmpty()) {
+            float percentage = *attack_time / *total_attack_time;
+            int target_frame = (int)(percentage * (*attack_frames).size());
             if(percentage<0.5){
-                pos.x+=(facingRight-0.5)*2.0*0.6;
-                pos_exp.x+=(facingRight-0.5)*2.0*0.6;
+                pos.x+=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
+                pos_exp.x+=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
             } else{
-                pos.x-=(facingRight-0.5)*2.0*0.6;
-                pos_exp.x-=(facingRight-0.5)*2.0*0.6;
-            }
-            
-            current_move_frame = std::min(target_frame, (int)sword_attack_frames.size() - 1);
+                pos.x-=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
+                pos_exp.x-=(static_cast<float>(facingRight)-0.5)*(*attack_dist);
+            }               
+            current_move_frame = std::min(target_frame, (int)(*attack_frames).size() - 1);
+            currentSprite = &(*attack_frames)[current_move_frame];
+            current_asset_dims = (*attack_frames_asset_dims)[current_move_frame];
+            current_character_dims = (*attack_frames_character_dims)[current_move_frame];
+            current_sword_dims = (*attack_frames_sword_dims)[current_move_frame];
         }
         
         // No horizontal movement during slide, just maintain direction
     }
+    
 }
 
 void Character::update_move(){
@@ -440,50 +316,26 @@ void Character::update_move(){
         current_move_frame = 0;
         walk_step_time = 0.0;
     }
+    currentSprite = &move_frames[current_move_frame];
+    current_asset_dims = move_frames_asset_dims[current_move_frame];
+    current_character_dims = move_frames_character_dims[current_move_frame];
+}
+
+void Character::set_hp(float hp_) {
+    float real_hp = hp_;
+    if (hp_ < 0) {
+        is_dead = true;
+        real_hp = 0.0;
+    } else if (hp_ > max_hp) {
+        real_hp = max_hp;
+    } 
+    hp = real_hp; 
+    lifebar->set_percentage(real_hp/max_hp);
 }
 
 void Character::draw(QPainter &painter)
 {
-    
-    float delta_x = 0.0;
 
-    if (moving && !move_frames.isEmpty()) {
-        currentSprite = &move_frames[current_move_frame];
-        current_asset_dims = move_frames_asset_dims[current_move_frame];
-        current_character_dims = move_frames_character_dims[current_move_frame];
-    } else if (jumping && !jump_frames.isEmpty()) {
-        currentSprite = &jump_frames[current_move_frame];
-        current_asset_dims = jump_frames_asset_dims[current_move_frame];
-        current_character_dims = jump_frames_character_dims[current_move_frame];
-    } else if (sliding && !slide_frames.isEmpty()) {
-        delta_x = get_x_sliding(slide_time);
-        currentSprite = &slide_frames[current_move_frame];
-        // Use move_frames dims since slide doesn't have its own
-        if (!move_frames_asset_dims.empty() && !move_frames_character_dims.empty()) {
-            current_asset_dims = move_frames_asset_dims[0];
-            current_character_dims = move_frames_character_dims[0];
-        }
-        if (slide_dir == "right") {
-            x += delta_x;
-        } else {
-            x-= delta_x;
-        }
-    } else if (lowering && !lower_frames.isEmpty()) {
-        currentSprite = &lower_frames[current_move_frame];
-        current_asset_dims = lower_frames_asset_dims[current_move_frame];
-        current_character_dims = lower_frames_character_dims[current_move_frame];
-    } else if (sword_attacking && !sword_attack_frames.isEmpty()) {
-        currentSprite = &sword_attack_frames[current_move_frame];
-        current_asset_dims = sword_attack_frames_asset_dims[current_move_frame];
-        current_character_dims = sword_attack_frames_character_dims[current_move_frame];
-        current_sword_dims = sword_attack_frames_sword_dims[current_move_frame];
-        
-    } else if (!(idleFrame.isNull() | idle_dims.empty())) {
-        current_asset_dims = idle_dims;
-        current_character_dims = idle_character_dims;
-        currentSprite = &idleFrame;
-    }
-    
     // Update dims based on current sprite
     if (currentSprite && !currentSprite->isNull()) {
         set_w(2*current_asset_dims[2]);
@@ -504,10 +356,13 @@ void Character::draw(QPainter &painter)
         painter.restore();
     }   
     lifebar->draw(painter);
+    if(projectile_attacking) {
+        projectile->draw(painter);
+    }
 }
 
 void Character::handle_rotate(QPainter &painter){
-    if(sliding || sword_attacking){
+    if(sliding || attacking){
         if (slide_dir=="left" || sword_attack_dir == "left"){
             painter.translate(get_x(), get_y());
             painter.scale(-1, 1);
@@ -557,11 +412,17 @@ void Character::set_left(bool l)
 
 void Character::set_jumping(bool jumping_)
 {
+    if(jumping && jumping_){
+        double_jumping = jumping_;
+    }
     jumping = jumping_;
     current_move_frame = 0;
     sliding = false;
     if (jumping_) {
         set_v_y(-speed_jump);
+    }
+    else{
+        double_jumping = false;;
     }
 }
 
@@ -569,9 +430,7 @@ void Character::set_sliding(bool s)
 {
     if (slide_time > time_between_slides) {
         moving = false;
-        qDebug() << "set true";
-        qDebug() << "Sliding = " << sliding;
-        qDebug() << "slide_time" << slide_time << ">" << time_between_slides;
+
         sliding = s;
         slide_time = 0.0;
         current_move_frame = 0;
@@ -585,10 +444,9 @@ void Character::set_sliding(bool s)
     }
 }
 
-void Character::set_lowering(bool s)
+void Character::set_lowering(bool s , bool combo)
 {
 
-    qDebug()<<s;
     if(lowering != s) {
         lower_time = 0.0f;
     }
@@ -597,8 +455,15 @@ void Character::set_lowering(bool s)
         lowering_start = true;
         lowering_stop = false;
     } else {
-        lowering_start = false;
-        lowering_stop = true;
+        if (combo) {
+            lowering = false;
+            lowering_start = false;
+            lowering_stop = false;
+        } else {
+            lowering = false;
+            lowering_start = false;
+            lowering_stop = true;
+        }
     }
 }
 
@@ -615,6 +480,39 @@ void Character::set_sword_attacking(bool a)
         sword_attack_dir = facingRight ? "right" : "left";
         
     }
+}
+
+void Character::set_sword_attacking_low(bool a)
+{
+    if (sword_attack_low_time > time_between_sword_attacks_low) {
+        moving = false;
+        sword_attacking_low = a;
+        first_hit_sword_attack = true;
+        attacking = a;
+        sword_attack_low_time = 0.0;
+        current_move_frame = 0;
+        
+        sword_attack_dir = facingRight ? "right" : "left";
+        
+    }
+}
+
+void Character::set_projectile_attacking(bool a) {
+    if(a && projectile_time>projectile_min_time){
+        projectile_attacking = a;
+        projectile_time = 0.0;
+        projectile->set_hit_started(false);
+        projectile->set_hit_finished(false);
+        projectile->set_disparition_time(0.0);
+        projectile->set_x(get_x());
+        projectile->set_y(get_y() - get_h()/2.0);
+        float v_projectile = 1000.0f;
+        projectile->set_v_x(v_projectile * 2.0f * (static_cast<float>(facingRight) - 0.5f));
+    } else if(!a) {
+        projectile_attacking = a;
+        projectile_time = projectile_min_time + 0.1;
+    }
+    
 }
 
 
