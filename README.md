@@ -4,7 +4,7 @@ A 2D fighting game developed as a school project using C++ and Qt framework. Bat
 
 ## Gameplay Overview
 
-<video src="resources/videos/gameplay.mp4" controls style="max-width: 100%;"></video>
+![Gameplay](resources/videos/gameplay.gif)
 
 *Two players battle it out in this fast-paced fighting game!*
 
@@ -80,7 +80,7 @@ Execute a powerful sword strike to damage your opponent. Each character has uniq
 
 ## Debugging - Hitbox Visualization
 
-<video src="resources/videos/bounding_boxes.mp4" controls style="max-width: 100%;"></video>
+![Hitbox Debug](resources/videos/bounding_boxes.gif)
 
 For debugging purposes, you can enable hitbox visualization by setting `draw_boxes` to `true` in the Character class. This will display:
 - **Red boxes**: Asset/sprite boundaries
