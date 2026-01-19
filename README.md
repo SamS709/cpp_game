@@ -4,7 +4,7 @@ A 2D fighting game developed as a school project using C++ and Qt framework. Bat
 
 ## Gameplay Overview
 
-https://github.com/user-attachments/assets/gameplay.mp4
+<video src="resources/videos/gameplay.mp4" controls style="max-width: 100%;"></video>
 
 *Two players battle it out in this fast-paced fighting game!*
 
@@ -32,17 +32,17 @@ https://github.com/user-attachments/assets/gameplay.mp4
 
 Collect power-ups that spawn randomly on the battlefield to gain advantages!
 
-### Bomb Bonus 💣
+### Bomb Bonus 
 ![Bomb Bonus](resources/images/readme/bonus_bomb.png)
 
 Spawns multiple bombs that explode after a short delay, dealing damage to your opponent.
 
-### Speed Boost ⚡
+### Speed Boost 
 ![Speed Bonus](resources/images/readme/bonus_speed.png)
 
 Temporarily increases your movement speed for a limited time.
 
-### Health Pack ❤️
+### Health Pack 
 ![Life Bonus](resources/images/readme/bonus_life.png)
 
 Restores health points instantly.
@@ -59,28 +59,28 @@ The health bar dynamically changes color based on remaining health:
 ## Character Actions
 
 ### Jump
-![Jump](resources/images/readme/jump.png)
+<img src="resources/images/readme/jump.png" alt="Jump" style="max-width: 400px;">
 
 Press the jump key to leap into the air. Can perform a double jump while airborne for enhanced mobility.
 
 ### Slide
-![Slide](resources/images/readme/slide.png)
+<img src="resources/images/readme/slide.png" alt="Slide" style="max-width: 400px;">
 
 Press down while running to perform a sliding move that allows you to evade attacks and move quickly under opponents.
 
 ### Sword Attack
-![Sword Attack](resources/images/readme/sword_attack.png)
+<img src="resources/images/readme/sword_attack.png" alt="Sword Attack" style="max-width: 400px;">
 
 Execute a powerful sword strike to damage your opponent. Each character has unique sword attack animations.
 
 ### Low Sword Attack (Combo)
-![Sword Attack Low](resources/images/readme/sword_attack_low.png)
+<img src="resources/images/readme/sword_attack_low.png" alt="Sword Attack Low" style="max-width: 400px;">
 
 **Special Combo**: Press **Down** and **Sword Attack** keys simultaneously while crouching to perform a low sword attack. This ground-level attack can catch opponents off-guard!
 
 ## Debugging - Hitbox Visualization
 
-https://github.com/user-attachments/assets/bounding_boxes.mp4
+<video src="resources/videos/bounding_boxes.mp4" controls style="max-width: 100%;"></video>
 
 For debugging purposes, you can enable hitbox visualization by setting `draw_boxes` to `true` in the Character class. This will display:
 - **Red boxes**: Asset/sprite boundaries
