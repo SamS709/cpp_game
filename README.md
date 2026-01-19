@@ -58,11 +58,6 @@ The health bar dynamically changes color based on remaining health:
 
 ## Character Actions
 
-<<<<<<< HEAD
-The animations are made using sequence of pngs, loaded as QPixmap, stores in QVector (one per action). Each frame (QPixmap) am is chooseen programatically depending on the action.
-
-=======
->>>>>>> dev
 ### Jump
 <img src="resources/images/readme/jump.png" alt="Jump" width="200">
 
@@ -105,16 +100,65 @@ The game uses **Position-Based Dynamics** for realistic physics simulation, prov
 
 ## Building the Project
 
-1. Ensure you have Qt 6.10+ installed
-2. Configure CMake:
-   ```bash
-   cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=<path_to_qt>
+### Prerequisites
+- Qt 6.10+ installed
+- CMake 3.16+
+- Ninja build tool (or use default generator)
+
+### Windows
+
+1. Set up environment and configure CMake:
+   ```powershell
+   $env:PATH = "C:\Qt\Tools\mingw1310_64\bin;C:\Qt\Tools\Ninja;C:\Qt\Tools\CMake_64\bin;$env:PATH"
+   C:/Qt/Tools/CMake_64/bin/cmake.exe -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=C:/Qt/6.10.1/mingw_64 -DCMAKE_MAKE_PROGRAM=C:/Qt/Tools/Ninja/ninja.exe
    ```
-3. Build:
+
+2. Build:
+   ```powershell
+   $env:PATH = "C:\Qt\Tools\mingw1310_64\bin;C:\Qt\Tools\Ninja;C:\Qt\Tools\CMake_64\bin;$env:PATH"
+   C:/Qt/Tools/CMake_64/bin/cmake.exe --build build
+   ```
+
+3. Run:
+   ```powershell
+   .\build\Stickman.exe
+   ```
+
+### macOS
+
+1. Configure CMake:
+   ```bash
+   cmake -S . -B build -DCMAKE_PREFIX_PATH=~/Qt/6.10.1/macos
+   ```
+
+2. Build:
    ```bash
    cmake --build build
    ```
-4. Run the executable from the build directory
+
+3. Run:
+   ```bash
+   open build/Stickman.app
+   ```
+
+### Linux
+
+1. Configure CMake:
+   ```bash
+   cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/Qt/6.10.1/gcc_64
+   ```
+
+2. Build:
+   ```bash
+   cmake --build build
+   ```
+
+3. Run:
+   ```bash
+   ./build/Stickman
+   ```
+
+**Note**: Replace the Qt path with your actual Qt installation directory.
 
 ## Future Improvements
 

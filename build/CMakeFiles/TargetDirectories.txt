@@ -1,0 +1,9 @@
+D:/Dev/cours/cpp_game/build/CMakeFiles/Stickman.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/edit_cache.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/rebuild_cache.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/list_install_components.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/install.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/install/local.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/install/strip.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/Stickman_autogen_timestamp_deps.dir
+D:/Dev/cours/cpp_game/build/CMakeFiles/Stickman_autogen.dir
