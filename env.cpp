@@ -284,7 +284,7 @@ void Env::keyPressEvent(QKeyEvent *event){
 
     // Character 1 controls 
     if (event->key() == Qt::Key_Up) {
-        if (!c1->get_jumping()) {
+        if (!c1->get_double_jumping()) {
             c1->set_moving(false);
             c1->set_sword_attacking(false);
             c1->set_jumping(true);            
@@ -321,10 +321,19 @@ void Env::keyPressEvent(QKeyEvent *event){
 
         }
     } if (event->key() == Qt::Key_0) {
-        c1->set_lowering(false);
+        if(c1->get_lowering()){
+            c1->set_sword_attacking_low(true);
+        } else {
+            c1->set_sword_attacking(true);
+        }
+        c1->set_lowering(false, true);
         c1->set_sliding(false);
         c1->set_jumping(false);
-        c1->set_sword_attacking(true);
+        
+        
+    } if (event->key() == Qt::Key_1) {
+        c1->set_projectile_attacking(true);
+        
         
     }
     
@@ -416,6 +425,7 @@ void Env::keyReleaseEvent(QKeyEvent *event){
         c1->set_lowering(false);
     } else if (event->key() == Qt::Key_0) {
         c1->set_sword_attacking(false);
+        c1->set_sword_attacking_low(false);
     }
     
     // Character 2 key releases
