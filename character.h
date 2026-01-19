@@ -16,7 +16,7 @@ using namespace std;
 class Character: public MovableRectangle
 {
 public:
-    Character(Vec2 pos_, float time_betwwen_frames_, float mass, float max_hp_);
+    Character(Vec2 pos_, float time_betwwen_frames_, float mass, float max_hp_, vector<int> color_);
     
     void loadSpriteFrames(const QString &basePath);
     void load_jump_frames(const QString &basePath);

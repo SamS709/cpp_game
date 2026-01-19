@@ -82,6 +82,7 @@ class BonusBox: public Rectangle {
 public:
 
     void set_bonus(int b) {b = b;}
+    void load_sprites(const VisualContainer *vc);
     int get_bonus() const { return b; }
     void draw(QPainter &painter) override;
     void update(std::vector<MovableCircle*>& particles);

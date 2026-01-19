@@ -36,7 +36,12 @@ void Lifebar::draw(QPainter &painter) {
     }
     // qDebug()<<sprite.width();
     painter.setPen(Qt::NoPen);
-    painter.setBrush(get_color());
+    
+    // Create color gradient from red (p=0) to green (p=1)
+    int red = static_cast<int>(255 * (1.0f - 3.0f/4.0f * p));
+    int green = static_cast<int>(255 * 3.0f/4.0f * p);
+    painter.setBrush(QColor(red, green, 50));
+    
     painter.drawRect(get_x() + 2 * offset + sprite.width() * 1.5, get_y(), get_w() * p, get_h());
     painter.setPen(QPen(Qt::black, 2));
     painter.setBrush(Qt::NoBrush);
@@ -119,17 +124,10 @@ BonusBox::BonusBox(int b_, const VisualContainer *vc, float dt_)
     dt(dt_)
     , bomb_sprites(vc->bomb_sprites)
     {
-        sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
-        sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
-        sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
-        if(b == 0) {
-            set_color(255, 50, 50, 255);
-        } else if(b == 1) {
-            set_color(50, 50, 255, 255);
-        } else if(b == 2) {
-            set_color(50, 255, 50, 255);
-        }
+        load_sprites(vc);
     }
+
+
 
 BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 dims_, float dt_)
     :Rectangle(Vec2(dims_.y, dims_.y))
@@ -137,16 +135,7 @@ BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 dims_, float dt_)
     dt(dt_)
     , bomb_sprites(vc->bomb_sprites)
     {
-        sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
-        sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
-        sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
-        if(b == 0) {
-            set_color(255, 50, 50, 255);
-        } else if(b == 1) {
-            set_color(50, 50, 255, 255);
-        } else if(b == 2) {
-            set_color(50, 255, 50, 255);
-        }
+        load_sprites(vc);
     }
 BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 pos_, Vec2 dims_, float dt_)
     :Rectangle(pos_, Vec2(dims_.y, dims_.y))
@@ -154,17 +143,21 @@ BonusBox::BonusBox(int b_, const VisualContainer *vc, Vec2 pos_, Vec2 dims_, flo
     dt(dt_)
     , bomb_sprites(vc->bomb_sprites)
     {
-        sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
-        sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
-        sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
-        if(b == 0) {
-            set_color(200, 50, 50, 255);
-        } else if(b == 1) {
-            set_color(50, 50, 200, 255);
-        } else if(b == 2) {
-            set_color(100, 200, 100, 255);
-        }
+        load_sprites(vc);
     }
+
+void BonusBox::load_sprites(const VisualContainer *vc){
+    sprites.append(bomb_sprites[0].scaledToHeight(dims.y, Qt::SmoothTransformation));
+    sprites.append(vc->speed_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+    sprites.append(vc->hp_sprite.scaledToHeight(dims.y, Qt::SmoothTransformation));
+    if(b == 0) {
+        set_color(200, 100, 100, 255);
+    } else if(b == 1) {
+        set_color(100, 100, 200, 255);
+    } else if(b == 2) {
+        set_color(100, 200, 100, 255);
+    }
+}
 
 void BonusBox::activate(Character& character, std::vector<MovableCircle*>& particles, int j){
     activated = true;

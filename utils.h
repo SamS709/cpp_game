@@ -14,7 +14,7 @@ using namespace std;
 
 class SpriteLoader {
 public:
-    SpriteLoader(float scale = 100.0f, bool draw_boxes = false);
+    SpriteLoader(float scale = 100.0f, bool draw_boxes = false, QColor color_ = QColor(0,0,0,0));
     
     // Load a sequence of sprites with automatic hitbox detection
     bool loadSequence(
@@ -51,6 +51,7 @@ public:
 private:
     float c_scale;
     bool draw_boxes;
+    QColor color;
     
     // Helper functions for pixel detection
     bool isAssetPixel(QRgb pixel);

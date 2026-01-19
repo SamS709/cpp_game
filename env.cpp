@@ -65,7 +65,9 @@ void Env::load_env_assets(){
     Vec2 pos = Vec2(width / 2 - 200, height/2);
     Vec2 dims = Vec2(400.0, 100.0);
     // Ground
-    assets.push_back(std::make_unique<Rectangle>(Vec2(-100.0, height - ground_height), Vec2(width + 200.0, ground_height)));
+    std::unique_ptr<Rectangle> ground = std::make_unique<Rectangle>(Vec2(-100.0, height - ground_height), Vec2(width + 200.0, ground_height));
+    ground->set_color(150,150,150,255);
+    assets.push_back(std::move(ground));
     // Platforms
     float platfor_width = 100.0f;
     std::unique_ptr<Rectangle> p1 = std::make_unique<Rectangle>(Vec2(150.0, height-height/3.0), Vec2(platfor_width,25.0));

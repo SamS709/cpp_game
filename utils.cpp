@@ -1,8 +1,9 @@
 #include "utils.h"
 
-SpriteLoader::SpriteLoader(float scale, bool draw_boxes)
+SpriteLoader::SpriteLoader(float scale, bool draw_boxes, QColor color_)
     : c_scale(scale)
     , draw_boxes(draw_boxes)
+    , color(color_)
 {
 }
 
@@ -103,7 +104,9 @@ void SpriteLoader::set_hitbox(
             }
             if (leftBoundCharacter == width && isCharacterPixel(pixel)) {
                 leftBoundCharacter = x;
+                
             }
+            
             if (leftBoundSword == width && isSwordPixel(pixel)) {
                 leftBoundSword = x;
             }
@@ -164,6 +167,9 @@ void SpriteLoader::set_hitbox(
             if (bottomBoundSword == 0 && isSwordPixel(pixel)) {
                 bottomBoundSword = y;
             }
+            if(color.alpha() != 0 && isCharacterPixel(pixel)) {
+                image.setPixel(x, y, color.rgba());
+            }
         }
     }
     
@@ -206,6 +212,9 @@ void SpriteLoader::set_hitbox(
         });
     }
     
+    // Convert modified image back to sprite
+    sprite = QPixmap::fromImage(image);
+    
     // Draw bounding boxes if enabled
     if (draw_boxes) {
         QPainter painter(&sprite);
@@ -232,7 +241,7 @@ bool SpriteLoader::isCharacterPixel(QRgb pixel) {
     int r = qRed(pixel);
     int g = qGreen(pixel);
     int b = qBlue(pixel);
-    return (r < 5 && g < 5 && b < 5);
+    return (r > 150 && g < 150 && b < 150);
 }
 
 bool SpriteLoader::isSwordPixel(QRgb pixel) {

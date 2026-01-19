@@ -1,7 +1,7 @@
 #include "character.h"
 #include "utils.h"
 
-Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float max_hp_)
+Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float max_hp_, vector<int> color_)
     : MovableRectangle(mass)
     , time_between_frames(time_betwwen_frames_)
     , max_hp(max_hp_)
@@ -16,6 +16,7 @@ Character::Character(Vec2 pos_, float time_betwwen_frames_, float mass_, float m
     , framesPerSprite(100)  // Change sprite every 5 updates (~12 FPS at 60 FPS)
     , jump_height(500)
 {
+    set_color(color_[0], color_[1], color_[2], color_[3]);
     loadSpriteFrames("resources/images/characters/redhat");
     current_asset_dims = move_frames_asset_dims[0];
     lifebar = new Lifebar(Vec2(100,20));
@@ -43,7 +44,7 @@ void Character::loadSpriteFrames(const QString &basePath)
 }
 
 void Character::load_move_frames(const QString &basePath){
-    SpriteLoader loader(c_scale, draw_baxes);
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
     loader.loadSequence(basePath, "walk", 1, 39, move_frames, move_frames_asset_dims, move_frames_character_dims);
     
     // Use first move frame as idle frame
@@ -56,12 +57,12 @@ void Character::load_move_frames(const QString &basePath){
 }
 
 void Character::load_jump_frames(const QString &basePath){
-    SpriteLoader loader(c_scale, draw_baxes);
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
     loader.loadSequence(basePath, "jump", 0, 63, jump_frames, jump_frames_asset_dims, jump_frames_character_dims);
 }
 
 void Character::load_slide_frames(const QString &basePath){
-    SpriteLoader loader(c_scale, draw_baxes);
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
     loader.loadSequence(basePath, "slide", 0, 29, slide_frames, slide_frames_asset_dims, slide_frames_character_dims);
 }
 
@@ -71,7 +72,7 @@ void Character::load_lower_frames(const QString &basePath){
 }
 
 void Character::load_sword_attack_frames(const QString &basePath){
-    SpriteLoader loader(c_scale, draw_baxes);
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
     loader.loadSequence(basePath, "sword_attack", 1, 53, sword_attack_frames, 
                        sword_attack_frames_asset_dims, sword_attack_frames_character_dims, 
                        &sword_attack_frames_sword_dims);
@@ -87,7 +88,7 @@ void Character::load_sword_attack_frames(const QString &basePath){
 }
 
 void Character::load_sword_attack_low_frames(const QString &basePath){
-    SpriteLoader loader(c_scale, draw_baxes);
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
     loader.loadSequence(basePath, "sword_attack_low", 1, 17, sword_attack_low_frames, 
                        sword_attack_low_frames_asset_dims, sword_attack_low_frames_character_dims, 
                        &sword_attack_low_frames_sword_dims);

@@ -394,7 +394,7 @@ void Collider::check_contact_character_projectile(const Character* character1, C
     float char_x = character2->get_x();
     float char_y = character2->get_y();
     float char_w = 0.0;
-    float char_h = 2.0 * char_dims[2];
+    float char_h = 2.0 * char_dims[3];
     
     // Character rectangle bounds: x to x+w (horizontal), y-h to y (vertical, y points down)
     float rect_left = char_x;
