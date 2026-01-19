@@ -59,22 +59,22 @@ The health bar dynamically changes color based on remaining health:
 ## Character Actions
 
 ### Jump
-<img src="resources/images/readme/jump.png" alt="Jump" style="max-width: 400px;">
+<img src="resources/images/readme/jump.png" alt="Jump" style="max-width: 200px;">
 
 Press the jump key to leap into the air. Can perform a double jump while airborne for enhanced mobility.
 
 ### Slide
-<img src="resources/images/readme/slide.png" alt="Slide" style="max-width: 400px;">
+<img src="resources/images/readme/slide.png" alt="Slide" style="max-width: 200px;">
 
 Press down while running to perform a sliding move that allows you to evade attacks and move quickly under opponents.
 
 ### Sword Attack
-<img src="resources/images/readme/sword_attack.png" alt="Sword Attack" style="max-width: 400px;">
+<img src="resources/images/readme/sword_attack.png" alt="Sword Attack" style="max-width: 200px;">
 
 Execute a powerful sword strike to damage your opponent. Each character has unique sword attack animations.
 
 ### Low Sword Attack (Combo)
-<img src="resources/images/readme/sword_attack_low.png" alt="Sword Attack Low" style="max-width: 400px;">
+<img src="resources/images/readme/sword_attack_low.png" alt="Sword Attack Low" style="max-width: 200px;">
 
 **Special Combo**: Press **Down** and **Sword Attack** keys simultaneously while crouching to perform a low sword attack. This ground-level attack can catch opponents off-guard!
 
