@@ -59,22 +59,22 @@ The health bar dynamically changes color based on remaining health:
 ## Character Actions
 
 ### Jump
-<img src="resources/images/readme/jump.png" alt="Jump" style="max-width: 200px;">
+<img src="resources/images/readme/jump.png" alt="Jump" width="200">
 
 Press the jump key to leap into the air. Can perform a double jump while airborne for enhanced mobility.
 
 ### Slide
-<img src="resources/images/readme/slide.png" alt="Slide" style="max-width: 200px;">
+<img src="resources/images/readme/slide.png" alt="Slide" width="200">
 
 Press down while running to perform a sliding move that allows you to evade attacks and move quickly under opponents.
 
 ### Sword Attack
-<img src="resources/images/readme/sword_attack.png" alt="Sword Attack" style="max-width: 200px;">
+<img src="resources/images/readme/sword_attack.png" alt="Sword Attack" width="200">
 
 Execute a powerful sword strike to damage your opponent. Each character has unique sword attack animations.
 
 ### Low Sword Attack (Combo)
-<img src="resources/images/readme/sword_attack_low.png" alt="Sword Attack Low" style="max-width: 200px;">
+<img src="resources/images/readme/sword_attack_low.png" alt="Sword Attack Low" width="200">
 
 **Special Combo**: Press **Down** and **Sword Attack** keys simultaneously while crouching to perform a low sword attack. This ground-level attack can catch opponents off-guard!
 
@@ -110,6 +110,10 @@ The game uses **Position-Based Dynamics** for realistic physics simulation, prov
    cmake --build build
    ```
 4. Run the executable from the build directory
+
+## Future Improvements
+
+This game is currently in development and far from being finished. As an AI enthusiast, my ultimate goal is to implement **Reinforcement Learning (RL)** to train a "super" agent that can master the game mechanics and defeat any opponent. 
 
 ---
 
