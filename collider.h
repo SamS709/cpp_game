@@ -57,6 +57,9 @@ private:
 
     void add_dynamic_contact_constraints(const std::vector<MovableCircle*>& particles, const std::vector<Character*>& characters);
     void check_contact_character_projectile(const Character* character1, Character* character2);
+    bool check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2);
+    void handle_sword_attack(Character* attacker, Character* defender);
+    void handle_attacks(Character* c1, Character* c2);
     void resolve_dynamic_constraints_particles(const std::vector<MovableCircle*>& particles);
     void enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2);
 

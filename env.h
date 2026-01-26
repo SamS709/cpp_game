@@ -23,7 +23,7 @@ class Env {
 public:
     Env(Character *c1_, Character *c2_, float dt_, float width_, float height_);
     ~Env();
-    void update(int width);
+    void update(int width); 
     void paint(QPainter *painter);
     void mousePressEvent(QMouseEvent* event);
     void keyPressEvent(QKeyEvent *event);
@@ -38,11 +38,8 @@ public:
 
     
     void draw_assets(QPainter &painter);
-    void handle_attacks();
     void update_bonuses();
-    void handle_sword_attack(Character* attacker, Character* defender);
 
-    bool check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2);
 
 private:
     Character *c1;

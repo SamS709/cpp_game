@@ -368,7 +368,7 @@ void Collider::add_dynamic_contact_constraints(const std::vector<MovableCircle*>
     for (int i = 0; i < characters.size(); i++){
         for(int j = 0; j < characters.size(); j++) {
             if(j != i){
-                check_contact_character_projectile(characters[i], characters[j]);
+                handle_attacks(characters[i], characters[j]);
             }
         }
     }
@@ -429,6 +429,59 @@ void Collider::resolve_dynamic_constraints_particles(const std::vector<MovableCi
         }
     } 
 }
+
+bool Collider::check_rectangles_overlap(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2) {
+    return (x1 <= x2 + w2 && x1 + w1 >= x2 && y1 <= y2 + h2 && y1 + h1 >= y2);
+}
+
+
+void Collider::handle_sword_attack(Character* attacker, Character* defender){
+    // Check if sword dims are available
+    if (attacker->get_current_sword_dims().empty() || defender->get_current_character_dims().empty() || defender->get_current_asset_dims().empty()) {
+        return;
+    }
+    float x_character_offset;
+    float x_sword_offset;
+    if(defender->get_right()){
+        x_character_offset = defender->get_current_character_dims()[0] - defender->get_current_asset_dims()[0] - defender->get_current_asset_dims()[2];
+    }
+    else {
+        x_character_offset = defender->get_current_asset_dims()[0] + defender->get_current_asset_dims()[2] - defender->get_current_character_dims()[0] - 2.0 * defender->get_current_character_dims()[2];
+    }
+    if(attacker->get_right()){
+        x_sword_offset = attacker->get_current_sword_dims()[0] - attacker->get_current_asset_dims()[0] - attacker->get_current_asset_dims()[2];
+    }
+    else {
+        x_sword_offset = attacker->get_current_asset_dims()[0] + attacker->get_current_asset_dims()[2] - attacker->get_current_sword_dims()[0] - 2.0 * attacker->get_current_sword_dims()[2];
+    }
+    
+    float x_sword = attacker->get_x() + x_sword_offset;
+    float y_sword = attacker->get_y() - attacker->get_current_asset_dims()[1] - 2.0 * attacker->get_current_asset_dims()[3] + attacker->get_current_sword_dims()[1];
+    float w_sword = 2.0 * attacker->get_current_sword_dims()[2];
+    float h_sword = 2.0 * attacker->get_current_sword_dims()[3];
+    // Attacked character dims
+    float x_character = defender->get_x() + x_character_offset;
+    float y_character = defender->get_y() - defender->get_current_asset_dims()[1] - 2.0 * defender->get_current_asset_dims()[3] + defender->get_current_character_dims()[1];
+    float w_character = 2.0 * defender->get_current_character_dims()[2];
+    float h_character = 2.0 * defender->get_current_character_dims()[3];
+    
+    
+    if (check_rectangles_overlap(x_sword, y_sword, w_sword, h_sword, x_character, y_character, w_character, h_character)) {
+        qDebug()<<"Attack hit!";
+        attacker->set_first_hit_sword_attack(false);
+        defender->set_hp(defender->get_hp() - attacker->get_sword_attack_damages());
+    }
+}
+
+void Collider::handle_attacks(Character* c1, Character* c2){
+    check_contact_character_projectile(c1, c2);
+    if (c1->get_attacking()){
+        if ((c1->get_sword_attacking() || c1->get_sword_attacking_low()) && c1->get_first_hit_sword_attack()) {
+            handle_sword_attack(c1, c2);
+        }
+    }
+}
+
 
 
 void Collider::enforceDynamicConstraint(const DynamicConstraint& constraint, MovableCircle& p1, MovableCircle& p2) {
