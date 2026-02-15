@@ -57,7 +57,7 @@ private:
     float life_bar_width {100.0};
     float rest {0.8};
     float speed_move {75.0};
-    float speed_run; 
+    float speed_run {150.0}; 
     float speed_jump {1000.0};
     float bomb_damages {20.0};
     float projectile_damages {10.0};

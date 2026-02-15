@@ -35,11 +35,14 @@ void Character::set_lifebar_dims(float x, float y, float w, float h) {
 void Character::loadSpriteFrames(const QString &basePath)
 {
     load_move_frames(basePath);
+    load_run_frames(basePath);
     load_jump_frames(basePath); 
     load_slide_frames(basePath);
     load_lower_frames(basePath);
     load_sword_attack_frames(basePath);
     load_sword_attack_low_frames(basePath);
+    load_defend_attack_frames(basePath);
+    load_projectile_sprites(basePath);
     
 }
 
@@ -54,6 +57,12 @@ void Character::load_move_frames(const QString &basePath){
         idle_character_dims = move_frames_character_dims[5];
         qDebug() << "Loaded" << move_frames.size() << "sprite frames";
     }
+}
+
+void Character::load_run_frames(const QString &basePath){
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "run", 1, 39, run_frames, run_frames_asset_dims, run_frames_character_dims);
+    qDebug() << "Loaded" << run_frames.size() << "run frames";
 }
 
 void Character::load_jump_frames(const QString &basePath){
@@ -102,14 +111,41 @@ void Character::load_sword_attack_low_frames(const QString &basePath){
     }
 }
 
+void Character::load_defend_attack_frames(const QString &basePath){
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    loader.loadSequence(basePath, "defend_attack", 1, 50, defend_attack_frames, 
+                       defend_attack_frames_asset_dims, defend_attack_frames_character_dims, 
+                       &defend_attack_frames_sword_dims);
+    qDebug() << "Loaded" << defend_attack_frames.size() << "defend_attack frames";
+}
+
+void Character::load_projectile_sprites(const QString &basePath){
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
+    vector<vector<float>> asset_dims, character_dims;
+    loader.loadSequence(basePath, "projectile", 1, 2, 
+                       projectile_sprites, asset_dims, character_dims);
+    
+    // Initialize the projectile with the loaded sprites
+    projectile = new Projectile(projectile_sprites, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), 10.0f, 1.0f, 15.0f, 0.05f);
+}
+
 
 
 void Character::update(int width)
 {
+    if (!moving) {
+        time_until_move_button_released += time_between_frames/1000.0f;
+    }
+    if(runing) {
+        update_run();
+    } else {
+        time_without_runing += time_between_frames/1000.f;
+    }
     slide_time += time_between_frames/1000.0f; // slide_time also counts when not sliding
     sword_attack_time += time_between_frames/1000.0f; // sword_attack_time also counts when not attacking
     sword_attack_low_time += time_between_frames/1000.0f; // sword_attack_time also counts when not attacking
     walk_step_time += time_between_frames/1000.0f; // walk_step_time always counts
+    run_step_time += time_between_frames/1000.0f; // run_step_time always counts
     if (projectile_attacking && !projectile->get_hit_finished()){
         projectile_time += time_between_frames/1000.0f;
         update_projectile();
@@ -123,8 +159,13 @@ void Character::update(int width)
     else if (lowering){
         update_lower();
     }
+    else if (defending_attack){
+        update_defending_attack();
+    }
     else if (sword_attacking || sword_attacking_low){
         update_sword_attack();
+    } else if (defending_attack) {
+        update_defending_attack();
     }
     
     else if(moving){
@@ -149,7 +190,7 @@ void Character::update_projectile(){
 }
 
 void Character::update_jump(){
-    jump_time += time_between_frames/1000;
+    jump_time += time_between_frames/1000.0f;
     
     // Update animation frame based on velocity - smooth interpolation
     if (!jump_frames.isEmpty()) {
@@ -160,7 +201,7 @@ void Character::update_jump(){
         // v_y ranges from -jump_velocity (rising) to +jump_velocity (falling)
         // Map to frame 0 (start of jump) -> num_frames/2 (peak) -> num_frames-1 (landing)
         
-        float velocity_range = speed_jump * 2.0;  // Total velocity range
+        float velocity_range = speed_jump * 2.0f;  // Total velocity range
         float normalized = (v_y + speed_jump) / velocity_range;  // 0.0 to 1.0
         normalized = std::max(0.0f, std::min(1.0f, normalized));  // Clamp
         
@@ -177,10 +218,10 @@ void Character::update_jump(){
 void Character::update_lower(){
     lower_time += time_between_frames/1000;
     if (!lower_frames.isEmpty()) {
-        float normalized = 1.0;
+        float normalized = 1.0f;
         int num_frames = lower_frames.size();
         if (lower_time<total_lower_time){
-            if(lowering_start) {
+            if(lower_toggled) {
                 normalized = lower_time / total_lower_time;
             } else {
                 normalized = 1.0f - lower_time / total_lower_time;
@@ -188,7 +229,7 @@ void Character::update_lower(){
         } else if (lowering_stop){
             lowering_stop = false;
             lowering = false;
-            normalized = 0.0;
+            normalized = 0.0f;
             if(sword_attacking_low){
                 sword_attack_low_time = 0.0f;
             }
@@ -200,11 +241,35 @@ void Character::update_lower(){
     current_character_dims = lower_frames_character_dims[current_move_frame];
 }
 
+void Character::update_defending_attack(){
+    defending_attack_time += time_between_frames/1000;
+    if (!defend_attack_frames.isEmpty()) {
+        float normalized = 1.0f;
+        int num_frames = defend_attack_frames.size();
+        if (defending_attack_time<total_defending_attack_time){
+            if(defending_attack_toggled) {
+                normalized = defending_attack_time / total_defending_attack_time;
+            } else {
+                normalized = 1.0f - defending_attack_time / total_defending_attack_time;
+            }
+        } else if (defending_attack_stop){
+            defending_attack_stop = false;
+            defending_attack = false;
+            normalized = 0.0f;
+        }
+        current_move_frame = (int)(normalized * (num_frames - 1));
+    }
+    currentSprite = &defend_attack_frames[current_move_frame];
+    current_asset_dims = defend_attack_frames_asset_dims[current_move_frame];
+    current_character_dims = defend_attack_frames_character_dims[current_move_frame];
+    current_sword_dims = defend_attack_frames_sword_dims[current_move_frame];
+}
+
 
 void Character::update_slide(){
     if(slide_time > total_slide_time) {
         sliding = false;
-        slide_time = 0.0;
+        slide_time = 0.0f;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
@@ -265,7 +330,7 @@ void Character::update_sword_attack(){
     if(*attack_time > *total_attack_time) {
         *s_attacking = false;
         attacking = false;
-        *attack_time = 0.0;
+        *attack_time = 0.0f;
         current_move_frame = 0;
         // Resume moving if a direction key is still pressed
         if (right || left) {
@@ -295,6 +360,37 @@ void Character::update_sword_attack(){
     
 }
 
+void Character::update_run(){
+
+    run_time += time_between_frames/1000.0f;
+     if (run_frames.isEmpty()) {
+        // Fallback to move frames if run frames not loaded
+        update_move();
+        return;
+    }
+    moving = false;
+    
+    if (right) {
+        
+        float cycle_time = fmod(run_step_time, total_run_step_time);
+        int target_frame = (int)((cycle_time / total_run_step_time) * run_frames.size());
+        current_move_frame = std::min(target_frame, (int)run_frames.size() - 1);
+        
+    } else if (left) {
+        
+        float cycle_time = fmod(run_step_time, total_run_step_time);
+        int target_frame = (int)((cycle_time / total_run_step_time) * run_frames.size());
+        current_move_frame = std::min(target_frame, (int)run_frames.size() - 1);
+        
+    } else {
+        current_move_frame = 0;
+        run_step_time = 0.0f;
+    }
+    currentSprite = &run_frames[current_move_frame];
+    current_asset_dims = run_frames_asset_dims[current_move_frame];
+    current_character_dims = run_frames_character_dims[current_move_frame];
+}
+
 void Character::update_move(){
     if (right) {
         // x += 0.5;
@@ -314,7 +410,7 @@ void Character::update_move(){
         }
     } else {
         current_move_frame = 0;
-        walk_step_time = 0.0;
+        walk_step_time = 0.0f;
     }
     currentSprite = &move_frames[current_move_frame];
     current_asset_dims = move_frames_asset_dims[current_move_frame];
@@ -323,9 +419,9 @@ void Character::update_move(){
 
 void Character::set_hp(float hp_) {
     float real_hp = hp_;
-    if (hp_ < 0) {
+    if (hp_ < 0.0f) {
         is_dead = true;
-        real_hp = 0.0;
+        real_hp = 0.0f;
     } else if (hp_ > max_hp) {
         real_hp = max_hp;
     } 
@@ -348,7 +444,7 @@ void Character::draw(QPainter &painter)
 
         // Calculate position for drawing (offset from the character dims)
         float drawX = get_x() - current_asset_dims[0]-current_asset_dims[2];
-        float drawY = get_y() - current_asset_dims[1]-2.0*current_asset_dims[3];
+        float drawY = get_y() - current_asset_dims[1]-2.0f*current_asset_dims[3];
         
         // Flip horizontally if facing left
         handle_rotate(painter);
@@ -390,11 +486,31 @@ void Character::set_moving(bool m)
     moving = m;
     if (m) {
         if (right) {
-            set_v_x(speed_move);
+            if(time_until_move_button_released < time_click_to_run && run_time < total_run_time && time_without_runing > time_between_run) {
+                set_v_x(speed_run);
+                run_time = 0.0f; 
+                runing = true;
+                time_without_runing = 0.0;
+            } else {
+                set_v_x(speed_move);
+            }
+            
         }
         else {
-            set_v_x(-speed_move);
+            if(time_until_move_button_released < time_click_to_run && run_time < total_run_time && time_without_runing > time_between_run) {
+                set_v_x(-speed_run);    
+                run_time = 0.0f;           
+                runing = true;
+                time_without_runing = 0.0;
+            } else {
+                set_v_x(-speed_move);
+            }
         }
+    } else {
+        runing = false;
+        run_time = 0.0;
+        time_until_move_button_released = 0.0;
+
     }
 }
 
@@ -452,17 +568,42 @@ void Character::set_lowering(bool s , bool combo)
     }
     if(s){
         lowering = s;
-        lowering_start = true;
+        lower_toggled = true;
         lowering_stop = false;
     } else {
         if (combo) {
             lowering = false;
-            lowering_start = false;
+            lower_toggled = false;
             lowering_stop = false;
         } else {
-            lowering = false;
-            lowering_start = false;
+            lowering = true;
+            lower_toggled = false;
             lowering_stop = true;
+            lower_time = 0.0;
+        }
+    }
+}
+
+void Character::set_defending_attack(bool d, bool combo)
+{
+
+    if(defending_attack != d) {
+        defending_attack_time = 0.0f;
+    }
+    if(d){
+        defending_attack = d;
+        defending_attack_toggled = true;
+        defending_attack_stop = false;
+    } else {
+        if (combo) {
+            defending_attack = false;
+            defending_attack_toggled = false;
+            defending_attack_stop = false;
+        } else {
+            defending_attack = true;
+            defending_attack_toggled = false;
+            defending_attack_stop = true;
+            defending_attack_time = 0.0;
         }
     }
 }
@@ -500,20 +641,21 @@ void Character::set_sword_attacking_low(bool a)
 void Character::set_projectile_attacking(bool a) {
     if(a && projectile_time>projectile_min_time){
         projectile_attacking = a;
-        projectile_time = 0.0;
+        projectile_time = 0.0f;
         projectile->set_hit_started(false);
         projectile->set_hit_finished(false);
-        projectile->set_disparition_time(0.0);
+        projectile->set_disparition_time(0.0f);
         projectile->set_x(get_x());
-        projectile->set_y(get_y() - get_h()/2.0);
+        projectile->set_y(get_y() - get_h()/2.0f);
         float v_projectile = 1000.0f;
         projectile->set_v_x(v_projectile * 2.0f * (static_cast<float>(facingRight) - 0.5f));
     } else if(!a) {
         projectile_attacking = a;
         projectile_time = projectile_min_time + 0.1;
     }
-    
+
 }
+
 
 
 void Character::checkBounds(int windowWidth)

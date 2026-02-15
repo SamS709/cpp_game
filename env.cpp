@@ -56,8 +56,6 @@ Env::~Env(){
 void Env::load_env_assets(){
     collider = new Collider();
     visual_container = new VisualContainer(100.0, false);
-    c1->set_projectile_sprites(&(visual_container->projectile_sprites));
-    c2->set_projectile_sprites(&(visual_container->projectile_sprites));
     c2->set_lifebar_dims(width - life_bar_width , 30.0, life_bar_width, 20.0 );
     c1->set_lifebar_dims(0.0,30.0,life_bar_width,20);
     Vec2 pos = Vec2(width / 2 - 200, height/2);
@@ -346,8 +344,9 @@ void Env::keyPressEvent(QKeyEvent *event){
     } if (event->key() == Qt::Key_E) {
         c2->set_projectile_attacking(true);
         
-        
-    } 
+    } if (event->key() == Qt::Key_R) {
+        c2->set_defending_attack(true);
+    }
 
 
 }
@@ -411,5 +410,7 @@ void Env::keyReleaseEvent(QKeyEvent *event){
         c2->set_lowering(false);
     } else if (event->key() == Qt::Key_A) {
         c2->set_sword_attacking(false);
+    } else if (event->key() == Qt::Key_R) {
+        c2->set_defending_attack(false);
     }
 }

@@ -21,18 +21,22 @@ public:
     void loadSpriteFrames(const QString &basePath);
     void load_jump_frames(const QString &basePath);
     void load_move_frames(const QString &basePath);
+    void load_run_frames(const QString &basePath);
     void load_slide_frames(const QString &basePath);
     void load_lower_frames(const QString &basePath);
     void load_sword_attack_frames(const QString &basePath);
     void load_sword_attack_low_frames(const QString &basePath);
+    void load_defend_attack_frames(const QString &basePath);
 
 
 
     void update(int width);
     void update_jump();
     void update_move();
+    void update_run();
     void update_slide();
     void update_lower();
+    void update_defending_attack();
     void update_sword_attack();
     void update_projectile();
 
@@ -58,6 +62,7 @@ public:
     void set_jumping(bool j);
     void set_sliding(bool s);
     void set_lowering(bool s, bool combo = false);
+    void set_defending_attack(bool d, bool combo = false);
     void set_sword_attacking(bool a);
     void set_sword_attacking_low(bool a);   
     void set_projectile_attacking(bool a);
@@ -69,8 +74,7 @@ public:
     void set_first_hit_sword_attack(bool f_h) {first_hit_sword_attack = f_h;}
     void set_lifebar_dims(float x, float y, float w, float h);
     void set_projectile_damages(float p_d_) { projectile_damages = p_d_; }
-    void set_projectile_sprites(QVector<QPixmap> *projectile_sprites_) {projectile_sprites = projectile_sprites_;
-    projectile = new Projectile(*projectile_sprites, Vec2(0.0, 0.0), Vec2(0.0, 0.0), 10.0, 1.0, 15.0, 0.05);}
+    void load_projectile_sprites(const QString &basePath);
 
     float get_rest() const override { return 0.0; } // No bounce for characters
 
@@ -91,6 +95,7 @@ public:
     float get_current_sprite_width() {return currentSprite->width();}
     float get_sword_attack_damages() { return sword_attack_damages; }
     float get_projectile_damages() { return projectile_damages; }
+    float get_time_until_move_button_released() { return time_until_move_button_released; }
     vector<float> get_current_asset_dims() {return current_asset_dims; }
     vector<float> get_current_character_dims() const {return current_character_dims; }
     vector<float> get_current_sword_dims() {return current_sword_dims; }
@@ -102,8 +107,8 @@ public:
     bool get_double_jumping() const { return double_jumping; }
     bool get_sliding() const {return sliding; };
     bool get_attacking() const { return attacking; }
-    bool get_lowering   () const { return lowering; }
-    bool get_sword_attacking() const {return sword_attacking; }
+    bool get_lowering   () const { return lowering; }    
+    bool get_defending_attack() const { return defending_attack; }    bool get_sword_attacking() const {return sword_attacking; }
     bool get_sword_attacking_low() const { return sword_attacking_low; }
     bool get_projectile_attacking() const { return projectile_attacking; }
     bool get_right() const { return facingRight; }
@@ -123,16 +128,20 @@ private:
     float x;
     float y;
     bool moving = false;
+    bool runing = false;
     bool jumping = false;
     bool double_jumping = false;
     bool sliding = false;
     bool lowering = false;
-    bool lowering_start = false;
+    bool lower_toggled = false;
     bool lowering_stop = false;
+    bool defending_attack = false;
+    bool defending_attack_toggled = false;
+    bool defending_attack_stop = false;
     bool attacking = false;
     bool sword_attacking = false;
     bool sword_attacking_low = false;   
-    bool projectile_attacking; 
+    bool projectile_attacking = false; 
     bool right;
     bool left;
     bool left_pressed;
@@ -146,6 +155,10 @@ private:
     QVector<QPixmap> move_frames;
     vector<vector<float>> move_frames_asset_dims;
     vector<vector<float>> move_frames_character_dims;
+
+    QVector<QPixmap> run_frames;
+    vector<vector<float>> run_frames_asset_dims;
+    vector<vector<float>> run_frames_character_dims;
 
     QVector<QPixmap> jump_frames;
     vector<vector<float>> jump_frames_asset_dims;
@@ -168,6 +181,11 @@ private:
     vector<vector<float>> sword_attack_low_frames_asset_dims;
     vector<vector<float>> sword_attack_low_frames_character_dims;
     vector<vector<float>> sword_attack_low_frames_sword_dims;
+
+    QVector<QPixmap> defend_attack_frames;
+    vector<vector<float>> defend_attack_frames_asset_dims;
+    vector<vector<float>> defend_attack_frames_character_dims;
+    vector<vector<float>> defend_attack_frames_sword_dims;
     
     QVector<float> bounds;
     Lifebar *lifebar;
@@ -180,8 +198,6 @@ private:
     
 
     QPixmap idleFrame;
-
-    QVector<QPixmap> *projectile_sprites; 
 
     int current_move_frame;
     int current_jump_frame;
@@ -208,21 +224,31 @@ private:
     float total_slide_time {0.7};
     float total_sword_attack_time {0.5};
     float total_sword_attack_low_time {0.5};
-    float total_lower_time {0.1};
+    float total_lower_time {0.07};
+    float total_defending_attack_time {0.2};
+    float total_run_time {3.0};
     float time_between_slides {1.0};
     float time_between_sword_attacks {1.0};
     float time_between_sword_attacks_low {1.0};
+    float time_between_run {2.0};
+    float time_without_runing {0.0};
+    float time_click_to_run {0.2};
+    float time_until_move_button_released {0.0};
+    float run_time;
     float projectile_time;
     float total_projectile_time {5.0};
     float projectile_min_time {1.0};
 
     float lower_time {0.0};
+    float defending_attack_time {0.0};
     float jump_time;
     float slide_time;
     float sword_attack_time = 0.0;
     float sword_attack_low_time = 0.0;
-    float walk_step_time {10000.0};
+    float walk_step_time {0.0};
+    float run_step_time {0.0};
     float total_walk_step_time {0.5};  // Total duration for one walk cycle
+    float total_run_step_time {0.3};  // Total duration for one run cycle
     float time_between_frames;
     float c_scale = 100.0;
     bool draw_baxes = false;
@@ -232,6 +258,8 @@ private:
     float projectile_damages;
     float sword_attack_low_damages {10.0};
     float speed_multiplier {1.0};
+
+    QVector<QPixmap> projectile_sprites;
 
 };
 

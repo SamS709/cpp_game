@@ -468,6 +468,9 @@ void Collider::handle_sword_attack(Character* attacker, Character* defender){
     
     if (check_rectangles_overlap(x_sword, y_sword, w_sword, h_sword, x_character, y_character, w_character, h_character)) {
         qDebug()<<"Attack hit!";
+        if(defender->get_defending_attack() && (defender->get_right() && !attacker->get_right()) || attacker->get_right() && !defender->get_right()) {
+            return;
+        }
         attacker->set_first_hit_sword_attack(false);
         defender->set_hp(defender->get_hp() - attacker->get_sword_attack_damages());
     }

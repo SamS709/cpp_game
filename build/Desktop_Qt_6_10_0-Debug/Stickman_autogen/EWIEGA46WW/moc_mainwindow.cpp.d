@@ -1,5 +1,5 @@
-D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/moc_mainwindow.cpp: D:/Dev/cours/cpp_game/mainwindow.h \
-  D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/moc_predefs.h \
+D:/dev/cours/cpp/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/moc_mainwindow.cpp: D:/dev/cours/cpp/cpp_game/mainwindow.h \
+  D:/dev/cours/cpp/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/moc_predefs.h \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QDebug \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QDir \
   C:/Qt/6.10.1/mingw_64/include/QtCore/QList \
@@ -465,9 +465,9 @@ D:/Dev/cours/cpp_game/build/Desktop_Qt_6_10_0-Debug/Stickman_autogen/EWIEGA46WW/
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/vadefs.h \
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wchar.h \
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wctype.h \
-  D:/Dev/cours/cpp_game/assets.h \
-  D:/Dev/cours/cpp_game/character.h \
-  D:/Dev/cours/cpp_game/collider.h \
-  D:/Dev/cours/cpp_game/env.h \
-  D:/Dev/cours/cpp_game/graphic_assets.h \
-  D:/Dev/cours/cpp_game/utils.h
+  D:/dev/cours/cpp/cpp_game/assets.h \
+  D:/dev/cours/cpp/cpp_game/character.h \
+  D:/dev/cours/cpp/cpp_game/collider.h \
+  D:/dev/cours/cpp/cpp_game/env.h \
+  D:/dev/cours/cpp/cpp_game/graphic_assets.h \
+  D:/dev/cours/cpp/cpp_game/utils.h
