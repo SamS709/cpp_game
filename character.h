@@ -207,7 +207,6 @@ private:
     int frame_per_sprite_slide;
     int frame_per_sprite_attack;
     int total_jump_frames {5};
-    std::string slide_dir;
     std::string sword_attack_dir = "right";
     
     float mass {2.0};

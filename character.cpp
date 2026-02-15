@@ -76,7 +76,7 @@ void Character::load_slide_frames(const QString &basePath){
 }
 
 void Character::load_lower_frames(const QString &basePath){
-    SpriteLoader loader(c_scale, draw_baxes);
+    SpriteLoader loader(c_scale, draw_baxes, get_color());
     loader.loadSequence(basePath, "lower", 0, 10, lower_frames, lower_frames_asset_dims, lower_frames_character_dims);
 }
 
@@ -133,6 +133,7 @@ void Character::load_projectile_sprites(const QString &basePath){
 
 void Character::update(int width)
 {
+    qDebug()<<lowering;
     if (!moving) {
         time_until_move_button_released += time_between_frames/1000.0f;
     }
@@ -458,8 +459,8 @@ void Character::draw(QPainter &painter)
 }
 
 void Character::handle_rotate(QPainter &painter){
-    if(sliding || attacking){
-        if (slide_dir=="left" || sword_attack_dir == "left"){
+    if(attacking){
+        if (sword_attack_dir == "left"){
             painter.translate(get_x(), get_y());
             painter.scale(-1, 1);
             painter.translate(-get_x(), -get_y());
@@ -550,13 +551,6 @@ void Character::set_sliding(bool s)
         sliding = s;
         slide_time = 0.0;
         current_move_frame = 0;
-        if (right) {
-            slide_dir = "right";
-        } else if (left) {
-            slide_dir = "left";
-        } else {
-            slide_dir = facingRight ? "right" : "left";
-        }
     }
 }
 
@@ -576,7 +570,7 @@ void Character::set_lowering(bool s , bool combo)
             lower_toggled = false;
             lowering_stop = false;
         } else {
-            lowering = true;
+            lowering = false;
             lower_toggled = false;
             lowering_stop = true;
             lower_time = 0.0;

@@ -249,7 +249,7 @@ void Env::keyPressEvent(QKeyEvent *event){
         if (!c1->get_jumping() && !c1->get_sliding() && !c1->get_sword_attacking()) {
             if (c1->get_moving()){
                 c1->set_sliding(true);
-            } else {
+            } else if (!c1->get_sliding()) {
                 c1->set_lowering(true);
             }
         }
@@ -304,7 +304,7 @@ void Env::keyPressEvent(QKeyEvent *event){
         if (!c2->get_jumping() && !c2->get_sliding() && !c2->get_sword_attacking()) {
             if (c2->get_moving()){
                 c2->set_sliding(true);
-            } else {
+            } else if (!c2->get_sliding()) {
                 c2->set_lowering(true);
             }
         }
